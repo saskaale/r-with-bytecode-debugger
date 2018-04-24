@@ -4,17 +4,20 @@ GNU R with implemented support for bytecode debugger
 
 ## howto compile
 
-```
+```bash
  cd r_source && ./configure --without-recommended-packages --with-x=no && make -j10
 ```
 
 ## howto run
 
-execute R with `./r_source/bin/R`
+execute R with 
+```bash
+./r_source/bin/R
+```
 
 and then debug the bytecode compiled function:
 
-```
+```R
 
 # initialization
 library(compiler)
