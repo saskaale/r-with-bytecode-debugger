@@ -1,0 +1,4 @@
+bcverbose               Set default verbosity level for bytecode
+                        _print_ method
+print.disassembly       Print bytecode object to output and returns it
+                        _invisibly_ (via 'invisible(x)')
