@@ -24,7 +24,7 @@ and then type some R input:
 # initialization
 library(compiler)
 enableBCDebug(TRUE)
-debugVerbose(TRUE)
+debugVerbose(TRUE) # try to comment this line out
 
 # function to run
 f<-function(x){
