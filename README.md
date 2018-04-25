@@ -10,7 +10,7 @@ GNU R with implemented bytecode debugger and support for conditional breakpoints
 
 ## how-to run
 
-execute R with 
+execute R with
 ```bash
 ./r_source/bin/R
 ```
@@ -74,7 +74,6 @@ cf(5)
 
 ## more info
 
-This work was part of my 2018 diploma thesis. For more details about implementation and all configuration see it's content in `thesis/DP_Saska_Ales_2018.pdf`.
+This work was part of my 2018 diploma thesis.
 
-
-
+See `examples` directory for more detailed examples about implementation or read the thesis content in `thesis/DP_Saska_Ales_2018.pdf` for more details about implementation and all configuration parameters.
