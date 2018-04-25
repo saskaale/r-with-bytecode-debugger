@@ -1,4 +1,0 @@
-export(cmpfun,cmpfile,loadcmp,compile,disassemble,bcinfo,bcOpArgDescr,bcListBreakpoints,bcSetBreakpoint)
-export(enableJIT,compilePKGS)
-export(getCompilerOption,setCompilerOptions)
-
