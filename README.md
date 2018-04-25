@@ -15,9 +15,9 @@ execute R with
 ./r_source/bin/R
 ```
 
-### bytecode debugger example
+and then type some R input:
 
-and then debug the bytecode compiled function:
+### bytecode debugger example
 
 ```R
 
