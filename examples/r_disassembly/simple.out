@@ -1,0 +1,2 @@
+list(.Code, list(8L, GETVAR.OP, 1L, LDCONST.OP, 2L, ADD.OP, 0L, 
+    RETURN.OP), list(a + 1, a, 1))

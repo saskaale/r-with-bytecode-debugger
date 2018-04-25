@@ -1,0 +1,9 @@
+
+  @ a
+  GETVAR              a
+  @ 1
+  LDCONST             1
+  @ a + 1
+  ADD                 
+  RETURN              
+
