@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/W32TeX) (preloaded format=pdflatex 2018.2.24)  23 APR 2018 23:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/W32TeX) (preloaded format=pdflatex 2018.2.24)  25 APR 2018 00:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -703,7 +703,7 @@ e
 {c:/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2
 
 ]
-<cvut-logo-bw-en.pdf, id=351, 591.64943pt x 193.23091pt>
+<cvut-logo-bw-en.pdf, id=371, 591.64943pt x 193.23091pt>
 File: cvut-logo-bw-en.pdf Graphic file (type pdf)
 <use cvut-logo-bw-en.pdf>
 Package pdftex.def Info: cvut-logo-bw-en.pdf  used on input line 51.
@@ -803,7 +803,7 @@ LaTeX Warning: Citation `R-OO' on page 3 undefined on input line 105.
 [3
 
 ] [4] [5] [6] [7] [8] [9]
-<Abstract-syntax-tree-of-the-while-loop.png, id=597, 231.86626pt x 168.63pt>
+<Abstract-syntax-tree-of-the-while-loop.png, id=623, 231.86626pt x 168.63pt>
 File: Abstract-syntax-tree-of-the-while-loop.png Graphic file (type png)
 <use Abstract-syntax-tree-of-the-while-loop.png>
 Package pdftex.def Info: Abstract-syntax-tree-of-the-while-loop.png  used on in
@@ -857,7 +857,7 @@ Overfull \hbox (25.20319pt too wide) in paragraph at lines 694--695
 [][][][][][][][][][][] 
  []
 
-<v8-architecture.png, id=843, 803.0pt x 601.24625pt>
+<v8-architecture.png, id=868, 803.0pt x 601.24625pt>
 File: v8-architecture.png Graphic file (type png)
 <use v8-architecture.png>
 Package pdftex.def Info: v8-architecture.png  used on input line 701.
@@ -899,145 +899,113 @@ Overfull \hbox (12.06308pt too wide) in paragraph at lines 1255--1256
 [][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[42] [43]
-
-LaTeX Warning: Reference `implementation-of-breakpoint-instruction' on page 44 
-undefined on input line 1320.
-
-[44]
+[42] [43] [44]
 Overfull \hbox (18.63313pt too wide) in paragraph at lines 1383--1384
 [][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 [45] [46]
-Overfull \hbox (18.63313pt too wide) in paragraph at lines 1438--1439
+Overfull \hbox (18.63313pt too wide) in paragraph at lines 1440--1441
 [][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (3.14716pt too wide) in paragraph at lines 1452--1453
+Overfull \hbox (3.14716pt too wide) in paragraph at lines 1454--1455
 \OT1/lmr/m/it/10.95 Break-point \OT1/lmr/m/n/10.95 func-tion from com-piler pac
 k-age). Once byte-code in-ter-preter reaches
  []
 
-[47] [48]
-Overfull \hbox (35.56398pt too wide) in paragraph at lines 1495--1496
-\OT1/lmr/m/n/10.95 min-i-mal. It re-quired just adding an macro \OT1/lmr/bx/n/1
-0.95 BREAK-POINT[]GOTO[]ORIGIN[]OP
- []
+[47] [48] [49] [50]
+
+LaTeX Warning: Reference `' on page 51 undefined on input line 1583.
 
 
-LaTeX Warning: Reference `' on page 49 undefined on input line 1514.
-
-
-Overfull \hbox (5.30145pt too wide) in paragraph at lines 1514--1515
+Overfull \hbox (5.30145pt too wide) in paragraph at lines 1583--1584
 \OT1/lmr/bx/n/10.95 POINT[]GOTO[]ORIGIN[]OP []\OT1/lmr/m/n/10.95 ) we set the a
 ux-il-iary vari-able (\OT1/lmr/m/it/10.95 jmp[]opcode\OT1/lmr/m/n/10.95 )
  []
 
 
-Overfull \hbox (44.42584pt too wide) in paragraph at lines 1514--1515
-\OT1/lmr/m/n/10.95 to the de-sired in-struc-tion code and jumped into jump la-b
-el which we added (\OT1/lmr/m/it/10.95 jmp[]opcode\OT1/lmr/m/n/10.95 )
+Overfull \hbox (49.49525pt too wide) in paragraph at lines 1583--1584
+\OT1/lmr/m/n/10.95 to the de-sired in-struc-tion code. and jumped into jump la-
+bel which we added (\OT1/lmr/m/it/10.95 jmp[]opcode\OT1/lmr/m/n/10.95 )
  []
 
-[49]
-Overfull \hbox (68.44817pt too wide) in paragraph at lines 1535--1536
+[51]
+Overfull \hbox (68.44817pt too wide) in paragraph at lines 1604--1605
 []\OT1/lmr/bx/n/10.95 bc \OT1/lmr/m/n/10.95 - print cur-rent byte-code with the
  po-si-tion (in-ter-nally call-ing \OT1/lmr/m/it/10.95 R[]printCurrentBCbody\OT
 1/lmr/m/n/10.95 ) 
  []
 
 
-Overfull \hbox (44.85272pt too wide) in paragraph at lines 1536--1537
+Overfull \hbox (44.85272pt too wide) in paragraph at lines 1605--1606
 []\OT1/lmr/bx/n/10.95 bcstack \OT1/lmr/m/n/10.95 - print cur-rent byte-code sta
 ck (in-ter-nally call-ing \OT1/lmr/m/it/10.95 R[]printCurrentBCstack\OT1/lmr/m/
 n/10.95 ) 
  []
 
-
-Overfull \hbox (12.06308pt too wide) in paragraph at lines 1552--1553
-[][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (31.77324pt too wide) in paragraph at lines 1557--1558
+[52]
+Overfull \hbox (5.49303pt too wide) in paragraph at lines 1627--1628
 [][][][][][][][][][][][][][][][] 
  []
 
-
-Overfull \hbox (12.06308pt too wide) in paragraph at lines 1559--1560
-[][][][][][][][][][][][][][][][][][] 
- []
-
-[50]
-Overfull \hbox (0.51608pt too wide) in paragraph at lines 1585--1586
-\OT1/lmr/m/it/10.95 R[]printCurrentBCbody \OT1/lmr/m/n/10.95 in \OT1/lmr/m/it/1
-0.95 sr-c/-main/e-val.c \OT1/lmr/m/n/10.95 in-ter-nally dis-patch-ing \OT1/lmr/
-m/it/10.95 print \OT1/lmr/m/n/10.95 method
- []
-
-
-Overfull \hbox (58.05345pt too wide) in paragraph at lines 1597--1598
-[][][][][][][][][][][] 
- []
-
-[51] [52]
-Overfull \hbox (18.63313pt too wide) in paragraph at lines 1640--1642
+[53]
+Overfull \hbox (18.63313pt too wide) in paragraph at lines 1687--1689
 [][][][][][][][][][][][][][][][][][][][][] 
  []
 
-
-Overfull \hbox (18.63313pt too wide) in paragraph at lines 1662--1663
+[54]
+Overfull \hbox (18.63313pt too wide) in paragraph at lines 1709--1710
 [][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (5.49303pt too wide) in paragraph at lines 1663--1664
+Overfull \hbox (5.49303pt too wide) in paragraph at lines 1710--1711
 [][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[53] [54
+[55] [56
 
-] [55]
-Overfull \hbox (12.06308pt too wide) in paragraph at lines 1715--1716
+] [57]
+Overfull \hbox (12.06308pt too wide) in paragraph at lines 1762--1763
 [][][][][][][][][][][][][] 
  []
 
-[56] [57] [58] (./DP_Saska_Ales_2018.bbl [59
+[58] [59] [60] (./DP_Saska_Ales_2018.bbl [61
 
-] [60
+] [62
 
 ]
 bibitemlist
 
 LaTeX Warning: Empty `thebibliography' environment on input line 10.
 
-) [61] [62
+) [63] [64
 
-] [63] [64
+] [65] [66
 
 ]
-LaTeX Font Info:    Try loading font information for OT1+lmtt on input line 183
-1.
+LaTeX Font Info:    Try loading font information for OT1+lmtt on input line 187
+8.
  (c:/texlive/2017/texmf-dist/tex/latex/lm/ot1lmtt.fd
 File: ot1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-[65]
+[67]
 \tf@toc=\write5
 \openout5 = `DP_Saska_Ales_2018.toc'.
 
 \tf@lof=\write6
 \openout6 = `DP_Saska_Ales_2018.lof'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1834.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1834.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1881.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1881.
  (./DP_Saska_Ales_2018.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1834.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1834.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1881.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1881.
 
 Package rerunfilecheck Info: File `DP_Saska_Ales_2018.out' has not changed.
-(rerunfilecheck)             Checksum: 2B159C550F9741826A9FB86917D0563E;16955.
+(rerunfilecheck)             Checksum: F91FFDD5568EAC950F0AEA49635BE47B;18173.
 
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
@@ -1048,16 +1016,16 @@ LaTeX Warning: There were undefined references.
 
 LaTeX Warning: There were multiply-defined labels.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1834.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1881.
  ) 
 Here is how much of TeX's memory you used:
- 15087 strings out of 492982
- 212355 string characters out of 6136225
- 354894 words of memory out of 5000000
- 17667 multiletter control sequences out of 15000+600000
+ 15117 strings out of 492982
+ 212860 string characters out of 6136225
+ 355048 words of memory out of 5000000
+ 17673 multiletter control sequences out of 15000+600000
  61510 words of font info for 42 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 37i,11n,32p,1568b,1628s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 37i,11n,32p,1568b,1622s stack positions out of 5000i,500n,10000p,200000b,80000s
 {c:/texlive/2017/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{c:/texlive/2017/tex
 mf-dist/fonts/enc/dvips/lm/lm-rmtt.enc}{c:/texlive/2017/texmf-dist/fonts/enc/dv
 ips/lm/lm-mathit.enc}{c:/texlive/2017/texmf-dist/fonts/enc/dvips/lm/lm-rmsc.enc
@@ -1072,10 +1040,10 @@ exlive/2017/texmf-dist/fonts/type1/public/lm/lmri10.pfb><c:/texlive/2017/texmf-
 dist/fonts/type1/public/lm/lmro10.pfb><c:/texlive/2017/texmf-dist/fonts/type1/p
 ublic/lm/lmssbx10.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/lm/lmsy10.
 pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on DP_Saska_Ales_2018.pdf (81 pages, 537389 bytes).
+Output written on DP_Saska_Ales_2018.pdf (83 pages, 543580 bytes).
 PDF statistics:
- 1760 PDF objects out of 2073 (max. 8388607)
- 1643 compressed objects within 17 object streams
- 864 named destinations out of 1000 (max. 500000)
- 688 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1816 PDF objects out of 2073 (max. 8388607)
+ 1697 compressed objects within 17 object streams
+ 888 named destinations out of 1000 (max. 500000)
+ 728 words of extra memory for PDF output out of 10000 (max. 10000000)
 

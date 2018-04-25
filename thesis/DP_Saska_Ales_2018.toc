@@ -65,25 +65,28 @@
 \contentsline {subsection}{\numberline {2.4.8}Support in the disassembly tool}{46}{subsection.2.4.8}
 \contentsline {subsection}{\numberline {2.4.9}Temporary and regular breakpoints}{47}{subsection.2.4.9}
 \contentsline {subsection}{\numberline {2.4.10}Implementation of the breakpoint instructions}{48}{subsection.2.4.10}
-\contentsline {subsection}{\numberline {2.4.11}Handling of the recursive character of the bytecode}{48}{subsection.2.4.11}
-\contentsline {subsection}{\numberline {2.4.12}Threaded and non-threaded design of the application}{49}{subsection.2.4.12}
-\contentsline {paragraph}{\numberline {2.4.12.0.1}THREADED{\_}CODE defined}{49}{paragraph.2.4.12.0.1}
-\contentsline {paragraph}{\numberline {2.4.12.0.2}THREADED{\_}CODE not defined}{49}{paragraph.2.4.12.0.2}
-\contentsline {subsection}{\numberline {2.4.13}Handling of the debugger user input}{50}{subsection.2.4.13}
-\contentsline {subsection}{\numberline {2.4.14}Default behavior of the bytecode debugger}{51}{subsection.2.4.14}
-\contentsline {subsection}{\numberline {2.4.15}Verbose mode of bytecode debugger}{51}{subsection.2.4.15}
-\contentsline {subsection}{\numberline {2.4.16}Initial entry points to the bcEval functions}{52}{subsection.2.4.16}
-\contentsline {chapter}{\chapternumberline {3}Testing and future work}{55}{chapter.3}
-\contentsline {section}{\numberline {3.1}Bytecode disassembler}{55}{section.3.1}
-\contentsline {section}{\numberline {3.2}Bytecode debugger}{56}{section.3.2}
-\contentsline {subsection}{\numberline {3.2.1}Effectiveness of testing}{57}{subsection.3.2.1}
-\contentsline {subsection}{\numberline {3.2.2}Side effects of the scripts}{57}{subsection.3.2.2}
-\contentsline {section}{\numberline {3.3}Conditional breakpoints}{58}{section.3.3}
-\contentsline {section}{\numberline {3.4}Future work}{58}{section.3.4}
-\contentsline {subsection}{\numberline {3.4.1}Push into working repository}{58}{subsection.3.4.1}
-\contentsline {subsection}{\numberline {3.4.2}Merging the bctools package into the compilers}{58}{subsection.3.4.2}
-\contentsline {subsection}{\numberline {3.4.3}GNU R Memory optimization}{58}{subsection.3.4.3}
-\contentsline {chapter}{Conclusion}{59}{chapter*.8}
-\contentsline {chapter}{Bibliography}{61}{section*.10}
-\contentsline {appendix}{\chapternumberline {A}Acronyms}{63}{appendix.A}
-\contentsline {appendix}{\chapternumberline {B}Contents of enclosed DVD}{65}{appendix.B}
+\contentsline {subsection}{\numberline {2.4.11}Bytecode interpreter internal status}{48}{subsection.2.4.11}
+\contentsline {subsubsection}{\numberline {2.4.11.1}The short compact way of status printing}{49}{subsubsection.2.4.11.1}
+\contentsline {subsubsection}{\numberline {2.4.11.2}The long verbose way showing all information}{49}{subsubsection.2.4.11.2}
+\contentsline {subsection}{\numberline {2.4.12}Debugger jumping granularity}{49}{subsection.2.4.12}
+\contentsline {subsection}{\numberline {2.4.13}Handling of the recursive character of the bytecode}{50}{subsection.2.4.13}
+\contentsline {subsection}{\numberline {2.4.14}Threaded and non-threaded design of the application}{51}{subsection.2.4.14}
+\contentsline {subsubsection}{\numberline {2.4.14.1}THREADED{\_}CODE defined}{51}{subsubsection.2.4.14.1}
+\contentsline {subsubsection}{\numberline {2.4.14.2}THREADED{\_}CODE not defined}{51}{subsubsection.2.4.14.2}
+\contentsline {subsection}{\numberline {2.4.15}Handling of the debugger user input}{52}{subsection.2.4.15}
+\contentsline {subsection}{\numberline {2.4.16}Default behavior of the bytecode debugger}{53}{subsection.2.4.16}
+\contentsline {subsection}{\numberline {2.4.17}Initial entry points to the bcEval functions}{53}{subsection.2.4.17}
+\contentsline {chapter}{\chapternumberline {3}Testing and future work}{57}{chapter.3}
+\contentsline {section}{\numberline {3.1}Bytecode disassembler}{57}{section.3.1}
+\contentsline {section}{\numberline {3.2}Bytecode debugger}{58}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}Effectiveness of testing}{59}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}Side effects of the scripts}{59}{subsection.3.2.2}
+\contentsline {section}{\numberline {3.3}Conditional breakpoints}{60}{section.3.3}
+\contentsline {section}{\numberline {3.4}Future work}{60}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Push into working repository}{60}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}Merging the bctools package into the compilers}{60}{subsection.3.4.2}
+\contentsline {subsection}{\numberline {3.4.3}GNU R Memory optimization}{60}{subsection.3.4.3}
+\contentsline {chapter}{Conclusion}{61}{chapter*.8}
+\contentsline {chapter}{Bibliography}{63}{section*.10}
+\contentsline {appendix}{\chapternumberline {A}Acronyms}{65}{appendix.A}
+\contentsline {appendix}{\chapternumberline {B}Contents of enclosed DVD}{67}{appendix.B}
