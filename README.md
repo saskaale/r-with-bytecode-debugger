@@ -2,13 +2,13 @@
 
 GNU R with implemented bytecode debugger and support for conditional breakpoints
 
-## howto compile
+## how-to compile
 
 ```bash
  cd r_source && ./configure --without-recommended-packages --with-x=no && make -j10
 ```
 
-## howto run
+## how-to run
 
 execute R with 
 ```bash
