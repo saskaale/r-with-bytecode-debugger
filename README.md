@@ -74,7 +74,7 @@ cf(5)
 
 ## more info
 
-This work was part of 2018 diploma thesis. For more details about implementation and all configuration see it's content in `thesis/DP_Saska_Ales_2018.pdf`.
+This work was part of my 2018 diploma thesis. For more details about implementation and all configuration see it's content in `thesis/DP_Saska_Ales_2018.pdf`.
 
 
 
