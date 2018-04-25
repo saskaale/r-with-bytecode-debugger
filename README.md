@@ -4,8 +4,19 @@ GNU R with implemented bytecode debugger and support for conditional breakpoints
 
 ## how-to compile
 
+install dependencies
 ```bash
- cd r_source && ./configure --without-recommended-packages --with-x=no && make -j10
+sudo apt-get install build-essential r-recommended gfortran libbz2-dev liblzma-dev libpcre3-dev libcurl4-openssl-dev libreadline-dev xorg-dev texinfo subversion
+```
+
+download R recommended package sources
+```bash
+./r_source/tools/rsync-recommended
+```
+
+compile GNU R
+```bash
+ cd r_source && ./configure && make -j10
 ```
 
 ## how-to run
@@ -42,8 +53,8 @@ debug(cf)
 cf(5)
 
 ```
-
-### conditional breakpoint example
+sudo ap
+### simulated conditional breakpoint example
 
 ```R
 
