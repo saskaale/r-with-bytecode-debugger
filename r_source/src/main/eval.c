@@ -1878,11 +1878,6 @@ static R_INLINE SEXP R_execClosure(SEXP call, SEXP newrho, SEXP sysparent,
 	PrintCall(call, rho);
     }
 
-    if(RDEBUG(rho)){
-      Rprintf("RDEBUG RHO EVAL FUNC TRUE\n");
-      Rprintf("BCINTACTIVE %d\n", R_BCIntActive);
-    }
-
     return cntxt.returnValue;
 }
 
