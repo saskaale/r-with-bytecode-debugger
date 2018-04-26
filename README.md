@@ -8,7 +8,7 @@ builded and tested on Ubuntu 16.04 LTS
 
 install dependencies
 ```bash
-sudo apt-get install build-essential r-recommended gfortran libbz2-dev liblzma-dev libpcre3-dev libcurl4-openssl-dev libreadline-dev xorg-dev texinfo subversion
+sudo apt-get install build-essential r-recommended gfortran libbz2-dev liblzma-dev libpcre3-dev libcurl4-openssl-dev libreadline-dev xorg-dev texinfo subversion texlive-latex-base
 ```
 
 <!--
