@@ -2,6 +2,8 @@
 
 GNU R with implemented bytecode debugger and support for conditional breakpoints
 
+builded and tested on Ubuntu 16.04 LTS
+
 ## how-to compile
 
 install dependencies
@@ -9,14 +11,14 @@ install dependencies
 sudo apt-get install build-essential r-recommended gfortran libbz2-dev liblzma-dev libpcre3-dev libcurl4-openssl-dev libreadline-dev xorg-dev texinfo subversion
 ```
 
-download R recommended package sources
-```bash
-./r_source/tools/rsync-recommended
-```
+<>download R recommended package sources
+<>```bash
+<>./r_source/tools/rsync-recommended
+<>```
 
 compile GNU R
 ```bash
- cd r_source && ./configure && make -j10
+ cd r_source && ./configure --without-recommended-packages && make -j10
 ```
 
 ## how-to run
