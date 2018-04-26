@@ -1,7 +1,7 @@
 #!/bin/bash
 # Shell wrapper for R executable.
 
-R_HOME_DIR="/mnt/c/Users/aless/skola/diplomka/zal/trunk"
+R_HOME_DIR="/home/testr/r-with-bytecode-debugger/r_source"
 if test "${R_HOME_DIR}" = "/usr/local/lib/R"; then
    case "linux-gnu" in
    linux*)
