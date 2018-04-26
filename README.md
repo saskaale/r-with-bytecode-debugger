@@ -20,7 +20,7 @@ download R recommended package sources
 
 compile GNU R
 ```bash
-cd r_source && ./configure --without-recommended-packages && make -j10
+cd r_source; ./configure --without-recommended-packages && make -j10; cd ..
 ```
 
 install bctools package
