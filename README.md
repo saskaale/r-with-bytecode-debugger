@@ -20,7 +20,7 @@ download R recommended package sources
 
 compile GNU R
 ```bash
-cd r_source; ./configure --without-recommended-packages && make Makefile Makeconf R docs recommended -j10; cd ..
+cd r_source; ./configure --without-recommended-packages && make Makefile Makeconf R -j10; cd ..
 ```
 
 <!--
