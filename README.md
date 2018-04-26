@@ -8,7 +8,7 @@ builded and tested on Ubuntu 16.04 LTS
 
 install dependencies
 ```bash
-sudo apt-get install build-essential r-recommended gfortran libbz2-dev liblzma-dev libpcre3-dev libcurl4-openssl-dev libreadline-dev xorg-dev texinfo subversion texlive-latex-base
+sudo apt-get install build-essential r-recommended gfortran libbz2-dev liblzma-dev libpcre3-dev libcurl4-openssl-dev libreadline-dev xorg-dev texinfo subversion texlive-latex-base libssl-dev
 ```
 
 <!--
@@ -20,8 +20,16 @@ download R recommended package sources
 
 compile GNU R
 ```bash
-cd r_source; ./configure --without-recommended-packages && make -j10; cd ..
+cd r_source; ./configure --without-recommended-packages && make Makefile Makeconf R docs recommended -j10; cd ..
 ```
+
+<!--
+install R development packages by running R through `./r_source/bin/R` and typing
+```bash
+install.packages("devtools")
+
+```
+-->
 
 install bctools package
 ```bash
