@@ -8141,7 +8141,7 @@ void R_printCurrentBCbody(SEXP body, void* pc, Rboolean peephole, int verboselvl
     PROTECT(bctoolssym = install("bctools"));
     PROTECT(compilersym = install("compiler"));
     PROTECT(disasmsym = install("disassemble"));
-    PROTECT(printdisasmsym = install("tryPrint"));
+    PROTECT(printdisasmsym = install("print"));
     PROTECT(quotesym = install("quote"));
 
     PROTECT(fcall = lang3(R_TripleColonSymbol, compilersym, disasmsym));
