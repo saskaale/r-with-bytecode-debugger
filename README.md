@@ -11,14 +11,21 @@ install dependencies
 sudo apt-get install build-essential r-recommended gfortran libbz2-dev liblzma-dev libpcre3-dev libcurl4-openssl-dev libreadline-dev xorg-dev texinfo subversion
 ```
 
-<>download R recommended package sources
-<>```bash
-<>./r_source/tools/rsync-recommended
-<>```
+<!--
+download R recommended package sources
+```bash
+./r_source/tools/rsync-recommended
+```
+-->
 
 compile GNU R
 ```bash
- cd r_source && ./configure --without-recommended-packages && make -j10
+cd r_source && ./configure --without-recommended-packages && make -j10
+```
+
+install bctools package
+```bash
+./r_source/bin/R CMD INSTALL ./bctools_0.1.0.tar.gz
 ```
 
 ## how-to run
