@@ -70,7 +70,7 @@ debug(cf)
 cf(5)
 
 ```
-sudo ap
+
 ### simulated conditional breakpoint example
 
 ```R
