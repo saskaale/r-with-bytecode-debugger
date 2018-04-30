@@ -4,7 +4,6 @@
 \contentsline {subsection}{Citation of this thesis}{vi}{section*.1}
 \contentsline {chapter}{Introduction}{1}{chapter*.5}
 \contentsline {section}{Motivation and objectives}{1}{section*.6}
-\contentsline {section}{Problem statements}{2}{section*.7}
 \contentsline {chapter}{\chapternumberline {1}Analysis and design}{3}{chapter.1}
 \contentsline {section}{\numberline {1.1}GNU R from user perspective}{3}{section.1.1}
 \contentsline {subsection}{\numberline {1.1.1}Basis usage~(main commands and REPL loop)}{3}{subsection.1.1.1}
@@ -86,7 +85,7 @@
 \contentsline {subsection}{\numberline {3.4.1}Push into working repository}{60}{subsection.3.4.1}
 \contentsline {subsection}{\numberline {3.4.2}Merging the bctools package into the compilers}{60}{subsection.3.4.2}
 \contentsline {subsection}{\numberline {3.4.3}GNU R Memory optimization}{60}{subsection.3.4.3}
-\contentsline {chapter}{Conclusion}{61}{chapter*.8}
-\contentsline {chapter}{Bibliography}{63}{section*.10}
+\contentsline {chapter}{Conclusion}{61}{chapter*.7}
+\contentsline {chapter}{Bibliography}{63}{section*.9}
 \contentsline {appendix}{\chapternumberline {A}Acronyms}{65}{appendix.A}
 \contentsline {appendix}{\chapternumberline {B}Contents of enclosed DVD}{67}{appendix.B}

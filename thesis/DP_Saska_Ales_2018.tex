@@ -38,12 +38,12 @@
 \author{Ale{\v s} Saska} %author's name without academic degrees
 \authorWithDegrees{Bc. Ale{\v s} Saska} %author's name with academic degrees
 \supervisor{Ing. Petr M{\' a}j}
-\acknowledgements{Thanks to my adviser Petr M{\' a}j for help with reviewing thesis, my code adviser Tom{\' a}{\v s} Kalibera for useful help with the VM code structure, my father for assistance with the submitting of this work, and big thanks to my girlfriend for psychological support and all the tea.}
-\abstractEN{This thesis is about analysis and implementation of current bytecode disassembler tool. The second part is describing the current debugger implementation and there is implementation of it's support for bytecode.}
+\acknowledgements{Thanks to my adviser Petr M{\' a}j for help with reviewing thesis, Tom{\' a}{\v s} Kalibera for useful help with the GNU-R code and functionality, my father for assisting with the submission of this work, and big thanks to my girlfriend for psychological support and all the tea required to make this work happen.}
+\abstractEN{This thesis is about analysis and implementation of the advanced bytecode disassembler tool for GNU-R language. Implemented tool is returning the information in human readable compact format for passed function. This second feature was reused in the second part of the thesis which is about native support for bytecode debugger. The current debugging options for the bytecode in GNU-R are very limited because of implementing through AST call. This has been improved in this thesis by implementing an native support for debugging bytecode. Presented implementation shows all internal information of the bytecode evaluator status. The solution written in this thesis is also focused on making any negative impact to overall performance of the language which has been successfully tested and proven with testing.}
 \abstractCS{V n{\v e}kolika v{\v e}t{\' a}ch shr{\v n}te obsah a p{\v r}{\' i}nos t{\' e}to pr{\' a}ce v {\v c}esk{\' e}m jazyce.}
 \placeForDeclarationOfAuthenticity{Prague}
 \keywordsCS{Replace with comma-separated list of keywords in Czech.}
-\keywordsEN{computer language,R,GNU R,bytecode,disassembler,debugger}
+\keywordsEN{computer language,R,GNU-R,bytecode,disassembler,debugger}
 \declarationOfAuthenticityOption{1} %select as appropriate, according to the desired license (integer 1-6)
 % \website{http://site.example/thesis} %optional thesis URL
 
@@ -58,20 +58,22 @@
 
 \section{Motivation and objectives}
 
-Almost everyone who has been trying to write computer program has made some logical mistakes in them. To help to solve them we usually run program step-by-step with debugging tools with some sort of debugger. The \textbf{GNU R} is one of the most widespread used scientific languages across the whole world.
+Almost everyone who has been trying to write computer program has made some logical mistakes in them. To help to solve them we usually run program \textbf{step-by-step} with debugging tools with some sort of debugger. The \mbox{\textbf{GNU-R}} which is one of the most widespread used scientific languages across the whole world also has it's implementation for debugging code.
 
-\textbf{GNU R} language is dynamically typed interpreted language which usually means that it needs \textbf{VM} to interpret. There are more ways to internally represent and implement its evaluation. The first one \textbf{Abstract Syntax Tree}~(see~\ref{AST}) evaluation is the most simplest one. To make speedup of its internal evaluation there has been introduced the \textbf{Bytecode}~(see~\ref{BC}) compiler and interpreter in 1998.
+GNU-R language is dynamically typed interpreted language which usually means that it needs \textbf{Virtual Machine} to interpret. There are more ways to internally represent and implement its evaluation. The first one \textbf{Abstract Syntax Tree}~(see~\ref{AST}) evaluation is the most simplest one. To make speedup of its internal evaluation there has been introduced the \textbf{Bytecode}~(see~\ref{BC}) compiler and interpreter into \mbox{GNU-R} in 1998.
 
-\textbf{Abstract syntax tree} which is usually the slowest one has all debugging features already implemented, but since now there was now no way how to analyze and eventually debug the bytecode one. There has been just very basic bytecode disassembler which was showing the data in human unfriendly way with actual no support for real debugging evaluation of bytecode. Also while debugging function instead of supporting debugging inside bytecode mode there is just fallback that switch to \textbf{AST} in case the function is debugged. This is causing potential issues because the code used for debugging can be slightly different than the code used while not-debugging even if it produces the same result. Eventually this can also cause issue when there is an error inside core AST or BC interpreter, and because the debug and non-debug mode is internally using the different code it can cause to confusing and very hard to solve issue.
+Abstract syntax tree evaluator which is the slowest one has in the GNU-R all debugging features already implemented, but since now there was now no way how to easily analyze and debug the bytecode one. The only method provided is just very basic bytecode disassembler which was showing the data in human unfriendly. There is currently also no support for debugging evaluation of bytecode in the GNU-R. Instead of debugging the bytecode it is currently switching into the AST interpreter once user request the debugging features. This is causing potential issues because the code used for debugging can be slightly different than the code used while not-debugging even if it produces the same result. Eventually this can also cause issue when there is an error inside core AST or BC interpreter, and because the debug and non-debug mode is internally using the different code it can cause to confusing and very hard to solve issue.
 
-This work is solving this issue by analyzing problem, suggesting solutions, and implementing them. The solutions include the implementation of more advanced and user-friendly bytecode disassembler tool and implementing of support for the bytecode debugger. This would enable and significantly improve the support for analysis and debugging any program.
+The work done in this is solving the insufficient \textbf{bytecode disassembler} by replacing it with an \textbf{new easy-to-use human friendly one}. The another implemented feature in the GNU-R language is \textbf{advanced and user-friendly native support for bytecode debugger} which is significantly improving the options for analysis and debugging any program code running on the bytecode engine of the language. This implementation was written with focus of having any negative in overall performance of the bytecode engine which was proven in the performance testing on the ending of the work. On top of this there was implemented feature for \textbf{breakpoint instruction} which can be used for the \textbf{simulation of the conditional breakpoints}.
+
+All the implemented features were successfully tested. The disassembler package has written it's own automated tests with an
 
 At the beginning of the thesis there is introduction into problems of evaluation of dynamic languages followed by the analysis of possible solutions how to implement the bytecode disassembler and the debugger. In the middle of work there is design of current implementation. After tgat there is described what type of testing has been done on the work. At the end there is proposed work for the future improvements of the work followed by thesis summarization in conclusion.
 
-\section{Problem statements}
+%\section{Problem statements}
 
-There are two main types of programming languages. Dynamic typed and static typed ones.
-Static such as \textbf{C} / \textbf{C++} / \textbf{FORTRAN} languages has strictly defined types and are usually more machine inspired/focused. Dynamic ones usually do not have strict type inference so they allow the user~(programmer) more freedom. As trade-off they usually needs Virtual Machine~(\textbf{VM}, see~\ref{VM}) to runs efficiently which cause possible performance slowdown. \textbf{GNU R} language was primarily developed for the scientists so user-friendliness and no need to necessary care about data types was one of the decision to make the language dynamic typed.
+%There are two main types of programming languages. Dynamic typed and static typed ones.
+%Static such as \textbf{C} / \textbf{C++} / \textbf{FORTRAN} languages has strictly defined types and are usually more machine inspired/focused. Dynamic ones usually do not have strict type inference so they allow the user~(programmer) more freedom. As trade-off they usually needs Virtual Machine~(\textbf{VM}, see~\ref{VM}) to runs efficiently which cause possible performance slowdown. \textbf{GNU R} language was primarily developed for the scientists so user-friendliness and no need to necessary care about data types was one of the decision to make the language dynamic typed.
 
 %TODO: add more of some good shit
 
