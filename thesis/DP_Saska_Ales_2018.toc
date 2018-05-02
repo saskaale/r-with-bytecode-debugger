@@ -8,33 +8,35 @@
 \contentsline {section}{\numberline {1.1}GNU R from user perspective}{3}{section.1.1}
 \contentsline {subsection}{\numberline {1.1.1}Basis usage~(main commands and REPL loop)}{3}{subsection.1.1.1}
 \contentsline {subsection}{\numberline {1.1.2}GNU R package system}{3}{subsection.1.1.2}
-\contentsline {subsection}{\numberline {1.1.3}GNU R class system}{3}{subsection.1.1.3}
+\contentsline {subsection}{\numberline {1.1.3}GNU R class system}{4}{subsection.1.1.3}
 \contentsline {section}{\numberline {1.2}GNU R internal structure}{4}{section.1.2}
 \contentsline {subsection}{\numberline {1.2.1}Implementation of the core features of language in R itself}{5}{subsection.1.2.1}
 \contentsline {subsection}{\numberline {1.2.2}Calling internal C functions from R}{5}{subsection.1.2.2}
 \contentsline {section}{\numberline {1.3}Computer Program Compiler Structure}{5}{section.1.3}
-\contentsline {subsection}{\numberline {1.3.1}Internal structure}{5}{subsection.1.3.1}
-\contentsline {subsection}{\numberline {1.3.2}Virtual Machine}{6}{subsection.1.3.2}
-\contentsline {subsection}{\numberline {1.3.3}Garbage Collector}{7}{subsection.1.3.3}
+\contentsline {subsection}{\numberline {1.3.1}Virtual Machine}{5}{subsection.1.3.1}
+\contentsline {subsection}{\numberline {1.3.2}GNU R memory types and memory management}{7}{subsection.1.3.2}
+\contentsline {subsection}{\numberline {1.3.3}GNU R garbage collector}{8}{subsection.1.3.3}
 \contentsline {subsection}{\numberline {1.3.4}Computed GOTO}{8}{subsection.1.3.4}
+\contentsline {subsubsection}{\numberline {1.3.4.1}Computed GOTO not used - Switch dispatch}{9}{subsubsection.1.3.4.1}
+\contentsline {subsubsection}{\numberline {1.3.4.2}GOTO not used}{9}{subsubsection.1.3.4.2}
 \contentsline {subsection}{\numberline {1.3.5}Abstract Syntax Tree}{10}{subsection.1.3.5}
-\contentsline {subsection}{\numberline {1.3.6}Bytecode}{10}{subsection.1.3.6}
+\contentsline {subsection}{\numberline {1.3.6}Bytecode}{11}{subsection.1.3.6}
 \contentsline {subsection}{\numberline {1.3.7}Just in Time compilation}{11}{subsection.1.3.7}
 \contentsline {section}{\numberline {1.4}GNU R Bytecode}{12}{section.1.4}
 \contentsline {subsection}{\numberline {1.4.1}GNU R internal representation of bytecode}{12}{subsection.1.4.1}
 \contentsline {subsection}{\numberline {1.4.2}Expression and source references}{13}{subsection.1.4.2}
 \contentsline {section}{\numberline {1.5}Current implementation of AST debugger}{13}{section.1.5}
 \contentsline {section}{\numberline {1.6}Current implementation of Bytecode disassembler}{15}{section.1.6}
-\contentsline {section}{\numberline {1.7}Analysis of disassembler improvements}{16}{section.1.7}
-\contentsline {subsection}{\numberline {1.7.1}Java bytecode disassembler}{16}{subsection.1.7.1}
-\contentsline {subsection}{\numberline {1.7.2}Python bytecode disassembler}{18}{subsection.1.7.2}
-\contentsline {subsection}{\numberline {1.7.3}Summary}{19}{subsection.1.7.3}
-\contentsline {section}{\numberline {1.8}Analysis of Bytecode debugger implementation}{19}{section.1.8}
-\contentsline {subsection}{\numberline {1.8.1}Inspiration with current AST implementation}{19}{subsection.1.8.1}
-\contentsline {subsection}{\numberline {1.8.2}Implementation inside Python VM}{20}{subsection.1.8.2}
-\contentsline {subsection}{\numberline {1.8.3}Implementation inside V8 VM}{20}{subsection.1.8.3}
-\contentsline {subsection}{\numberline {1.8.4}User interace and state of the BC evaluator}{22}{subsection.1.8.4}
-\contentsline {subsection}{\numberline {1.8.5}Summary}{23}{subsection.1.8.5}
+\contentsline {section}{\numberline {1.7}Analysis of disassembler improvements}{15}{section.1.7}
+\contentsline {subsection}{\numberline {1.7.1}Java bytecode disassembler}{15}{subsection.1.7.1}
+\contentsline {subsection}{\numberline {1.7.2}Python bytecode disassembler}{15}{subsection.1.7.2}
+\contentsline {subsection}{\numberline {1.7.3}Summary}{17}{subsection.1.7.3}
+\contentsline {section}{\numberline {1.8}Analysis of Bytecode debugger implementation}{17}{section.1.8}
+\contentsline {subsection}{\numberline {1.8.1}Inspiration with current AST implementation}{17}{subsection.1.8.1}
+\contentsline {subsection}{\numberline {1.8.2}Implementation inside Python VM}{17}{subsection.1.8.2}
+\contentsline {subsection}{\numberline {1.8.3}Implementation inside V8 VM}{18}{subsection.1.8.3}
+\contentsline {subsection}{\numberline {1.8.4}User interace and state of the BC evaluator}{18}{subsection.1.8.4}
+\contentsline {subsection}{\numberline {1.8.5}Summary}{19}{subsection.1.8.5}
 \contentsline {chapter}{\chapternumberline {2}Realisation}{25}{chapter.2}
 \contentsline {section}{\numberline {2.1}Implementation of the disassembler}{25}{section.2.1}
 \contentsline {subsection}{\numberline {2.1.1}User interface}{25}{subsection.2.1.1}
