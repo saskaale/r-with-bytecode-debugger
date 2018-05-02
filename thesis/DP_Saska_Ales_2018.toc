@@ -35,7 +35,7 @@
 \contentsline {subsection}{\numberline {1.8.1}Inspiration with current AST implementation}{17}{subsection.1.8.1}
 \contentsline {subsection}{\numberline {1.8.2}Implementation inside Python VM}{17}{subsection.1.8.2}
 \contentsline {subsection}{\numberline {1.8.3}Implementation inside V8 VM}{18}{subsection.1.8.3}
-\contentsline {subsection}{\numberline {1.8.4}User interace and state of the BC evaluator}{18}{subsection.1.8.4}
+\contentsline {subsection}{\numberline {1.8.4}User interace and state of the BC evaluator}{19}{subsection.1.8.4}
 \contentsline {subsection}{\numberline {1.8.5}Summary}{19}{subsection.1.8.5}
 \contentsline {chapter}{\chapternumberline {2}Realisation}{25}{chapter.2}
 \contentsline {section}{\numberline {2.1}Implementation of the disassembler}{25}{section.2.1}
@@ -54,7 +54,7 @@
 \contentsline {subsection}{\numberline {2.2.2}Printing of the stack values}{36}{subsection.2.2.2}
 \contentsline {subsection}{\numberline {2.2.3}RAWMEM stack type tag}{36}{subsection.2.2.3}
 \contentsline {subsection}{\numberline {2.2.4}Persisting stack pointers}{37}{subsection.2.2.4}
-\contentsline {section}{\numberline {2.3}Conditional breakpoints}{38}{section.2.3}
+\contentsline {section}{\numberline {2.3}Simulated conditional breakpoints}{38}{section.2.3}
 \contentsline {section}{\numberline {2.4}Implementation of the debugger}{39}{section.2.4}
 \contentsline {subsection}{\numberline {2.4.1}Main idea}{39}{subsection.2.4.1}
 \contentsline {subsection}{\numberline {2.4.2}Global design}{39}{subsection.2.4.2}
@@ -69,11 +69,11 @@
 \contentsline {subsection}{\numberline {2.4.11}Bytecode interpreter internal status}{48}{subsection.2.4.11}
 \contentsline {subsubsection}{\numberline {2.4.11.1}The short compact way of status printing}{49}{subsubsection.2.4.11.1}
 \contentsline {subsubsection}{\numberline {2.4.11.2}The long verbose way showing all information}{49}{subsubsection.2.4.11.2}
-\contentsline {subsection}{\numberline {2.4.12}Debugger jumping granularity}{49}{subsection.2.4.12}
+\contentsline {subsection}{\numberline {2.4.12}Debugger jumping granularity}{50}{subsection.2.4.12}
 \contentsline {subsection}{\numberline {2.4.13}Handling of the recursive character of the bytecode}{50}{subsection.2.4.13}
 \contentsline {subsection}{\numberline {2.4.14}Threaded and non-threaded design of the application}{51}{subsection.2.4.14}
 \contentsline {subsubsection}{\numberline {2.4.14.1}THREADED{\_}CODE defined}{51}{subsubsection.2.4.14.1}
-\contentsline {subsubsection}{\numberline {2.4.14.2}THREADED{\_}CODE not defined}{51}{subsubsection.2.4.14.2}
+\contentsline {subsubsection}{\numberline {2.4.14.2}THREADED{\_}CODE not defined}{52}{subsubsection.2.4.14.2}
 \contentsline {subsection}{\numberline {2.4.15}Handling of the debugger user input}{52}{subsection.2.4.15}
 \contentsline {subsection}{\numberline {2.4.16}Default behavior of the bytecode debugger}{53}{subsection.2.4.16}
 \contentsline {subsection}{\numberline {2.4.17}Initial entry points to the bcEval functions}{53}{subsection.2.4.17}
@@ -83,10 +83,11 @@
 \contentsline {subsection}{\numberline {3.2.1}Effectiveness of testing}{59}{subsection.3.2.1}
 \contentsline {subsection}{\numberline {3.2.2}Side effects of the scripts}{59}{subsection.3.2.2}
 \contentsline {section}{\numberline {3.3}Conditional breakpoints}{60}{section.3.3}
-\contentsline {section}{\numberline {3.4}Future work}{60}{section.3.4}
-\contentsline {subsection}{\numberline {3.4.1}Push into working repository}{60}{subsection.3.4.1}
-\contentsline {subsection}{\numberline {3.4.2}Merging the bctools package into the compilers}{60}{subsection.3.4.2}
-\contentsline {subsection}{\numberline {3.4.3}GNU R Memory optimization}{60}{subsection.3.4.3}
+\contentsline {section}{\numberline {3.4}Performance testing}{60}{section.3.4}
+\contentsline {section}{\numberline {3.5}Future work}{60}{section.3.5}
+\contentsline {subsection}{\numberline {3.5.1}Push into working repository}{60}{subsection.3.5.1}
+\contentsline {subsection}{\numberline {3.5.2}Merging the bctools package into the compilers}{60}{subsection.3.5.2}
+\contentsline {subsection}{\numberline {3.5.3}GNU R Memory optimization}{60}{subsection.3.5.3}
 \contentsline {chapter}{Conclusion}{61}{chapter*.7}
 \contentsline {chapter}{Bibliography}{63}{section*.9}
 \contentsline {appendix}{\chapternumberline {A}Acronyms}{65}{appendix.A}

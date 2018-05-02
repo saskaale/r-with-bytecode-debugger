@@ -384,7 +384,7 @@ For now the compilation of packages is enabled by calling \code{compilePKGS} wit
 
 \subsection{GNU R internal representation of bytecode}\label{R-internal-bc-representation}
 
-Internal representation of bytecode is \code{SEXP} node of \code{BCODESXP} type. It is internally represented as an list~(linked one) of two variables:
+Internal representation of bytecode is \code{SEXP} node of \code{BCODESXP} type. It is internally represented as an linked list~(CONS of cells) of two variables:
 \begin{itemize}
 	\item \textbf{Bytecode code}~(body) array which contains set bytecode instructions following its' parameters
 
@@ -671,7 +671,7 @@ One of the good examples of the similar language and VM is the Python one.
 
 In the following paragraph there is description of \textit{cpython} VM~(Python itself is language and not a VM) - there are different VMs supporting evaluation of the language but the \textit{cpython} is the most common used one. It is supporting just the \textbf{BC} interpreter with the quite similar instruction set to the GNU-R.
 
-The BC implementation of the debugger inside this VM is pretty straightforward. There is implemented runtime checking of the debug flag in the label \code{fast{\_}next{\_}opcode}. To speedup this there is shortcut for dispatching computed goto~(see~\ref{Computed-GOTO}) through dispatch table inside \code{FAST{\_}DISPATCH} macro. Inside this macro is check for the \code{{\!}{\_}Py{\_}TracingPossible} {\&\&} \code{{\!}PyDTrace{\_}LINE{\_}ENABLED()}~(eventually also combined with the \code{!lltrace} flag). This design of the implementation implicates that debugger implementation is causing performance overhead even while function not being debugged~(for every evaluated BC instruction there is at least one value comparison and conditional jump needed for processor compute). However this implementation is easy to implement, does not require any specific debug instruction and does not cause any changes to the memory subsystem~(potential GC issues).
+The BC implementation of the debugger inside this VM is pretty straightforward. There is implemented runtime checking of the debug flag in the label \code{fast{\_}next{\_}opcode}. To speedup this there is shortcut for dispatching computed goto~(see~\ref{Computed-GOTO}) through dispatch table inside \code{FAST{\_}DISPATCH} macro. Inside this macro is check for the \code{{\!}{\_}Py{\_}TracingPossible} {\&\&} \code{{\!}PyDTrace{\_}LINE{\_}ENABLED()}~(eventually also combined with the \code{!lltrace} flag). This design of the implementation implicates that debugger implementation is causing performance overhead even while function not being debugged~(for every evaluated BC instruction there is at least one value comparison and conditional jump needed for processor compute). However this implementation is easy to implement, does not require any specific debug instruction and does not cause any changes to the memory subsystem~(potential GC issues). Also the overhead would in real world usage not be huge due to branch prediction feature in the modern CPUs.
 
 \subsection{Implementation inside V8 VM}\label{bcdebug-implementation-in-v8}
 
@@ -1167,11 +1167,11 @@ $R{\_}BCNodeStackBase < R{\_}BCNodeStackTop < R{\_}BCNodeStackEnd$
 
 To be able to print values on the current evaluating bytecode stack we need to know when function stack frame starts and ends~(\textit{R{\_}BCNodeStackBase} points to the beginning of the whole stack and not to the beginning of current evaluated function). For knowing this information we don't have enough information in these variables so we decided \textbf{R{\_}BCNodeStackFnBase} which would point to the beginning~(bottom) of the current evaluated function so after that we would have an memory range in within is the current evaluated stack frame. As long as this variable is internally represented as C global variable but it is used in function context~(mimicking of the CPU function local stack frame behavior) we need to add this variable also to the handling the context~(in the \textit{src/main/context.c}).
 
-\section{Conditional breakpoints}\label{conditional-breakpoints}
+\section{Simulated conditional breakpoints}\label{conditional-breakpoints}
 
-Due to lack of the the ability of the conditional breakpoins which are simple and user-friendly there has been put decision to add simple user-friendly \textit{breakpoint()} function which fires the debugger functionality on the spot. It is inspired by the \textbf{JS} \textit{debugger;} command, but instead of being an separate command which would be big change in the language parser we decided it to be just an callable function.
+Due to lack of the the ability of the conditional breakpoints which are simple and user-friendly there has been put decision to add \textit{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()} function is inspired by the JS \textit{debugger;} command, but instead of being an separate command which would be big change in the language parser we decided it to be a callable function.
 
-This function is simply modifying the \textit{RDEBUG} feature of the current evaluating environment and resetting the temporary bytecode variables (\textit{R{\_}BrowserLastCommand} and \textit{browserfinish} member of function context). This command works like every other function, so it is called with new environment. On the other side we want to change variables of not this environment but the evaluated function, so there has to be done the environment lookup for the parent function context.
+This function is simply modifying the \textit{RDEBUG} feature of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context). The command works like every other function, so it is called with new environment. On the other side we want to change variables of not this environment but the evaluated function, so there has to be done the environment lookup for the parent function context.
 
 \begin{lstlisting}
 SEXP attribute_hidden do_breakpoint
@@ -1845,7 +1845,11 @@ These parts of code are:
 
 \section{Conditional breakpoints}
 
-Technically conditional breakpoints are in term of the code part of the debugger support so even the testing was done altogether other testing of the bytecode debugger support.
+The conditional breakpoints are in term of the code part of the debugger support so the testing was done altogether with other testing of the bytecode debugger support.
+
+\section{Performance testing}
+
+TODO: performance testing
 
 \section{Future work}
 
@@ -1912,7 +1916,7 @@ All the features were developed and tested and are included on the enclosed DVD.
 		.1 readme.txt\DTcomment{instruction for the file}.
 		.1 analysis\DTcomment{analysis of other implementations}.
 		.1 examples\DTcomment{implementation examples directory}.
-		.2 cond{\_}breakpoint\DTcomment{conditional breakpoint examples directory}.
+		.2 cond{\_}breakpoint\DTcomment{simulated conditional breakpoint examples directory}.
 		.2 r{\_}breakpoints\DTcomment{bytecode debugger examples directory}.
 		.2 r{\_}disassembly\DTcomment{bytecode disassembler examples directory}.
 		.1 noncomplete{\_}functions\DTcomment{analysis of other implementations}.
