@@ -1,6 +1,6 @@
 # r-with-bytecode-debugger
 
-GNU-R with implemented bytecode debugger and support for conditional breakpoints
+GNU-R with implemented bytecode debugger and support for simulated conditional breakpoints through `debugger()` function
 
 builded and tested on Ubuntu 16.04 LTS
 
