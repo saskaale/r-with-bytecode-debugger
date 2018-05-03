@@ -137,6 +137,8 @@ The GNU-R has internally written the loading mechanism in the way that the \text
 
 \subsection{Calling internal C functions from R}
 
+%TODO: REWRITE IT
+
 \textbf{C code} compiled into R at build time can be called directly in what are termed primitives or via the \code{.Internal} interface, which is very similar to the \code{.External} interface except in syntax. More precisely, R keeps a table of function names and corresponding C functions to call, which by convention all start with \code{do{\_}} and return a \code{SEXP}. This table (\code{R{\_}FunTab} sitting in file \textit{src/main/names.c}) also specifies how many arguments to a function are required or allowed, whether or not the arguments are to be evaluated before calling, and whether the function is internal in the sense that it must be accessed via the \textbf{.Internal} interface, or directly accessible in which case it is printed in \textbf{R} as \textbf{.Primitive}.
 
 \section{Computer Program Compiler Structure}
@@ -186,7 +188,7 @@ The examples of virtual machines are
 	\item Chakra ( JavaScript inside MS Edge browser)
 \end{itemize}
 
-
+\subsubsection{Internal parts of the VM}\label{internal-parts-of-vm}
 
 \textbf{GNU R} virtual machine is stack based one. Due to simplicity it consists of these parts:
 \begin{itemize}
@@ -618,7 +620,7 @@ SourceFile: "HelloWorld.java"
 
 \textbf{Python} has in-built support of disassembler for it's internal BC~\ref{fig:python-dis-output-example}. It is provided inside package \code{dis} which is part of python~(no need to manually installing). Source code location is in the \textit{Lib/dis.py}. As you can see the code is showing just one function at once. It is also showing the combined output of constant array at one line~(not printing any separate array for constant array).
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \begin{lstlisting}
 import dis
 
@@ -650,7 +652,7 @@ Currently there is no support for debugging the bytecode evaluation in real time
 
 The general idea how to run the is taken from the current implementation of the AST debugger. Its implementation of the debug code~\ref{fig:ast-implementation-of-debugger} check if there is \code{RDEBUG} flag on the current executed function and if there is it would print information about the current evaluated code~(source reference if available + evaluated expression). Following command is the \code{do{\_}browser()} which is internally calling the environment browser with support for evaluating expression~(seeing what is value of which variable + evaluating functions) and inbuilt handling of debugger commands~(\textit{next step}, \textit{step into}, \textit{continue} etc.). It also has support for showing backtrace~(\code{where} command). The environment browser is internally reusing the \textbf{REPL}~\ref{REPL} functionality of whole language~(implemented by the function \code{Rf{\_}ReplIteration} or \code{ParseBuffer} inside \textit{src/main/main.c}).
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \begin{lstlisting}
 if (RDEBUG(rho) && !R_GlobalContext->browserfinish) {
   SrcrefPrompt("debug", R_Srcref);
@@ -665,7 +667,7 @@ if (RDEBUG(rho) && !R_GlobalContext->browserfinish) {
 	\caption{GNU-R AST implementation of the debugger}\label{fig:ast-implementation-of-debugger}
 \end{figure}
 
-\subsection{Implementation inside Python VM}
+\subsection{Implementation inside Python VM}\label{bcdebug-implementation-in-python}
 
 One of the good examples of the similar language and VM is the Python one.
 
@@ -683,7 +685,7 @@ The bytecode interpreter is single stack registed based VM~(similarly to the GNU
 
 If the breakpoint is set on the instruction~(for example \textit{ShiftRight} instruction with the 2 parameters) it causes its replacement by the corresponding breakpoint instruction according to number of the parameters~(\textit{DebugBreak2} for \textit{ShiftRight} because it has 2 parameters). These BC instructions works like special instructions~\ref{fig:v8-breakpoint-instruction-implementation} which internally calls the handler for debugger and also dispatch the original instruction to maintain the same behavior~(consistency) of the original code.
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \begin{lstlisting}
   /* Debug Breakpoints - one for each possible
   		size of unscaled bytecodes */
@@ -713,7 +715,7 @@ If the breakpoint is set on the instruction~(for example \textit{ShiftRight} ins
 	\caption{V8 BC definition for the breakpoint instructions}\label{fig:v8-bc-breakpoint-definitions}
 \end{figure}
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \begin{lstlisting}
 // DebugBreak
 //
@@ -759,32 +761,42 @@ Alongside the showing the current position there would be also need to show the 
 
 \subsection{Summary}
 
-In order to improve bytecode debugging there is need for improving~(implementing the human-readable) disassembler. 
+In order to improve bytecode debugging there is need for improving~(implementing the human-readable) disassembler. There was decided that in order to keep better maintainability and more flexibility of the tool it would be implemented as separate \code{print.disassembly} function inside the new \code{bctools} package.
 
-After analyzing the GNU-R internal implementation of \code{bcEval} function and the implementation of the JS V8 VM and Python VM there is definitely need to mark and put some condition for the marking of the bytecode instruction that the bytecode has been setted on that one. As long as there is focus on performance the bytecode debugger should in the best way put no overhead while it is not debugging. Looking into the internals of the V8 we can reuse the idea of making the separate instructions for bytecode debug flag which would call the neccesary debug routines~(as shown in the AST~debugger~\ref{AST-debugger}) and after that call the original instruction to keep functionality of BC~(needed to not break program integrity).
+The another part of the thesis is to implement the native bytecode debugger into the GNU-R. The solution proposed in this thesis was inspired by the JS~V8~VM~\ref{bcdebug-implementation-in-v8} and Python~VM~\ref{bcdebug-implementation-in-python}. It consists of the implementing set of bytecode instructions~(\code{BREAKPOINT0} through \code{BREAKPOINT4}) alongside with storing of the original instructions in the separate array. This proposed solution is performance oriented because the bytecode debugger architecture should not have any negative effect on overall language performance.
 
-Finally there has to be done some showing of the internal status to end user. This consists of the printing the current position in the code and printing the stack content. For the current position in the code there can be reused the disassembler~(see~\ref{analysis-of-disassembler}) but for the dumping of the stack content there has to be implemented an separate tool.
+Finally in the debugger there has to be done some showing of the evaluator internal status to the user. The status consists of the bytecode of the function, current evaluated instruction and stack content. For showing the function bytecode and printing the current evaluator position in the code there can be reused the disassembler tool~(see~\ref{analysis-of-disassembler}) but for the dumping of the stack content there has to be implemented an separate tool.
 
-\chapter{Realisation}
+\chapter{Realization}
 
-There are three different things which has to been done - disasembler, stack printer and finally the \textbf{BC} debugger. The BC debugger is using use the stack printer and disassembler so it make sense to implement the disassembler first.
+There are three different things which has to been done - disassembler, stack printer and finally the BC debugger itself. 
 
 \section{Implementation of the disassembler}\label{implementation-of-disassembler}
 
-The whole project was structured that disassembler can be easily released~(to the \textbf{CRAN} repository) without the debugger. This is affecting the whole structuring of the project. The disassembler feature is made to be ready-to-deploy to the \textbf{GNU R} beta-testing codebase.
+The whole project was structured that \textbf{disassembler can be easily released to the CRAN repository} without the debugger. This is affecting the whole structuring of the project. \textbf{As much as possible code in the R} language~(most of it in separate package \code{bctools}, but some also to the \code{compiler} one~\label{internal-parts-of-vm}) and just necessary \textbf{minimum in C} for keeping the changes into the GNU-R core code simple.
 
-The main idea behind the disassembly rool was to write as much as possible code in the R language and just neccesary minimum in C for keeping the code simple. In the \textbf{GNU R} language there is the \textit{compiler} package written in R which contains the current \textbf{BC} compiler and \textbf{BC} disassembler~(very minimal - see~\ref{current-bc-disassembler}). As long as the contribution to the \textbf{GNU R} repository has very strict code styling rules which are much more relaxed for the 3rd party libraries inside \textbf{CRAN} repository decision was to make as much as possible inside the separate library which would be then published with some minimal changes to the main repository. Name of the package was decided to be the \textit{bctools}.
+In the GNU-R language there is the \code{compiler} package written in R which is lying the current BC compiler and BC disassembler~(very minimal - see~\ref{current-bc-disassembler}). The changes made in order to realize the implementation of the disassembler code involved also modifying the \code{compiler} package. This package lies inside the GNU-R core code so the general idea about implementation was to put the just the bare minimum inside it~(it results in the inserting annotation of instructions~\ref{annotation-of-instructions} and putting class into the disassembly code \ref{user-interface}). The most of the functionality was implemented then in the \code{bctools} package.
 
-\subsection{User interface}
+\subsection{User interface}\label{user-interface}
 
-For more user friendliness of the \textbf{BC} print function there has been make an decision to use advantage of the \textbf{S3} class system~(see~\ref{R-Classes}). The old \textit{disassemble} function inside the \textit{compiler} package was kept almost intact. The only change that has been made there was putting class into the disasembly code. The name of the class has been decided to be the "disassembly". This allows us to have \textit{print.disassembly} function~(\textit{print} method of \textit{disassembly} class) inside our package which would be automatically dispatched once user call the \textit{print} function on the object if the \textit{bctools} package would be loaded inside user library.
+For better user friendliness of the BC print function there has been made an decision to use advantage of the S3 class system~(see~\ref{R-Classes}). The old \code{disassemble} function inside the \code{compiler} package was kept intact except of the \textbf{putting class into the disasembly code}. The name of the class has been decided to be the \code{"disassembly"}. This allows us to have \textit{print.disassembly} function~(\textit{print} method of \textit{disassembly} class) inside our \code{bctools} package. That function would be then automatically dispatched once user call the \code{print} function on the object~(if the \code{bctools} package would be loaded inside user library).
 
-The usage then changed from~(in the previous version / before the changes made in this thesis):
+The usage then changed from simple list (see figure~\ref{fig:old-disassembly-ui}) to the user friendly disassembly code~(see figure~\ref{fig:new-disassembly-ui}):
 
+\begin{figure}[!h]
 \begin{lstlisting}
 #initialization
 library(compiler)
-f<-function(a) a+1
+f<-function(x) {
+    y <- x*2
+    while(x < y)
+	x <- x+1
+
+    if(x %% 2 == 0)
+	x
+    else
+	-x
+}
 compiled <- cmpfun(f)
 
 #disassembly
@@ -793,19 +805,42 @@ compiled <- cmpfun(f)
 disassemble(compiled)
 
 #generated output:
-# list(.Code, list(8L, GETVAR.OP, 1L,
-#   LDCONST.OP, 2L, ADD.OP, 0L,
-#   RETURN.OP), list(a + 1, a, 1))
+# list(.Code, list(8L, GETVAR.OP, 1L, LDCONST.OP, 
+#	2L, MUL.OP, 3L, SETVAR.OP, 4L, POP.OP, GETVAR.OP,
+#	1L, GETVAR.OP, 4L, LT.OP, 5L, BRIFNOT.OP, 6L, 30L, 
+#	GETVAR.OP, 1L, LDCONST.OP, 7L, ADD.OP, 8L, 
+#	SETVAR.OP, 1L, POP.OP, GOTO.OP, 10L, LDNULL.OP, 
+#	POP.OP, GETBUILTIN.OP, 9L, GETVAR.OP, 1L, PUSHARG.OP,
+#	PUSHCONSTARG.OP, 2L, CALLBUILTIN.OP, 10L, LDCONST.OP, 
+#	11L, EQ.OP, 12L, BRIFNOT.OP, 13L, 51L, GETVAR.OP, 
+#	1L, RETURN.OP, GETVAR.OP, 1L, UMINUS.OP, 14L, 
+#	RETURN.OP), list({
+#   y <- x * 2
+#   while (x < y) x <- x + 1
+#   if (x%%2 == 0) 
+#       x
+#   else -x
+#}, x, 2, x * 2, y, x < y, while (x < y) x <- x + 1, 1, x + 1, 
+#   `%%`, x%%2, 0, x%%2 == 0, if (x%%2 == 0) x else -x, -x))
 \end{lstlisting}
+	\caption{Old disassembly user interface}\label{fig:old-disassembly-ui}
+\end{figure}
 
-
-To the:
-
+\begin{figure}[!h]
 \begin{lstlisting}
 #initialization
 library(compiler)
 library(bctools) #new package
-f<-function(a) a+1
+f<-function(x) {
+    y <- x*2
+    while(x < y)
+	x <- x+1
+
+    if(x %% 2 == 0)
+	x
+    else
+	-x
+}
 compiled <- cmpfun(f)
 
 #disassembly
@@ -825,6 +860,8 @@ disassemble(compiled)
 #  RETURN
 #
 \end{lstlisting}
+	\caption{Old disassembly user interface}\label{fig:new-disassembly-ui}
+\end{figure}
 
 \subsection{Instruction arguments}\label{instruction-arguments}
 The \textbf{BC} instruction contains the integer code identifying it followed by variable number of arguments. These arguments can be of different types~(described in more detail bellow). 
@@ -871,7 +908,7 @@ So the final list of the argument types is:
 	represented as reference~(integer index) to the constant pool where is located an array containing the references~(integer indexes) to the code array itself
 \end{itemize}
 
-\subsection{Annotation of instructions}
+\subsection{Annotation of instructions}\label{annotation-of-instructions}
 These 6 types should be printed in different way. There are 2 ways how to implement these behaviors in the bytecode disassembler. The first is to hardcode the behavior for the each instruction. This make sense for the compiler ( \textit{compiler} package ) and evaluator ( mostly \textit{bcEval()} function ) because they are basically generating or evaluating the instructions which does not need any anotation at all. On the other hand in our disassembly script only difference between printing these argument types would formatting of output. For this reason it makes a sense to write the code as much generic as possible. The best solution is to just take the definition and prints out the instruction according to its' definition.
 
 In the compiler package there is already some annotation of the \textbf{BC} instructions in the form specifying the number of arguments for each instruction. After fully annotating all instruction by specifying each argument type, these values can be computed from the instruction annotation. This definition of the instruction parameters annotation also is more logically connected with the \textbf{BF} which generation and support functions are inside \textit{compiler} package than the disassembler~(would be just using this feature). Despite the fact that in the purpose of the work there has been idea that as much as possible code should be put inside the 3rd party library~(\textit{bctools}) it was decided to put the annotation inside the compiler package. This annotation of the instructions inside the \textit{compiler} package would also allow easier maintainance for the \textit{bctools} package because every time there would be added new instruction its definition has to be added in the \textit{compiler}. The argument annotation would now be part of the instruction annotation so even the disassembler would support then this instruction~(it would be reading the instruction definition from the \textit{compiler} package).
@@ -1929,3 +1966,4 @@ All the features were developed and tested and are included on the enclosed DVD.
 \end{figure}
 
 \end{document}
+	
