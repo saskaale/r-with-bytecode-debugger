@@ -1,9 +1,54 @@
 
-  @ a
-  GETVAR              a
+  @ x
+  GETVAR              x
+  @ 2
+  LDCONST             2
+  @ x * 2
+  MUL                 
+  @ y <- x * 2
+  SETVAR              y
+  POP                 
+1:
+  @ x
+  GETVAR              x
+  @ y
+  GETVAR              y
+  @ x < y
+  LT                  
+  @ while (x < y) x <- x + 1
+  BRIFNOT             while (x < y) x <- x + 1	 | $2
+  @ x
+  GETVAR              x
   @ 1
   LDCONST             1
-  @ a + 1
+  @ x + 1
   ADD                 
+  @ x <- x + 1
+  SETVAR              x
+  @ while (x < y) x <- x + 1
+  POP                 
+  GOTO                $1
+2:
+  LDNULL              
+  POP                 
+  @ x%%2
+  GETBUILTIN          `%%`
+  GETVAR              x
+  PUSHARG             
+  PUSHCONSTARG        2
+  CALLBUILTIN         x%%2
+  @ 0
+  LDCONST             0
+  @ x%%2 == 0
+  EQ                  
+  @ if (x%%2 == 0) x else -x
+  BRIFNOT             if (x%%2 == 0) x else -x	 | $3
+  @ x
+  GETVAR              x
+  RETURN              
+3:
+  GETVAR              x
+  @ -x
+  UMINUS              
   RETURN              
 
