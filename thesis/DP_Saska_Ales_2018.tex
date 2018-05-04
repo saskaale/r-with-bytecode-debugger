@@ -863,6 +863,8 @@ disassemble(compiled)
 	\caption{Old disassembly user interface}\label{fig:new-disassembly-ui}
 \end{figure}
 
+%TODO: REDO THIS EXAMPLE
+
 \subsection{Instruction arguments}\label{instruction-arguments}
 The \textbf{BC} instruction contains the integer code identifying it followed by variable number of arguments. These arguments can be of different types~(described in more detail bellow). 
 
@@ -875,14 +877,14 @@ The implementation of these operators is expecting arguments with different type
 
 	\item \textbf{INT} integer value
 
-	\item \textbf{LABEL} label~-~jump target / reference~(integer index) to the code array itself
+	\item \textbf{LABEL} - jump target / reference~(integer index) to the code array itself
 
 	\item \textbf{CONSTANT{\_}LABEL} variation~(extension) of the \textit{LABEL} which allow more than one referenced index
 	
 	represented as reference~(integer index) to the constant pool where is located an array containing the references~(integer indexes) to the code array itself
 \end{itemize}
 
-The \textbf{CONSTANT} parameter although can have two different meanings in the code. In the \textbf{GNU R} bytecode some of the arguments could be just whole expression~(e.g. a+b+c) kept due to usage in some corner cases during evaluation~( e.g. ADD instruction is in the most cases taking the two topmost arguments, just in these corner cases it is calling the other internal functions which are originally designed to work on the \textbf{AST} evaluator so they expect the expression as an input). Basically it means that these arguments are stored just because the internal implementation and contains the duplicate information. These two meaning should be distinguished inside the disassembler print so there has been put decision to split the \textbf{CONSTANT} parameter into the:
+The \textbf{CONSTANT} parameter although can have two different meanings in the code. In the \textbf{GNU R} bytecode some of the arguments could be just whole expression~(e.g. a+b+c) kept due to usage in some corner cases during evaluation~( e.g. ADD instruction is in the most cases taking the two topmost arguments, just in these corner cases it is calling the other internal functions which are originally designed to work on the \textbf{AST} evaluator so they expect the expression as an input). This means that these arguments are stored just because the internal implementation of the bytecode evaluator and they contains the duplicate information. These two meaning should be distinguished inside the disassembler print so there has been put decision to split the \textbf{CONSTANT} parameter into the:
 
 \begin{itemize}
 	\item \textbf{CONSTANT{\_}DBG} - constant expression inside the argument used internally just for the corner cases~(technically containing duplicitous information)
@@ -890,30 +892,16 @@ The \textbf{CONSTANT} parameter although can have two different meanings in the 
 	\item \textbf{CONSTANT} - regular constant expression used for most of common cases
 \end{itemize}
 
-So the final list of the argument types is:
-
-\begin{itemize}
-	\item \textbf{CONSTANT} representing reference~(integer index) to the constant pool where is located constant expression~(can be either number or function)
-
-	\item \textbf{CONSTANT{\_}DBG} - constant expression inside the argument used internally just for the corner cases~(technically containing duplicitous information)
-
-	\item \textbf{BOOL} boolean value
-
-	\item \textbf{INT} integer value
-
-	\item \textbf{LABEL} label~-~jump target / reference~(integer index) to the code array itself
-
-	\item \textbf{CONSTANT{\_}LABEL} variation~(extension) of the \textit{LABEL} which allow more than one referenced index
-	
-	represented as reference~(integer index) to the constant pool where is located an array containing the references~(integer indexes) to the code array itself
-\end{itemize}
-
 \subsection{Annotation of instructions}\label{annotation-of-instructions}
-These 6 types should be printed in different way. There are 2 ways how to implement these behaviors in the bytecode disassembler. The first is to hardcode the behavior for the each instruction. This make sense for the compiler ( \textit{compiler} package ) and evaluator ( mostly \textit{bcEval()} function ) because they are basically generating or evaluating the instructions which does not need any anotation at all. On the other hand in our disassembly script only difference between printing these argument types would formatting of output. For this reason it makes a sense to write the code as much generic as possible. The best solution is to just take the definition and prints out the instruction according to its' definition.
+These 6 types should be printed in different way. Each of it has to be print out in different way. There are two possible ways how to achieve this behavior. The first one is to hardcode it for the each instruction.  Other options is to the make an definition for each instruction argument~(annotate the instructions) which was chosen in this work. This one would allow the code to be more modular and more generic. The pretty printing disasembly function~(in the \code{bctools} package) would be then take instruction definition and printing the arguments according to the definition. 
 
-In the compiler package there is already some annotation of the \textbf{BC} instructions in the form specifying the number of arguments for each instruction. After fully annotating all instruction by specifying each argument type, these values can be computed from the instruction annotation. This definition of the instruction parameters annotation also is more logically connected with the \textbf{BF} which generation and support functions are inside \textit{compiler} package than the disassembler~(would be just using this feature). Despite the fact that in the purpose of the work there has been idea that as much as possible code should be put inside the 3rd party library~(\textit{bctools}) it was decided to put the annotation inside the compiler package. This annotation of the instructions inside the \textit{compiler} package would also allow easier maintainance for the \textit{bctools} package because every time there would be added new instruction its definition has to be added in the \textit{compiler}. The argument annotation would now be part of the instruction annotation so even the disassembler would support then this instruction~(it would be reading the instruction definition from the \textit{compiler} package).
+In the compiler package there is already some annotation of the \textbf{BC} instructions specifying the number of arguments for each instruction~(\code{Opcodes.argc} list). The created new list containing the fully annotated instruction was named \code{Opcodes.argdescr}.
 
-The \textit{compiler} package is made with the \textit{noweb} tool which is the tool to write documentation alongside with the code. Because of the fact that build command~(\textit{make}) is not written to re-generate the source code from \textit{noweb} each time the compiling is provided, each time this noweb source is changed there has to be run the \textit{make from-noweb} command inside the compiler package directory~(\textit{src/library/compiler}) to regenerate the C sources.
+The old previous \code{Opcodes.argc} list was then computed from the instruction annotation from the \code{Opcodes.argdescr} by simply applying the \code{length} function to each element. 
+
+This implemented solution is allowing easier maintainance for the \textit{bctools} package because the definition of the instructions would be readed from the GNU-R core~(the \code{compiler} package).
+
+The \code{compiler} package is made with the \code{noweb} tool which is the tool to write documentation alongside with the code. Its source is written in the \textit{src/library/compiler/noweb/compiler.nw} file. Because of the fact that build command~(\code{make}) is not written to re-generate the source code from \code{noweb} each time the compiling is provided, we have to rerun the \textit{make from-noweb} command inside the \code{compiler} to regenerate the R sources for the \code{compiler} package.
 
 Example of the Instruction argument annotation inside \textit{compiler} package:
 \begin{lstlisting}

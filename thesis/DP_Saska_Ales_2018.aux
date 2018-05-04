@@ -43,6 +43,8 @@
 \@writefile{toc}{\contentsline {section}{\numberline {1.3}Computer Program Compiler Structure}{5}{section.1.3}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.3.1}Virtual Machine}{5}{subsection.1.3.1}}
 \newlabel{VM}{{\M@TitleReference {1.3.1}{Virtual Machine}}{5}{Virtual Machine}{subsection.1.3.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.3.1.1}Internal parts of the VM}{6}{subsubsection.1.3.1.1}}
+\newlabel{internal-parts-of-vm}{{\M@TitleReference {1.3.1.1}{Internal parts of the VM}}{6}{Internal parts of the VM}{subsubsection.1.3.1.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.3.2}GNU R memory types and memory management}{7}{subsection.1.3.2}}
 \newlabel{memory-management}{{\M@TitleReference {1.3.2}{GNU R memory types and memory management}}{7}{GNU R memory types and memory management}{subsection.1.3.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.3.3}GNU R garbage collector}{8}{subsection.1.3.3}}
@@ -82,6 +84,7 @@
 \@writefile{toc}{\contentsline {section}{\numberline {1.8}Analysis of Bytecode debugger implementation}{17}{section.1.8}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.8.1}Inspiration with current AST implementation}{17}{subsection.1.8.1}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.8.2}Implementation inside Python VM}{17}{subsection.1.8.2}}
+\newlabel{bcdebug-implementation-in-python}{{\M@TitleReference {1.8.2}{Implementation inside Python VM}}{17}{Implementation inside Python VM}{subsection.1.8.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.8.3}Implementation inside V8 VM}{18}{subsection.1.8.3}}
 \newlabel{bcdebug-implementation-in-v8}{{\M@TitleReference {1.8.3}{Implementation inside V8 VM}}{18}{Implementation inside V8 VM}{subsection.1.8.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.8.4}User interace and state of the BC evaluator}{19}{subsection.1.8.4}}
@@ -101,64 +104,71 @@
 \newlabel{fig:ast-v8-architecture}{{\M@TitleReference {1.10}{V8 internal architecture}}{24}{V8 internal architecture}{figure.1.10}{}}
 \@writefile{lof}{\addvspace {10pt}}
 \@writefile{lot}{\addvspace {10pt}}
-\@writefile{toc}{\contentsline {chapter}{\chapternumberline {2}Realisation}{25}{chapter.2}}
+\@writefile{toc}{\contentsline {chapter}{\chapternumberline {2}Realization}{25}{chapter.2}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.1}Implementation of the disassembler}{25}{section.2.1}}
 \newlabel{implementation-of-disassembler}{{\M@TitleReference {2.1}{Implementation of the disassembler}}{25}{Implementation of the disassembler}{section.2.1}{}}
+\newlabel{internal-parts-of-vm}{{\M@TitleReference {2.1}{Implementation of the disassembler}}{25}{Implementation of the disassembler}{section.2.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1.1}User interface}{25}{subsection.2.1.1}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.2}Instruction arguments}{27}{subsection.2.1.2}}
-\newlabel{instruction-arguments}{{\M@TitleReference {2.1.2}{Instruction arguments}}{27}{Instruction arguments}{subsection.2.1.2}{}}
+\newlabel{user-interface}{{\M@TitleReference {2.1.1}{User interface}}{25}{User interface}{subsection.2.1.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.2}Instruction arguments}{26}{subsection.2.1.2}}
+\newlabel{instruction-arguments}{{\M@TitleReference {2.1.2}{Instruction arguments}}{26}{Instruction arguments}{subsection.2.1.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.1}{\ignorespaces Old disassembly user interface}}{27}{figure.2.1}}
+\newlabel{fig:old-disassembly-ui}{{\M@TitleReference {2.1}{Old disassembly user interface}}{27}{Old disassembly user interface}{figure.2.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.2}{\ignorespaces Old disassembly user interface}}{28}{figure.2.2}}
+\newlabel{fig:new-disassembly-ui}{{\M@TitleReference {2.2}{Old disassembly user interface}}{28}{Old disassembly user interface}{figure.2.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1.3}Annotation of instructions}{28}{subsection.2.1.3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.4}Instruction arguments and labels}{29}{subsection.2.1.4}}
-\newlabel{instruction-arguments-labels}{{\M@TitleReference {2.1.4}{Instruction arguments and labels}}{29}{Instruction arguments and labels}{subsection.2.1.4}{}}
+\newlabel{annotation-of-instructions}{{\M@TitleReference {2.1.3}{Annotation of instructions}}{28}{Annotation of instructions}{subsection.2.1.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.4}Instruction arguments and labels}{30}{subsection.2.1.4}}
+\newlabel{instruction-arguments-labels}{{\M@TitleReference {2.1.4}{Instruction arguments and labels}}{30}{Instruction arguments and labels}{subsection.2.1.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1.5}Computing of labels}{30}{subsection.2.1.5}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.6}Verbosity and formatting}{31}{subsection.2.1.6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.6}Verbosity and formatting}{32}{subsection.2.1.6}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1.7}Function types in the constant pool}{32}{subsection.2.1.7}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1.8}Printing functions}{33}{subsection.2.1.8}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.9}Printing of different types}{33}{subsection.2.1.9}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.10}Documenting of code}{34}{subsection.2.1.10}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.9}Printing of different types}{34}{subsection.2.1.9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.10}Documenting of code}{35}{subsection.2.1.10}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.2}Implementation of the bytecode stack printer}{35}{section.2.2}}
 \newlabel{implementation-of-stack-printer}{{\M@TitleReference {2.2}{Implementation of the bytecode stack printer}}{35}{Implementation of the bytecode stack printer}{section.2.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.1}Stack definition}{35}{subsection.2.2.1}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.2}Printing of the stack values}{36}{subsection.2.2.2}}
 \newlabel{printing-stack-values}{{\M@TitleReference {2.2.2}{Printing of the stack values}}{36}{Printing of the stack values}{subsection.2.2.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}RAWMEM stack type tag}{36}{subsection.2.2.3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.4}Persisting stack pointers}{37}{subsection.2.2.4}}
-\newlabel{persisting-stack-pointers}{{\M@TitleReference {2.2.4}{Persisting stack pointers}}{37}{Persisting stack pointers}{subsection.2.2.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}RAWMEM stack type tag}{37}{subsection.2.2.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.4}Persisting stack pointers}{38}{subsection.2.2.4}}
+\newlabel{persisting-stack-pointers}{{\M@TitleReference {2.2.4}{Persisting stack pointers}}{38}{Persisting stack pointers}{subsection.2.2.4}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.3}Simulated conditional breakpoints}{38}{section.2.3}}
 \newlabel{conditional-breakpoints}{{\M@TitleReference {2.3}{Simulated conditional breakpoints}}{38}{Simulated conditional breakpoints}{section.2.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.4}Implementation of the debugger}{39}{section.2.4}}
 \newlabel{implementation-of-debugger}{{\M@TitleReference {2.4}{Implementation of the debugger}}{39}{Implementation of the debugger}{section.2.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}Main idea}{39}{subsection.2.4.1}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}Global design}{39}{subsection.2.4.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}Main idea}{40}{subsection.2.4.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}Global design}{40}{subsection.2.4.2}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.3}Instruction for debugging}{40}{subsection.2.4.3}}
 \newlabel{instruction-for-debugging}{{\M@TitleReference {2.4.3}{Instruction for debugging}}{40}{Instruction for debugging}{subsection.2.4.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.4}Storing of the original instruction when the breakpoint is setted}{41}{subsection.2.4.4}}
 \newlabel{storing-original-instructions}{{\M@TitleReference {2.4.4}{Storing of the original instruction when the breakpoint is setted}}{41}{Storing of the original instruction when the breakpoint is setted}{subsection.2.4.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.5}Setting and unsetting debug instruction}{41}{subsection.2.4.5}}
-\newlabel{setting-and-unsetting-debug-instruction}{{\M@TitleReference {2.4.5}{Setting and unsetting debug instruction}}{41}{Setting and unsetting debug instruction}{subsection.2.4.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.5}Setting and unsetting debug instruction}{42}{subsection.2.4.5}}
+\newlabel{setting-and-unsetting-debug-instruction}{{\M@TitleReference {2.4.5}{Setting and unsetting debug instruction}}{42}{Setting and unsetting debug instruction}{subsection.2.4.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.6}Listing breakpoints}{43}{subsection.2.4.6}}
 \newlabel{listing-breakpoints}{{\M@TitleReference {2.4.6}{Listing breakpoints}}{43}{Listing breakpoints}{subsection.2.4.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.7}Setting the next breakpoint}{44}{subsection.2.4.7}}
 \newlabel{setting-next-breakpoint}{{\M@TitleReference {2.4.7}{Setting the next breakpoint}}{44}{Setting the next breakpoint}{subsection.2.4.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.8}Support in the disassembly tool}{46}{subsection.2.4.8}}
-\newlabel{debugger-support-in-disassembly}{{\M@TitleReference {2.4.8}{Support in the disassembly tool}}{46}{Support in the disassembly tool}{subsection.2.4.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.9}Temporary and regular breakpoints}{47}{subsection.2.4.9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.8}Support in the disassembly tool}{47}{subsection.2.4.8}}
+\newlabel{debugger-support-in-disassembly}{{\M@TitleReference {2.4.8}{Support in the disassembly tool}}{47}{Support in the disassembly tool}{subsection.2.4.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.9}Temporary and regular breakpoints}{48}{subsection.2.4.9}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.10}Implementation of the breakpoint instructions}{48}{subsection.2.4.10}}
 \newlabel{implementation-of-breakpoint-instruction}{{\M@TitleReference {2.4.10}{Implementation of the breakpoint instructions}}{48}{Implementation of the breakpoint instructions}{subsection.2.4.10}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.11}Bytecode interpreter internal status}{48}{subsection.2.4.11}}
-\newlabel{bytecode-interpreter-internal-status}{{\M@TitleReference {2.4.11}{Bytecode interpreter internal status}}{48}{Bytecode interpreter internal status}{subsection.2.4.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.11}Bytecode interpreter internal status}{49}{subsection.2.4.11}}
+\newlabel{bytecode-interpreter-internal-status}{{\M@TitleReference {2.4.11}{Bytecode interpreter internal status}}{49}{Bytecode interpreter internal status}{subsection.2.4.11}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.11.1}The short compact way of status printing}{49}{subsubsection.2.4.11.1}}
 \newlabel{short-compact-way-of-status-printing}{{\M@TitleReference {2.4.11.1}{The short compact way of status printing}}{49}{The short compact way of status printing}{subsubsection.2.4.11.1}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.11.2}The long verbose way showing all information}{49}{subsubsection.2.4.11.2}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.12}Debugger jumping granularity}{50}{subsection.2.4.12}}
 \newlabel{debugger-jumping-granuality}{{\M@TitleReference {2.4.12}{Debugger jumping granularity}}{50}{Debugger jumping granularity}{subsection.2.4.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.13}Handling of the recursive character of the bytecode}{50}{subsection.2.4.13}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.13}Handling of the recursive character of the bytecode}{51}{subsection.2.4.13}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.14}Threaded and non-threaded design of the application}{51}{subsection.2.4.14}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.14.1}THREADED{\_}CODE defined}{51}{subsubsection.2.4.14.1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.14.1}THREADED{\_}CODE defined}{52}{subsubsection.2.4.14.1}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.14.2}THREADED{\_}CODE not defined}{52}{subsubsection.2.4.14.2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.15}Handling of the debugger user input}{52}{subsection.2.4.15}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.16}Default behavior of the bytecode debugger}{53}{subsection.2.4.16}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.17}Initial entry points to the bcEval functions}{53}{subsection.2.4.17}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.15}Handling of the debugger user input}{53}{subsection.2.4.15}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.16}Default behavior of the bytecode debugger}{54}{subsection.2.4.16}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.17}Initial entry points to the bcEval functions}{54}{subsection.2.4.17}}
 \@writefile{lof}{\addvspace {10pt}}
 \@writefile{lot}{\addvspace {10pt}}
 \@writefile{toc}{\contentsline {chapter}{\chapternumberline {3}Testing and future work}{57}{chapter.3}}

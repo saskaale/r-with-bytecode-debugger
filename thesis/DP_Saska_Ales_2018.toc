@@ -14,6 +14,7 @@
 \contentsline {subsection}{\numberline {1.2.2}Calling internal C functions from R}{5}{subsection.1.2.2}
 \contentsline {section}{\numberline {1.3}Computer Program Compiler Structure}{5}{section.1.3}
 \contentsline {subsection}{\numberline {1.3.1}Virtual Machine}{5}{subsection.1.3.1}
+\contentsline {subsubsection}{\numberline {1.3.1.1}Internal parts of the VM}{6}{subsubsection.1.3.1.1}
 \contentsline {subsection}{\numberline {1.3.2}GNU R memory types and memory management}{7}{subsection.1.3.2}
 \contentsline {subsection}{\numberline {1.3.3}GNU R garbage collector}{8}{subsection.1.3.3}
 \contentsline {subsection}{\numberline {1.3.4}Computed GOTO}{8}{subsection.1.3.4}
@@ -37,46 +38,46 @@
 \contentsline {subsection}{\numberline {1.8.3}Implementation inside V8 VM}{18}{subsection.1.8.3}
 \contentsline {subsection}{\numberline {1.8.4}User interace and state of the BC evaluator}{19}{subsection.1.8.4}
 \contentsline {subsection}{\numberline {1.8.5}Summary}{19}{subsection.1.8.5}
-\contentsline {chapter}{\chapternumberline {2}Realisation}{25}{chapter.2}
+\contentsline {chapter}{\chapternumberline {2}Realization}{25}{chapter.2}
 \contentsline {section}{\numberline {2.1}Implementation of the disassembler}{25}{section.2.1}
 \contentsline {subsection}{\numberline {2.1.1}User interface}{25}{subsection.2.1.1}
-\contentsline {subsection}{\numberline {2.1.2}Instruction arguments}{27}{subsection.2.1.2}
+\contentsline {subsection}{\numberline {2.1.2}Instruction arguments}{26}{subsection.2.1.2}
 \contentsline {subsection}{\numberline {2.1.3}Annotation of instructions}{28}{subsection.2.1.3}
-\contentsline {subsection}{\numberline {2.1.4}Instruction arguments and labels}{29}{subsection.2.1.4}
+\contentsline {subsection}{\numberline {2.1.4}Instruction arguments and labels}{30}{subsection.2.1.4}
 \contentsline {subsection}{\numberline {2.1.5}Computing of labels}{30}{subsection.2.1.5}
-\contentsline {subsection}{\numberline {2.1.6}Verbosity and formatting}{31}{subsection.2.1.6}
+\contentsline {subsection}{\numberline {2.1.6}Verbosity and formatting}{32}{subsection.2.1.6}
 \contentsline {subsection}{\numberline {2.1.7}Function types in the constant pool}{32}{subsection.2.1.7}
 \contentsline {subsection}{\numberline {2.1.8}Printing functions}{33}{subsection.2.1.8}
-\contentsline {subsection}{\numberline {2.1.9}Printing of different types}{33}{subsection.2.1.9}
-\contentsline {subsection}{\numberline {2.1.10}Documenting of code}{34}{subsection.2.1.10}
+\contentsline {subsection}{\numberline {2.1.9}Printing of different types}{34}{subsection.2.1.9}
+\contentsline {subsection}{\numberline {2.1.10}Documenting of code}{35}{subsection.2.1.10}
 \contentsline {section}{\numberline {2.2}Implementation of the bytecode stack printer}{35}{section.2.2}
 \contentsline {subsection}{\numberline {2.2.1}Stack definition}{35}{subsection.2.2.1}
 \contentsline {subsection}{\numberline {2.2.2}Printing of the stack values}{36}{subsection.2.2.2}
-\contentsline {subsection}{\numberline {2.2.3}RAWMEM stack type tag}{36}{subsection.2.2.3}
-\contentsline {subsection}{\numberline {2.2.4}Persisting stack pointers}{37}{subsection.2.2.4}
+\contentsline {subsection}{\numberline {2.2.3}RAWMEM stack type tag}{37}{subsection.2.2.3}
+\contentsline {subsection}{\numberline {2.2.4}Persisting stack pointers}{38}{subsection.2.2.4}
 \contentsline {section}{\numberline {2.3}Simulated conditional breakpoints}{38}{section.2.3}
 \contentsline {section}{\numberline {2.4}Implementation of the debugger}{39}{section.2.4}
-\contentsline {subsection}{\numberline {2.4.1}Main idea}{39}{subsection.2.4.1}
-\contentsline {subsection}{\numberline {2.4.2}Global design}{39}{subsection.2.4.2}
+\contentsline {subsection}{\numberline {2.4.1}Main idea}{40}{subsection.2.4.1}
+\contentsline {subsection}{\numberline {2.4.2}Global design}{40}{subsection.2.4.2}
 \contentsline {subsection}{\numberline {2.4.3}Instruction for debugging}{40}{subsection.2.4.3}
 \contentsline {subsection}{\numberline {2.4.4}Storing of the original instruction when the breakpoint is setted}{41}{subsection.2.4.4}
-\contentsline {subsection}{\numberline {2.4.5}Setting and unsetting debug instruction}{41}{subsection.2.4.5}
+\contentsline {subsection}{\numberline {2.4.5}Setting and unsetting debug instruction}{42}{subsection.2.4.5}
 \contentsline {subsection}{\numberline {2.4.6}Listing breakpoints}{43}{subsection.2.4.6}
 \contentsline {subsection}{\numberline {2.4.7}Setting the next breakpoint}{44}{subsection.2.4.7}
-\contentsline {subsection}{\numberline {2.4.8}Support in the disassembly tool}{46}{subsection.2.4.8}
-\contentsline {subsection}{\numberline {2.4.9}Temporary and regular breakpoints}{47}{subsection.2.4.9}
+\contentsline {subsection}{\numberline {2.4.8}Support in the disassembly tool}{47}{subsection.2.4.8}
+\contentsline {subsection}{\numberline {2.4.9}Temporary and regular breakpoints}{48}{subsection.2.4.9}
 \contentsline {subsection}{\numberline {2.4.10}Implementation of the breakpoint instructions}{48}{subsection.2.4.10}
-\contentsline {subsection}{\numberline {2.4.11}Bytecode interpreter internal status}{48}{subsection.2.4.11}
+\contentsline {subsection}{\numberline {2.4.11}Bytecode interpreter internal status}{49}{subsection.2.4.11}
 \contentsline {subsubsection}{\numberline {2.4.11.1}The short compact way of status printing}{49}{subsubsection.2.4.11.1}
 \contentsline {subsubsection}{\numberline {2.4.11.2}The long verbose way showing all information}{49}{subsubsection.2.4.11.2}
 \contentsline {subsection}{\numberline {2.4.12}Debugger jumping granularity}{50}{subsection.2.4.12}
-\contentsline {subsection}{\numberline {2.4.13}Handling of the recursive character of the bytecode}{50}{subsection.2.4.13}
+\contentsline {subsection}{\numberline {2.4.13}Handling of the recursive character of the bytecode}{51}{subsection.2.4.13}
 \contentsline {subsection}{\numberline {2.4.14}Threaded and non-threaded design of the application}{51}{subsection.2.4.14}
-\contentsline {subsubsection}{\numberline {2.4.14.1}THREADED{\_}CODE defined}{51}{subsubsection.2.4.14.1}
+\contentsline {subsubsection}{\numberline {2.4.14.1}THREADED{\_}CODE defined}{52}{subsubsection.2.4.14.1}
 \contentsline {subsubsection}{\numberline {2.4.14.2}THREADED{\_}CODE not defined}{52}{subsubsection.2.4.14.2}
-\contentsline {subsection}{\numberline {2.4.15}Handling of the debugger user input}{52}{subsection.2.4.15}
-\contentsline {subsection}{\numberline {2.4.16}Default behavior of the bytecode debugger}{53}{subsection.2.4.16}
-\contentsline {subsection}{\numberline {2.4.17}Initial entry points to the bcEval functions}{53}{subsection.2.4.17}
+\contentsline {subsection}{\numberline {2.4.15}Handling of the debugger user input}{53}{subsection.2.4.15}
+\contentsline {subsection}{\numberline {2.4.16}Default behavior of the bytecode debugger}{54}{subsection.2.4.16}
+\contentsline {subsection}{\numberline {2.4.17}Initial entry points to the bcEval functions}{54}{subsection.2.4.17}
 \contentsline {chapter}{\chapternumberline {3}Testing and future work}{57}{chapter.3}
 \contentsline {section}{\numberline {3.1}Bytecode disassembler}{57}{section.3.1}
 \contentsline {section}{\numberline {3.2}Bytecode debugger}{58}{section.3.2}
