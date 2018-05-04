@@ -1,6 +1,6 @@
-\babel@toc {english}{}
-\babel@toc {english}{}
-\babel@toc {english}{}
+\select@language {english}
+\select@language {english}
+\select@language {english}
 \addvspace {10pt}
 \addvspace {10pt}
 \contentsline {figure}{\numberline {1.1}{\ignorespaces Example of the VM with switch dispatch architecture.}}{9}{figure.1.1}
@@ -15,7 +15,7 @@
 \contentsline {figure}{\numberline {1.10}{\ignorespaces V8 internal architecture}}{24}{figure.1.10}
 \addvspace {10pt}
 \contentsline {figure}{\numberline {2.1}{\ignorespaces Old disassembly user interface}}{27}{figure.2.1}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Old disassembly user interface}}{28}{figure.2.2}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Old disassembly user interface}}{56}{figure.2.2}
 \addvspace {10pt}
 \addvspace {10pt}
 \addvspace {10pt}

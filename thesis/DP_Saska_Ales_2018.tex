@@ -832,14 +832,9 @@ disassemble(compiled)
 library(compiler)
 library(bctools) #new package
 f<-function(x) {
-    y <- x*2
-    while(x < y)
-	x <- x+1
+    while(x < y) x <- x+1
 
-    if(x %% 2 == 0)
 	x
-    else
-	-x
 }
 compiled <- cmpfun(f)
 
@@ -848,16 +843,51 @@ compiled <- cmpfun(f)
 #    print(disassemble(compiled))
 disassemble(compiled)
 
-
 #generated output:
 #
-#  @ a
-#  GETVAR              a
-#  @ 1
-#  LDCONST             1
-#  @ a + 1
-#  ADD
-#  RETURN
+1:
+  @ x
+  GETVAR              x
+  @ 10
+  LDCONST             10
+  @ x < 10
+  LT                  
+  @ while (x < 10) x <- x + 2
+  BRIFNOT             while (x < 10) x <- x + 2	 | $2
+  @ x
+  GETVAR              x
+  @ 2
+  LDCONST             2
+  @ x + 2
+  ADD                 
+  @ x <- x + 2
+  SETVAR              x
+  @ while (x < 10) x <- x + 2
+  POP                 
+  GOTO                $1
+2:
+  LDNULL              
+  POP                 
+  @ x%%2
+  GETBUILTIN          `%%`
+  GETVAR              x
+  PUSHARG             
+  PUSHCONSTARG        2
+  CALLBUILTIN         x%%2
+  @ 0
+  LDCONST             0
+  @ x%%2 == 0
+  EQ                  
+  @ if (x%%2 == 0) x else -x
+  BRIFNOT             if (x%%2 == 0) x else -x	 | $3
+  @ x
+  GETVAR              x
+  RETURN              
+3:
+  GETVAR              x
+  @ -x
+  UMINUS              
+  RETURN            
 #
 \end{lstlisting}
 	\caption{Old disassembly user interface}\label{fig:new-disassembly-ui}
