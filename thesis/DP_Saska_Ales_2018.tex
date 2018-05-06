@@ -1137,7 +1137,7 @@ Bytecode ver. 10
 	\caption{Disassembly output with verbose lvl 2}\label{fig:disassembly-verbose-2}
 \end{figure}
 
-
+%TODO: redo these examples
 
 \subsection{Function types in the constant pool}
 
@@ -1149,30 +1149,34 @@ The constant expressions in the constant pool can of more 3 types:
 	\item BC compiler function code
 \end{itemize}
 
-There is no way how to print out the native functions because its structure is written and compiled inside the runtime core in C language and the R interpreter knows just it's location~(function pointer) to call. These functions are printed as an \textit{$<$INTERNAL{\_}FUNCTION$>$}. Alongside of these internal functions there are also stored the \textbf{BC} compiled functions which should be also printed out. The way how to do it is just say that this is the function and print out flag like \textit{$<$BYTECODE{\_}FUNCTION$>$}. The second approach is to be able to print it out nested with some indentation. The second described approach was chosen. To enable this feature there are 3 parameters in out disassembly tool:
+There is no way how to print out the native functions because its structure is written and compiled inside the runtime core in C language and the R interpreter knows just the location~(function pointer) to call. These functions are printed as an \textit{$<$INTERNAL{\_}FUNCTION$>$}. 
+
+There are also stored the \textbf{BC} compiled functions which should be also printed. One way is to print out flag like \textit{$<$BYTECODE{\_}FUNCTION$>$}. The second approach is to be able to print it out nested with some indentation. The second described approach was chosen. In order to implement this feature there were introduced these 3 parameters in the disassembly tool:
 
 \begin{itemize}
-	\item \textbf{prefix} - the string prefix which is putted before each line printed in the whole function
+	\item \code{prefix} - the string prefix which is putted before each line printed in the whole function
 	
-	\item \textbf{depth} - current depthness of the recursion.
+	\item \code{depth} - current depthness of the recursion.
  	
-	\item \textbf{maxdepth} - maximal depthness for recursion~(once it would reach this level, the \textit{$<$FUNCTION$>$} instead of calling the disassembly print would be shown in the output)
+	\item \code{maxdepth} - maximal depthness for recursion~(once the \code{depth} reaches this level, the \code{$<$FUNCTION$>$} instead of calling the disassembly print would be shown in the output)
 \end{itemize}
 
-With these arguments it is possible to provide functionality disassembly recursiveness. Even though if the maxdepth would be set to the 0, the disassembly tool would print out just the \textit{$<$BYTECODE{\_}FUNCTION$>$} for every bytecode information~(the nested BC printing would be disabled).
+If the \code{maxdepth} would be set to the 0, the disassembly tool would print out just the \textit{$<$BYTECODE{\_}FUNCTION$>$} for every nested bytecode~(the nested BC printing would be disabled).
+
+%TODO: add examples
 
 \subsection{Printing functions}
 
-One type of the constant expressions in the constant array are the functions written as an expression references~(non-byte-compiled and being able to potentially evaluate with \textit{eval} function inside \textit{src/main/eval.c}). These ones has to be printed in some user-friendly way which would not break the consistency of disassembly output. One way of printing the is to use the \textit{dput} function but they would be printed line by line which is not desired output. In order to make the arguments look as dense as possible~(and not break consistency and compactness of the disassemble function) there has been put decision to write the function in single line. There are 2 ways how to solve this:
+One type of the constant expressions in the constant array are the functions written as an expression references~(non-byte-compiled and being able to potentially evaluate with \textit{eval} function). These ones has to be printed in some user-friendly way which would not break the consistency of disassembly output. One way is to use the \code{dput} function but it would format them line by line which is not desired output. For making the arguments look as dense as possible~(and not break consistency and compactness of the disassemble function) there has been put decision to write the function in single line. There are 2 ways how to solve this:
 
 \begin{itemize}
 	\item Write an specific call into the \textit{print.c}~(\textit{src/main/print.c}) - \textit{deparse1} function
 	\item Call an \textit{dput} to print out line-by-line into the buffer by \textit{capture.output} and after that make string modifications over this output.
 \end{itemize}
 
-The first approach is more clean in order of the code but as long as there has been put the decision to make just minimal amount of the changes into the C core of the language to be able to release the disassemble package the second way was chosen.
+The first approach is more clean in order of the code but because there has been put the decision to make just minimal amount of the changes into the C core of the language~(for being able to release the disassembler in separate package) the second way was chosen.
 
-%TODO: maybe add some good shit ( code example )
+%TODO: maybe add code example
 
 \subsection{Printing of different types}
 
@@ -1203,11 +1207,11 @@ In the application there are different types of the actions to print~(e.g. Const
 
 	formatting notation - \$\textit{LABEL{\_}NO}~(e.g.~\$1)
 	
-	\item \textbf{SrcRef} a.k.a. \textbf{source reference}  
+	\item \textbf{\code{SrcRef}} a.k.a. \textbf{source reference}  
 	
 	formatting notation - \textit{SRCREF}~(e.g.~simple{\_}bc{\_}verbosity1.R{\#}4)
 	 
-	\item \textbf{ExprRef} a.k.a. \textbf{expression reference}
+	\item \textbf{\code{ExprRef}} a.k.a. \textbf{expression reference}
 	
 	formatting notation - $@$\textit{EXPRESSION}~(e.g.~$@a+1$)
 
@@ -1215,40 +1219,38 @@ In the application there are different types of the actions to print~(e.g. Const
 	
 \end{itemize}
 
+%TODO: maybe add code example
+
 \subsection{Documenting of code}
 
-Code itself was written to be self-explainable and easily readable with any developer for good maintainability. On top of that there was also written a lot of comments thorough the code.
+The \code{compiler} package has documentation written altogether with the code. It is managed through \code{noweb} tool~(see~\ref{annotation-of-instructions}).
 
-From the user-perspectiwe there was created an user-documentation for R the package by the \textit{roxygen} tool~(the \textbf{GNU R} inbuilt documenting system). There are several ways for developer to rebuild the documentation:
-
-There are three main ways to run \textit{roxygen}:
+The \code{bctools} package user-documentation was created with the \code{roxygen} tool~(the GNU-R inbuilt documenting system). There are several ways for developer to rebuild the documentation~(run \code{roxygen}):
 \begin{itemize}
- \item \textbf{roxygen2::roxygenise()}, or
- \item \textbf{devtools::document()}, if the \textbf{devtools} are used, or
- \item \textbf{rCtrl + Shift + D}, if the \textbf{RStudio} is used
+ \item \code{roxygen2::roxygenise()}, or
+ \item \code{devtools::document()}, if the \code{devtools} are used, or
+ \item \code{rCtrl + Shift + D}, if the \code{RStudio} is used
 \end{itemize}
- 
-The second listed~(calling \textbf{devtools::document()}) was used during an development of this package.
+
+The second listed~(calling \code{devtools::document()}) was used during an development of this package.
 
 \section{Implementation of the bytecode stack printer}\label{implementation-of-stack-printer}
 
-In order to implement the \textbf{BC} debugger we need to be able to print in user-friendly way the \textbf{BC} stack content~(see~\ref{user-interface-and-state-of-the-bc-eval}). The way how the implementation was designed was that it was written in the \textbf{C} language~(\textbf{GNU R} language core) a printing function capable of stack of current pointer.
+In order to implement the BC debugger we need to be able to print the \code{BC} stack content~(see~\ref{user-interface-and-state-of-the-bc-eval}). The way how the implementation was designed was that it was written in the C language~(GNU-R language core) a printing function capable of stack of current pointer.
 
 \subsection{Stack definition}
 
-Stack definition depends on the \textit{TYPED{\_}STACK} typedef conditional. If it is definied then the stack optimalization~(type of \textbf{unboxing}) is enabled so there can be stored even raw values on the stack alongside an boxing \textbf{SEXP} type. So then the types which could be stored on the stack are of type:
+Stack definition depends on the \code{TYPED{\_}STACK} typedef conditional~(see figure~\ref{fig:stack-elements-definition}). Once it is defined, the option for saved unboxed values enabled. It causes that instead of the \code{SEXP} stored in the stack every time~(which is more expensive to handle), there could be also stored raw values~(\code{int} / \code{double}). There is also \code{RAWMEM} memory which is used in the BC evaluator to store for example evaluation context frame~(but generally speaking this data type can be out of any other data type). Once the stack is enables, the stack values could be then out of these types:
 
 \begin{itemize}
-	\item \textbf{int}
-	\item \textbf{double}
-	\item \textbf{RAWMEM} - additional piece of raw memory piece of length SEXP->ival~(in sizeof(SEXP))
-	\item \textbf{SEXP} - internal representation of the boxed object storing any value
+	\item \textbf{\code{int}}
+	\item \textbf{\code{double}}
+	\item \textbf{\code{RAWMEM}} - additional piece of raw memory piece of length \code{SEXP}$->$ival
+		its size is defined in number of \code{sizeof(SEXP)} sized  chunks
+	\item \textbf{\code{SEXP}} - internal representation of the boxed object storing any value
 \end{itemize}
-	
-In case this \textit{TYPED{\_}STACK} is not defined it is just the boxed \textit{SEXP} value.
 
-The definition of the stack element is here:
-
+\begin{figure}[h]
 \begin{lstlisting}
 #ifdef TYPED_STACK
 typedef struct {
@@ -1267,8 +1269,10 @@ typedef SEXP R_bcstack_t;
 ... other definitions ...
 #endif
 \end{lstlisting}
+	\caption{Definition of stack elements}\label{fig:stack-elements-definition}
+\end{figure}
 
-Luckily there is implemented an macro \textit{GETSTACK{\_}PTR} which would return us an boxed \textit{SEXP} type equivalent no matter if the value in stack is boxed or unboxed. This would allow us to write the stack print function much easier without any need of separate handling of unboxed values.
+To be able to not have to write specific code for each stack type there is implemented an macro \code{GETSTACK{\_}PTR} returning an boxed \code{SEXP} type equivalent of stack position~(no matter if the value in stack is boxed or not).
 
 \subsection{Printing of the stack values}\label{printing-stack-values}
 
