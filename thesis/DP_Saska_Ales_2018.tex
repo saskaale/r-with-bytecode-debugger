@@ -896,44 +896,42 @@ disassemble(compiled)
 %TODO: REDO THIS EXAMPLE
 
 \subsection{Instruction arguments}\label{instruction-arguments}
-The \textbf{BC} instruction contains the integer code identifying it followed by variable number of arguments. These arguments can be of different types~(described in more detail bellow). 
+The \textbf{BC} instruction contains the integer code identifying it followed by variable number of arguments. These arguments can be of different 5 basic types~-~-see\ref{fig:bytecode-argument-types}~(\code{BOOL}, \code{INT}, \code{LABEL}, \code{CONSTANT{\_}LABEL} and \code{CONSTANT}). The printing of the output was 
 
-The implementation of these operators is expecting arguments with different types~(definition is hardcoded inside compiler and evaluator function) but there is currently no list containing list of these 4 types for each instruction:
+The \code{CONSTANT} parameter can have two different meanings in the code. Some of the arguments could be just whole expression~(e.g. a+b+c) kept due to usage in some corner cases during evaluation~( e.g. \code{ADD} instruction is in the most cases taking the two topmost arguments. Just in some corner cases it is calling the other internal functions which are originally designed to work on the AST evaluator so they expect the expression as an input). This means that some arguments are stored because the internal implementation of the bytecode evaluator and they contains the duplicate information. The optional parameter kept due to internal purposes of evaluator was named an \code{CONSTANT{\_}DBG}.
 
+These arguments are printed by the different functions.
+
+\begin{figure}[!h]
 \begin{itemize}
-	\item \textbf{CONSTANT} representing reference~(integer index) to the constant pool where is located constant expression~(can be either number or function)
+	\item \code{BOOL} boolean value
 
-	\item \textbf{BOOL} boolean value
+	\item \code{INT} integer value
 
-	\item \textbf{INT} integer value
+	\item \code{LABEL} - jump target / reference~(integer index) to the code array itself
 
-	\item \textbf{LABEL} - jump target / reference~(integer index) to the code array itself
-
-	\item \textbf{CONSTANT{\_}LABEL} variation~(extension) of the \textit{LABEL} which allow more than one referenced index
+	\item \code{CONSTANT{\_}LABEL} variation~(extension) of the \textit{LABEL} which allow more than one referenced index
 	
 	represented as reference~(integer index) to the constant pool where is located an array containing the references~(integer indexes) to the code array itself
+
+	\item \code{CONSTANT} representing reference~(integer index) to the constant pool where is located constant expression~(can be either number or function)
+
+	used for most of common cases
+
+	\item \code{CONSTANT{\_}DBG} - constant expression inside the argument used internally just for the corner cases~(technically containing duplicitous information)
 \end{itemize}
+	\caption{Bytecode instruction argument types}\label{fig:bytecode-argument-types}
+\end{figure}
 
-The \textbf{CONSTANT} parameter although can have two different meanings in the code. In the \textbf{GNU R} bytecode some of the arguments could be just whole expression~(e.g. a+b+c) kept due to usage in some corner cases during evaluation~( e.g. ADD instruction is in the most cases taking the two topmost arguments, just in these corner cases it is calling the other internal functions which are originally designed to work on the \textbf{AST} evaluator so they expect the expression as an input). This means that these arguments are stored just because the internal implementation of the bytecode evaluator and they contains the duplicate information. These two meaning should be distinguished inside the disassembler print so there has been put decision to split the \textbf{CONSTANT} parameter into the:
-
-\begin{itemize}
-	\item \textbf{CONSTANT{\_}DBG} - constant expression inside the argument used internally just for the corner cases~(technically containing duplicitous information)
-
-	\item \textbf{CONSTANT} - regular constant expression used for most of common cases
-\end{itemize}
 
 \subsection{Annotation of instructions}\label{annotation-of-instructions}
-These 6 types should be printed in different way. Each of it has to be print out in different way. There are two possible ways how to achieve this behavior. The first one is to hardcode it for the each instruction.  Other options is to the make an definition for each instruction argument~(annotate the instructions) which was chosen in this work. This one would allow the code to be more modular and more generic. The pretty printing disasembly function~(in the \code{bctools} package) would be then take instruction definition and printing the arguments according to the definition. 
+These 6 types should be printed in different way according to the annotation. There has been created an definition for each instruction argument~(annotation of the instructions). The pretty printing disasembly function~(\code{print.disassembly} method in the \code{bctools} package) would be then taking instruction definition and printing the arguments according to the definition. 
 
-In the compiler package there is already some annotation of the \textbf{BC} instructions specifying the number of arguments for each instruction~(\code{Opcodes.argc} list). The created new list containing the fully annotated instruction was named \code{Opcodes.argdescr}.
+In the compiler package there is already some sort of annotation annotation specifying the number of arguments for each instruction~(\code{Opcodes.argc} list). This was list was replaced by the \code{Opcodes.descr} list containing the fully annotated instruction was named \code{Opcodes.argdescr}~(see the figure~\ref{fig:computation-of-argdescr}). To keep the old behavior the old previous \code{Opcodes.argc} list was computed from \code{Opcodes.argdescr} by applying the \code{length} function to each element~(see figure~\ref{fig:computation-of-argc}). This solution is not duplicating any information in the \code{compiler} package.
 
-The old previous \code{Opcodes.argc} list was then computed from the instruction annotation from the \code{Opcodes.argdescr} by simply applying the \code{length} function to each element. 
+The \code{compiler} package is made with the \code{noweb} tool which is the tool to write documentation alongside with the code. Its source is written in the \textit{src/library/compiler/noweb/compiler.nw} file. Because of the fact that build command~\code{make} is not written to re-generate the source code from \code{noweb} each time the compiling is provided, we have to rerun the \code{make from-noweb} command inside the \code{compiler} to regenerate the R sources for the \code{compiler} package.
 
-This implemented solution is allowing easier maintainance for the \textit{bctools} package because the definition of the instructions would be readed from the GNU-R core~(the \code{compiler} package).
-
-The \code{compiler} package is made with the \code{noweb} tool which is the tool to write documentation alongside with the code. Its source is written in the \textit{src/library/compiler/noweb/compiler.nw} file. Because of the fact that build command~(\code{make}) is not written to re-generate the source code from \code{noweb} each time the compiling is provided, we have to rerun the \textit{make from-noweb} command inside the \code{compiler} to regenerate the R sources for the \code{compiler} package.
-
-Example of the Instruction argument annotation inside \textit{compiler} package:
+\begin{figure}[!h]
 \begin{lstlisting}
 <<opcode argument description>>=
 
@@ -941,8 +939,9 @@ SKIP.ARGTYPE<--1L
 LABEL.ARGTYPE<-0L
 CONSTANTS.ARGTYPE<-3L
 CONSTANTS_DBG.ARGTYPE<-4L
-BOOL.ARGTYPE<-5L
-INT.ARGTYPE<-6L
+CONSTANTS_LABEL.ARGTYPE<-5L
+BOOL.ARGTYPE<-6L
+INT.ARGTYPE<-7L
 
 Opcodes.argdescr <- list(
 
@@ -958,32 +957,36 @@ STARTLOOPCNTXT.OP = c(BOOL.ARGTYPE, LABEL.ARGTYPE),
 .... all remaining instructions ....
 )
 \end{lstlisting}
+	\caption{Example of instruction annotation}\label{fig:computation-of-argdescr}
+\end{figure}
 
-Calculating of the argument count array is done then by:
-
+\begin{figure}[!h]
 \begin{lstlisting}
 Opcodes.argc <- lapply(Opcodes.argdescr, length)
 \end{lstlisting}
+	\caption{Computation of argument count in the compiler package}\label{fig:computation-of-argc}
+\end{figure}
 
 \subsection{Instruction arguments and labels}\label{instruction-arguments-labels}
 
-Label is form of representation of the reference to the code. It is used in the jumps through the code. Main \textbf{BC} array can store just one value itself so if there is an need for few jump locations~(e.g. like \textit{GOTO} operator) it is just value of the argument itself~(\textit{LABEL} type of argument). The switch operator could have also multiple locations where to jump so it is internally utilizing an \textit{CONSTANT{\_}LABEL} arguments type.
+Label is form of representation of the reference to the code. It is used in the jumps through the code. 
 
 \subsection{Computing of labels}
 
-To visualize the jumping locations in the diassembler there are usually showed labels in the code to specify target location~(usually incrementally numbered from the 1) and arguments are then in forms of references to these locations. These references are printed in the way that is has to be obvious that it is aiming to the specific location. This can be achieved using some specific symbol - e.g. {\$}1)~(reference to label with number 1). 
-However there is no real direct information about these locations which should contain labels directly in the bytecode definition~(even the x86 code does not have these). Instead of it there are just references in the instructions to the code array, but we can compute the list of labels from these references. For generating this list there was done the two-pass linear lookup through code to generate auxiliary array containing the information direct information of number of the label~(the list is expressed as this array).
+Labels are shown in the code in specific styling~(usually incrementally numbered from the 1, e.g. \code{2:}). Arguments are then referencing to these locations~(e.g. \code{{\$}2). 
+
+There is no direct list containing locations of the labels, but it can be computed from the code. Generating of this list was done in the two-pass linear lookup through code~(see figure \ref{fig:code-generating-labels}). The result is auxiliary array containing the information direct information of number of the label~(the list is expressed as this array).
 
 Steps to generate labels are then:
 \begin{enumerate}
-	\item Initialize auxiliary array with the size of code buffer. The each element has the default value representing, that there is no instruction which argument is pointing to that position.
-	\item Go through all instruction in forward direction. For each argument if it contains any label~(see labels inside arguments~\ref{instruction-arguments-labels}) label then mark the according instruction on its location inside the auxiliary array.
-	\item Go through the auxiliary array and set on each position marked as target for some instruction number of label. This number of label is calculated incrementally~(in the beginning set counter to 1, and on each marked position set the value of counter to the array and increment the counter)
+	\item \textbf{Initialize auxiliary array} with the size of code buffer. The each element has the default value representing, that there is no instruction which argument is pointing to that position.
+	\item \textbf{Go through all instruction} in forward direction. For each argument if it contains any label~(see labels inside arguments~\ref{instruction-arguments-labels}) label then mark the according instruction on its location inside the auxiliary array.
+	\item \textbf{Go through the auxiliary array} and set on each position marked as target for some instruction number of label. This number of label is calculated incrementally~(in the beginning set counter to 1, and on each marked position set the value of counter to the array and increment the counter)
 \end{enumerate}
 
 This array then would contain the information whether there is no label at the instruction or the label unique number.
 
-Code used for computing labels:
+\begin{figure}[!h]
 \begin{lstlisting}
 #first pass to mark instruction with labels
 #labels is array that describes if each	Aq
@@ -1030,6 +1033,8 @@ while( i <= n ) {
     i<-i+1
 }
 \end{lstlisting}
+	\caption{Code for generating labels}\label{fig:code-generating-labels}
+\end{figure}
 
 \subsection{Verbosity and formatting}
 
@@ -1038,12 +1043,13 @@ Bytecode compiled function has optionally the information about location of the 
 The levels are:
 
 \begin{itemize}
-	\item \textbf{0} - display only source references~(if they are available, if they aren't print expression references instead)
-	\item \textbf{1} - the same as 0 + display bytecode version and display expression references ( if they are available )
-	\item \textbf{2} - the same as 1 + display every operand's argument~(including ones used just for debugging)
+	\item \code{0} - display only source references~(if they are available, if they aren't print expression references instead)
+	\item \code{1} - the same as 0 + display bytecode version and display expression references ( if they are available )
+	\item \code{2} - the same as 1 + display every operand's argument~(including ones used just for debugging)
 \end{itemize}
 
-Default value can be pre-set by \emph{bcverbose} function~(provided in the \textit{bctools} package).
+Default value can be pre-set by \code{bcverbose} function~(provided in the \code{bctools} package).
+
 
 \subsection{Function types in the constant pool}
 
