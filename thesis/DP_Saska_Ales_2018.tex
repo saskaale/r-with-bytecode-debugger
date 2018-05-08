@@ -331,8 +331,8 @@ Another option how to represent the source code to evaluate is the \textbf{bytec
 
 \subsection{Just in Time compilation}\label{JIT}
 
-In order to speedup evaluation of inside \textbf{VM} there has been developed various techniques of the performance optimization. One of them is Just in Time~(JIT) compilation of code. The underlying idea is to internally translate code into some more efficient representation ( from \textbf{AST} to either \textbf{Bytecode} or to the native machine code ). However this transformation (compilation) is usually pretty expensive so it is called once the execution of specified piece of code reached some limit.
-GNU-R has basic internal support of \textbf{JIT}. Implementation lies inside \textit{src/main/eval.c} mainly in functions \code{R{\_}CheckJIT} and \textit{R{\_}cmpfun} ) and doing running of the \code{Compiler::tryCmpfun} to compile function \textbf{AST} into \textbf{bytecode}. According to the posts from running code with ByteCode JIT enables speedup up to 10 times~(theoretically up to 25 times but these cases are very rare).
+In order to speedup evaluation of inside \textbf{VM} there has been developed various techniques of the \textbf{performance optimization}. One of them is Just in Time~(JIT) compilation of code. The underlying idea is to internally translate code into some more efficient representation ( from \textbf{AST} to either \textbf{Bytecode} or to the native machine code ). However this transformation (compilation) is usually pretty expensive so it is called once the execution of specified piece of code reached some limit.
+GNU-R has basic internal support of \textbf{JIT}. Implementation lies inside \code{src/main/eval.c} mainly in functions \code{R{\_}CheckJIT} and \code{R{\_}cmpfun} ) and doing running of the \code{Compiler::tryCmpfun} to compile function \textbf{AST} into \textbf{bytecode}. According to the posts from running code with ByteCode JIT enables speedup up to 10 times~(theoretically up to 25 times but these cases are very rare).
 This means that the bytecode engine of GNU-R code can be evaluated even without user knowing it~(explicitly calling compilation) which would make work for the bytecode debugger in our thesis very important. The second important thing is that the both interpreters~(AST and BC one) can be run together so there has to be need to clearly decide which is presently active~(implemented in \ref{bytecode-interpreter-internal-status}).
 
 %As mentioned before, the compilation can take significant amount time, so it makes sense for the virtual machine to compile just the most used parts of code~(if the every function would be compiled, it would have even cause the slowdown). The \textbf{GNU R} has for this more strategies:
@@ -370,6 +370,66 @@ This means that the bytecode engine of GNU-R code can be evaluated even without 
 %
 %      \hspace*{6mm} time seen if top-level, 2nd time seen otherwise
 %\end{itemize}
+
+\subsection{Computer language promises}\label{computer-promises}
+
+GNU-R computer language is heavy dependent on the promise pattern. As its name says this pattern represents an promise into the future that some code would be evaluated~(instead of running it immediately). For example instead direct call (see figure~\ref{fig:reading-csv-without-promise}) you can manually force GNU R to wrap the function evaluation in the promise via \code{future} function (see figure~\ref{fig:reading-csv-with-promise}).
+
+\begin{figure}[!h]
+\begin{lstlisting}
+#fires immediatelly the read function
+value <- read.csv(... some datafile ...)
+
+#just prints the value
+print(value)
+\end{lstlisting}
+\caption{\label{fig:reading-csv-without-promise} GNU R - reading an data from csv table}
+\end{figure}
+
+\begin{figure}[!h]
+\begin{lstlisting}
+#create just an promise containing the read function call
+value <- future(read.csv(... some datafile ...))
+
+#evaluates the promise (do the read.csv function)
+#  on the background
+#  and finally printing out the result
+print(value)
+\end{lstlisting}
+\caption{\label{fig:reading-csv-with-promise} GNU R - reading an data from csv table wrapped in promise}
+\end{figure}
+
+This shown approach is manual and pretty straightforward for user to understand. However the GNU-R has promise based lazy evaluation of arguments. Every argument in the function is the promise and instead of evaluating it before the function call~(like in other old-fashioned languages like \code{C} or \code{Java}), the argument is evaluated inside the function code once it is accessed~(see the figure~\ref{gnu-r-promise-arguments}). It causes that the GNU-R is internally heavy dependent on the promises even it is not obvious for the normal user at the first sight.
+
+\begin{figure}[!h]
+\begin{lstlisting}
+getB <- function(){
+	print("getB")
+	5
+}
+
+calc <- function(a,b){
+	print("calc enter")
+	ret <- a*2
+	print("accessB")
+	ret <- b*10
+	print("calc exit")
+}
+calc(2,getB())
+
+#will produce output:
+# [1] "calc enter"
+# [1] "accessB"
+# [1] "getB"
+# [1] "calc exit"
+\end{lstlisting}
+\caption{\label{fig:gnu-r-promise-arguments} GNU R - example of promise based arguments evaluation}
+\end{figure}
+
+
+\begin{lstlisting}
+
+\end{lstlisting}
 
 
 \section{GNU R Bytecode}
@@ -1167,7 +1227,9 @@ If the \code{maxdepth} would be set to the 0, the disassembly tool would print o
 
 \subsection{Printing functions}
 
-One type of the constant expressions in the constant array are the functions written as an expression references~(non-byte-compiled and being able to potentially evaluate with \textit{eval} function). These ones has to be printed in some user-friendly way which would not break the consistency of disassembly output. One way is to use the \code{dput} function but it would format them line by line which is not desired output. For making the arguments look as dense as possible~(and not break consistency and compactness of the disassemble function) there has been put decision to write the function in single line. There are 2 ways how to solve this:
+%The printing of the functions were done by calling an 
+
+One type of the constant expressions in the constant array are the functions written as an expression references~(non-byte-compiled and being able to potentially evaluate with \code{eval} function). They have to be printed in user-friendly way which would not break the consistency of disassembly output. One way how to achieves that is to call the \code{dput} function printing the but it would format them line by line which is not desired output. For making the arguments look as dense as possible~(and not break consistency and compactness of the disassemble function) there has been put decision to write the function in single line. There are 2 ways how to solve this:
 
 \begin{itemize}
 	\item Write an specific call into the \textit{print.c}~(\textit{src/main/print.c}) - \textit{deparse1} function
@@ -1245,7 +1307,8 @@ Stack definition depends on the \code{TYPED{\_}STACK} typedef conditional~(see f
 \begin{itemize}
 	\item \textbf{\code{int}}
 	\item \textbf{\code{double}}
-	\item \textbf{\code{RAWMEM}} - additional piece of raw memory piece of length \code{SEXP}$->$ival
+	\item \textbf{\code{RAWMEM}} - piece of raw memory
+
 		its size is defined in number of \code{sizeof(SEXP)} sized  chunks
 	\item \textbf{\code{SEXP}} - internal representation of the boxed object storing any value
 \end{itemize}
@@ -1276,9 +1339,7 @@ To be able to not have to write specific code for each stack type there is imple
 
 \subsection{Printing of the stack values}\label{printing-stack-values}
 
-This functionality is completely written in \textit{C} and it was designed to reuse as much code as possible. 
-
-In analyzing printing of the stack values there has been realized that it is not possible to use the \textit{print}~(\textit{PrintValue} call in \textbf{C}) function because it is dumping output in the very spread out manner~(array and object items are printed each at separate line). The better output formatting has the \textit{dput} function, but it is written inside \textit{base} package~(written in \textbf{R} instead of \textbf{C}). After the research what is \textit{dput} doing under hood it was observed that is calling the internal \textbf{C} implementation of the \textit{do{\_}dput}~(inside \textit{src/main/deparse.c}) which unfortunately cannot be reused without any changes. The reason is that it is internally caling the \textit{deparse1} function with the parameter to internally evaluate the promises. However this printing should not evaluate any promises because they could  potentially change the output of the bytecode~(they can have side effects). To disable this feature~(promise evaluation) we can call the \textit{deparse1} function with first argument setted to \textit{SHOWATTRIBUTES} | \textit{DELAYPROMISES}. The function would instead of evaluating them just print the $<$promise$>$ text signalizing that there is promise in that particular element.
+The printing of stack values is done through direct call of \code{deparse1} function in the C core. It is inspired by the \code{dput} function which is used for writing an \code{ASCII} representation of the R object to the text output or file. The \code{dput} function cannot be reused without any changes because it is internally evaluating the promises while dumping the output~(see~\ref{computer-promises}). However the evaluating of the promises can potentially introduce some unwanted side-effects. In order to disable the evaluating the promises the \code{deparse1} function was then called with the \code{DELAYPROMISES} argument~(instead of evaluting the promises it is showing \code{$<$promise$>$} text).
 
 \subsection{RAWMEM stack type tag}
 
@@ -1286,7 +1347,7 @@ Items on the stack are formatted in C-style array but in case the \textit{TYPED{
 
 The data on the stack would be in our function printed with the first line pointing to the top of the  stack. Because of this this reason we want to print the stack from the top to the bottom. The \textit{RAWMEM} type however is pointing to the followed data instructions and not the previous. This means that if we would be printing the stack from the end~(top) we would not be able to decide whether the next position contains raw memory or regular stack value.
 
-To be able to detect this we created the auxiliary \textit{LOGICAL}~(internal representation of binary inside \textbf{GNU R}) array which would contain boolean flag if the value is printable. Tis means we also needed to add one linear pass through the stack to fill in this array. This pass is in the forward order~(from bottom to top of the stack) so we are able to tell whether the memory is the raw or not. 
+To be able to detect this we created the auxiliary \textit{LOGICAL}~(internal representation of binary inside \textbf{GNU R}) array which would contain boolean flag if the value is printable. This means we also needed to add one linear pass through the stack to fill in this array. This pass is in the forward order~(from bottom to top of the stack) so we are able to tell whether the memory is the raw or not. 
 
 This caused that whole algorithm to dump the stack needs to have two passes:
 
