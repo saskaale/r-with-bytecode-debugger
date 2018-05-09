@@ -1301,7 +1301,7 @@ The second listed~(calling \code{devtools::document()}) was used during an devel
 
 In order to implement the BC debugger we need to be able to print the \code{BC} stack content~(see~\ref{user-interface-and-state-of-the-bc-eval}). The way how the implementation was designed was that it was written in the C language~(GNU-R language core) a printing function capable of stack of current pointer.
 
-\subsection{Stack definition}
+\subsection{Stack definition}\label{stack-definition}
 
 Stack definition depends on the \code{TYPED{\_}STACK} typedef conditional~(see figure~\ref{fig:stack-elements-definition}). Once it is defined, the option for saved unboxed values enabled. It causes that instead of the \code{SEXP} stored in the stack every time~(which is more expensive to handle), there could be also stored raw values~(\code{int} / \code{double}). There is also \code{RAWMEM} memory which is used in the BC evaluator to store for example evaluation context frame~(but generally speaking this data type can be out of any other data type). Once the stack is enables, the stack values could be then out of these types:
 
@@ -1314,11 +1314,6 @@ Stack definition depends on the \code{TYPED{\_}STACK} typedef conditional~(see f
 	\item \textbf{\code{SEXP}} - internal representation of the boxed object storing any value
 \end{itemize}
 
-\begin{figure}[h!]
-	\includegraphics[width=90mm]{stack-rawmem.png}
-	\caption{Definition of stack elements and generated auxiliary array showing the pritable elements}\label{fig:stack-elements-definition}
-\end{figure}
-
 To be able to not have to write specific code for each stack type there is implemented an macro \code{GETSTACK{\_}PTR} returning an boxed \code{SEXP} type equivalent of stack position~(no matter if the value in stack is boxed or not).
 
 \subsection{Printing of the stack values}\label{printing-stack-values}
@@ -1327,43 +1322,14 @@ The printing of stack values is done through direct call of \code{deparse1} func
 
 \subsection{RAWMEM stack type tag}
 
-Items on the stack are formatted in C-style array but in case the \textit{TYPED{\_}STACK} is defined the one of the types can be \textit{RAWMEM}. In that case the following memory contains the some raw data so we cannot call to these items regular function for printing elements and instead of we have to skip~(jump over) that chunk of memory.
-
-\begin{figure}[h]
-\begin{lstlisting}
-Bytecode ver. 10
-
-1:
- - simple_bc_verbosity1.R#4: function(a) while(a) a <- a-1
-  @ a
-   1: GETVAR              a
-  @ while (a) a <- a - 1
-   3: BRIFNOT             while (a) a <- a - 1	 | $2
-  @ a
-   6: GETVAR              a
-  @ 1
-   8: LDCONST             1
-  @ a - 1
-  10: SUB                 
-  @ a <- a - 1
-  12: SETVAR              a
-  @ while (a) a <- a - 1
-  14: POP                 
-  15: GOTO                $1
-2:
-  17: LDNULL              
-  18: INVISIBLE           
-  19: RETURN              
-\end{lstlisting}
-	\caption{GNU-R BC Stack with RAWMEM element of size 5}\label{fig:bc-stack-with-rawmem}
+\begin{figure}[h!]
+	\includegraphics[width=90mm]{stack-rawmem.png}
+	\caption{Definition of stack elements and generated auxiliary array showing the pritable elements}\label{fig:stack-elements-definition}
 \end{figure}
 
+In case the \code{TYPED{\_}STACK} is defined~(see~\ref{stack-definition}) then the stack values can contain raw memory chunks which cannot be printed~(see figure~\ref{fig:stack-elements-definition}). Information about size of these chunks is directed to the top of the stack. However we want to print the values in the direction from the top to the down. It results in the unsolved question whether the cell is printable or not. To be able to answer this question there has been created an auxiliary array containing the values if the cell is printable~(see figure~\ref{fig:stack-elements-definition}). It is causing some additionally complexity by running one more linear pass through the stack to fill out this array. This pass is in the forward order~(from bottom to top of the stack) so we are able to tell whether the memory is the raw or not. 
 
-The data on the stack would be in our function printed with the first line pointing to the top of the  stack. Because of this this reason we want to print the stack from the top to the bottom. The \textit{RAWMEM} type however is pointing to the followed data instructions and not the previous. This means that if we would be printing the stack from the end~(top) we would not be able to decide whether the next position contains raw memory or regular stack value.
-
-To be able to detect this we created the auxiliary \textit{LOGICAL}~(internal representation of binary inside \textbf{GNU R}) array which would contain boolean flag if the value is printable. This means we also needed to add one linear pass through the stack to fill in this array. This pass is in the forward order~(from bottom to top of the stack) so we are able to tell whether the memory is the raw or not. 
-
-This caused that whole algorithm to dump the stack needs to have two passes:
+The whole algorithm to dump the stack is then having two passes:
 
 \begin{itemize}
 	\item \textbf{First pass} from bottom to top to fill out the auxiliary array
@@ -1374,6 +1340,8 @@ This caused that whole algorithm to dump the stack needs to have two passes:
 	
 			works in the way that skip values for every place where the are auxiliary value is set to FALSE. If TRUE then look to the tag~(if \textit{TYPED{\_}STACK} available) if is \textit{RAWMEM}, then print $<$rawmem of size \%d$>$ otherwise call the print function for the value~(see~\ref{printing-stack-values}).
 \end{itemize}
+
+The \textit{TYPED{\_}STACK} however also could be disabled. It
 
 If there is \textit{TYPED{\_}STACK} not defined it means that the there is no support for \textit{RAWMEM} which would induce that all of the values are printable. In that case the auxiliary array is useless but we still decided to keep this auxiliary array to be able to use as much same code for every case as possible. This would induce one linear lookup of the array which is not neccesary but in term of performance it is just constant slowdown. This function would be used mainly in debugging we are not concerned about the performance that much~(the \textbf{VM} would be sitting and waiting for user input at some point of the time anyways).
 
