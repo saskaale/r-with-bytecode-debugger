@@ -1334,18 +1334,14 @@ The whole algorithm to dump the stack is then having two passes:
 \begin{itemize}
 	\item \textbf{First pass} from bottom to top to fill out the auxiliary array
 	
-			sets the TRUE value on the visited value. If the visited value is the RAWMEM type, then mark the n following~(size parameter of the RAWMEM cell) cells FALSE
+			sets the \code{TRUE} value on the visited value. If the visited value is the \code{RAWMEM} type, then mark the n following~(size parameter of the \code{RAWMEM} cell) cells \code{FALSE}
 
 	\item \textbf{Second pass} from top to bottom to actually print out the values on the stack
 	
-			works in the way that skip values for every place where the are auxiliary value is set to FALSE. If TRUE then look to the tag~(if \textit{TYPED{\_}STACK} available) if is \textit{RAWMEM}, then print $<$rawmem of size \%d$>$ otherwise call the print function for the value~(see~\ref{printing-stack-values}).
+			works in the way that skip values for every place where the are auxiliary value is set to FALSE. If TRUE then look to the tag~(if \code{TYPED{\_}STACK} available) if is \code{RAWMEM}, then print \code{$<$rawmem of size \%d$>$} otherwise call the print function for the value~(see~\ref{printing-stack-values}).
 \end{itemize}
 
-The \textit{TYPED{\_}STACK} however also could be disabled. It
-
-If there is \textit{TYPED{\_}STACK} not defined it means that the there is no support for \textit{RAWMEM} which would induce that all of the values are printable. In that case the auxiliary array is useless but we still decided to keep this auxiliary array to be able to use as much same code for every case as possible. This would induce one linear lookup of the array which is not neccesary but in term of performance it is just constant slowdown. This function would be used mainly in debugging we are not concerned about the performance that much~(the \textbf{VM} would be sitting and waiting for user input at some point of the time anyways).
-
-For style formatting we chose to print just simply $<$rawmem of size \%d$>$ text to specify that there is raw memory chunk on the stack.
+The \code{TYPED{\_}STACK} however could also be disabled. It means that there cannot be \code{RAWMEM} stored on the stack. Even though we decided to keep the whole algorithm intact which would result in the auxiliary array having just the \code{TRUE} values~(every item is pritable). This decision would cause better maintainability of the code because there are less \code{IFDEF} compiler conditions.
 
 \subsection{Persisting stack pointers}\label{persisting-stack-pointers}
 
