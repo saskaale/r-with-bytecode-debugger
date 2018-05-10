@@ -54,6 +54,8 @@
 
 \begin{document}
 
+%\captionsetup{justification=centering}
+
 % \newacronym{CVUT}{{\v C}VUT}{{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v Praze}
 % \newacronym{FIT}{FIT}{Fakulta informa{\v c}n{\' i}ch technologi{\' i}}
 
@@ -1348,71 +1350,29 @@ The \code{TYPED{\_}STACK} however could also be disabled. It means that there ca
 In regards of the \textbf{BC} stack information there are currently these~(global) variables representing the current state.
  
 \begin{itemize}
-\item \textbf{R{\_}BCNodeStackBase} representing the bottom of the stack
-	\item \textbf{R{\_}BCNodeStackTop} pointing to the current top of the stack
-	\item \textbf{R{\_}BCNodeStackEnd} representing the end of allocate space for the stack~( stack is represented internally as an array)
+	\item \textbf{R{\_}BCNodeStackBase} - the bottom of the stack
+	\item \textbf{R{\_}BCNodeStackTop} - current top of the stack
+	\item \textbf{R{\_}BCNodeStackEnd} - the end of allocate space for the stack~(stack is represented internally as an array)
 \end{itemize}
 
-Which satisfies equation 
+all of these satisfying a equation:
 
-$R{\_}BCNodeStackBase <= R{\_}BCNodeStackTop < R{\_}BCNodeStackEnd$
+$R{\_}BCNodeStackBase <= R{\_}BCNodeStackTop <= R{\_}BCNodeStackEnd$
 
-To be able to print values on the current evaluating bytecode stack we need to know when function stack frame starts and ends~(\textit{R{\_}BCNodeStackBase} points to the beginning of the whole stack and not to the beginning of current evaluated function). For knowing this information we don't have enough information in these variables so we decided \textbf{R{\_}BCNodeStackFnBase} which would point to the beginning~(bottom) of the current evaluated function so after that we would have an memory range in within is the current evaluated stack frame. As long as this variable is internally represented as C global variable but it is used in function context~(mimicking of the CPU function local stack frame behavior) we need to add this variable also to the handling the context~(in the \textit{src/main/context.c}).
 
-\section{Simulated conditional breakpoints}\label{conditional-breakpoints}
-
-Due to lack of the the ability of the conditional breakpoints which are simple and user-friendly there has been put decision to add \textit{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()} function is inspired by the JS \textit{debugger;} command, but instead of being an separate command which would be big change in the language parser we decided it to be a callable function.
-
-This function is simply modifying the \textit{RDEBUG} feature of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context). The command works like every other function, so it is called with new environment. On the other side we want to change variables of not this environment but the evaluated function, so there has to be done the environment lookup for the parent function context.
-
-\begin{lstlisting}
-SEXP attribute_hidden do_breakpoint
-	(SEXP call, SEXP op, SEXP args, SEXP rho)
-{
-    Rboolean oldrdebug;
-    oldrdebug = RDEBUG(rho);
-    SET_RDEBUG(rho, 1);
-    R_GlobalContext->browserfinish = 0;
-    R_BrowserLastCommand = 'n';
-
-	...other support for bytecode 
-		debugger ( described below )...
-
-    return R_NilValue;
-}
-\end{lstlisting}
-
-Usage example:
-\begin{lstlisting}
-#setting up the bytecode
-options(keep.source=TRUE)
-debugVerbose(TRUE)
-enableBCDebug(TRUE)
-library(compiler)
-
-#evaluated function
-f<-function(){
-  for(x in 1:5){
-    if(x == 3){
-	  breakpoint();
-	}
-  }
-}
-compiled <- cmpfun(f)
-compiled()
-\end{lstlisting}
-
+To be able to print values on the current evaluating bytecode stack we need to know when function stack frame starts and ends~(\textit{R{\_}BCNodeStackBase} points to the bottom of the whole stack and not function). There is currently not any enough information from which easily we can get an start of stack frame. To achieve this there has been added the \code{R{\_}BCNodeStackFnBase} variable representing an begin of function stack frame. It is global variable but kept and managed through context handling~(in the \textit{src/main/context.c}) to simulate the CPU function register stack frame.
 
 \section{Implementation of the debugger}\label{implementation-of-debugger}
 
 The main purpose of this work is enable to do the bytecode debugging. In order to do debugging we need to visualize the current bytecode internal state of the evaluating function~(debugger work in the each function separately) which consists of:
 
 \begin{itemize}
+	\item Bytecode
 	\item Position inside bytecode
 	\item Bytecode stack content
 \end{itemize}
 
-The position inside bytecode can be printed alongside with the bytecode content~(we can use already implemented bytecode disassembler~\ref{implementation-of-disassembler}). For the second part we already implemented the stack printer function.
+The position inside bytecode can be printed alongside alongside with the bytecode~(we can re-use already implemented bytecode disassembler~\ref{implementation-of-disassembler}). For the second part we already implemented the stack printer function.
 
 \subsection{Main idea}
 
@@ -1420,9 +1380,9 @@ The main idea behind the debugger implementation is to maintain the same functio
 
 \subsection{Global design}
 
-The idea used behind the debugger implementation is inspired by the \textbf{JS V8 VM}~(see~\ref{bcdebug-implementation-in-v8}). It is to replace the original instruction with special breakpoint instruction together with backuping~(saving) the original instruction alongside the bytecode. This would enable the dispatching of bytecode debug features with evaluating the same code while not causing any performance overhead in case the code is not debugged.
+The idea used behind the debugger implementation is \textbf{inspired by the JS V8 VM}~(see~\ref{bcdebug-implementation-in-v8}). It is to replace the original instruction with special breakpoint instruction together with backuping~(saving) the original instruction alongside the bytecode. This would enable the dispatching of bytecode debug features with evaluating the same code while not causing any performance overhead in case the code is not debugged.
 
-This feature is still experimental so it is by default disabled. Managing this state is done in \textit{src/main/debug.c} by \textit{R{\_}is{\_}bc{\_}debug{\_}enabled} and \textit{do{\_}enableBCDebug}~(exposed into R as \textit{enableBCDebug}).
+This feature is by default disabled. Managing the state for enabling it is done in \textit{src/main/debug.c} by \textit{R{\_}is{\_}bc{\_}debug{\_}enabled} and \textit{do{\_}enableBCDebug}~(exposed into R as \textit{enableBCDebug}).
 
 Example~(notice the \textit{enableBCDebug} call):
 \begin{lstlisting}
@@ -1951,9 +1911,69 @@ The \textbf{CHECK{\_}ADD{\_}BREAKPOINT} function is used for resetting the inter
 } while(0)
 \end{lstlisting}
 
+\section{Simulated conditional breakpoints}\label{conditional-breakpoints}
+
+Due to lack of the the ability of the simple and user-friendly conditional breakpoints there has been put decision to add support for simulating them. It is done through \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being an separate command which would be big change in the language parser it was decided to make it a callable function.
+
+As you can see in the figure~\ref{fig:conditional-breakpoints-breakpoint} this function is modifying the \code{RDEBUG} flag of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context). 
+
+\begin{figure}[h!]
+\begin{lstlisting}
+SEXP attribute_hidden do_breakpoint
+	(SEXP call, SEXP op, SEXP args, SEXP rho)
+{
+  Rboolean oldrdebug;
+  oldrdebug = RDEBUG(rho);
+  SET_RDEBUG(rho, 1);
+  R_GlobalContext->browserfinish = 0;
+  R_BrowserLastCommand = 'n';
+
+
+  if(!R_is_bc_debug_enabled() && R_BCIntActive)
+    warning(_("Calling breakpoint in the BC 
+  
+  while bytecode debugger disabled"));
+
+  /* Support for bytecode debugger */
+  if(R_BCIntActive && !oldrdebug){
+    R_RemoveBCtmpBreakpoints(
+      R_BCbody, *R_BCtmpBreakpoints);
+    Rf_breakOnNextBCInst(
+      R_BCbody, R_BCpc, R_BCtmpBreakpoints);
+  }
+
+  return R_NilValue;
+}
+\end{lstlisting}
+	\caption{Implementation of simulated conditional breakpoints through breakpoint() function}\label{fig:conditional-breakpoints-breakpoint}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{lstlisting}
+#setting up the bytecode
+options(keep.source=TRUE)
+debugVerbose(TRUE)
+enableBCDebug(TRUE)
+library(compiler)
+
+#evaluated function with breakpoint fired
+# once the x variable equals to 3
+f<-function(){
+  for(x in 1:5){
+    if(x == 3){
+      breakpoint();
+    }
+  }
+}
+compiled <- cmpfun(f)
+compiled()
+\end{lstlisting}
+	\caption{Example usage of simulated conditional breakpoints through breakpoint() function}\label{fig:example-of-conditional-breakpoints}
+\end{figure}
+
 \chapter{Testing and future work}
 
-The each 3 implemented parts of this thesis were tested separately. The best case scenario was to make set of automated tests which would test out the all of the implemented features.
+The each 3 implemented parts of this thesis were tested separately. The goal was to make as much code as possible to be able to run the automated tests on.
 
 \section{Bytecode disassembler}
 
