@@ -1420,9 +1420,10 @@ The decision to make separate instruction for each argument count was made becau
 
 \subsection{Storing of the original instruction when the breakpoint is setted}\label{storing-original-instructions}
 
-There is need to somehow remember the original instruction in case the breakpoint is set on the instruction~(the original instruction is overwritten by the corresponding breakpoint one but we still need to execute the original one alongside with the debugger features). The function can have more than one instruction replaced with the debug so there cannot be stored just one original instruction for each function but there has to be option ton store one for each position in the BC code array.
+In case the breakpoint is set~(the original instruction is overwritten by the corresponding breakpoint) we need to store the original instruction. It is necessary to keep the functionality of the evaluated BC function intact. 
+The idea begin implemented solution is to make an deep copy of unchanged code array to preserve the original instruction list. This copy is made the first change of the breakpoint~(first setting of the breakpoint) and attached to the \code{BCODESXP} by making new \code{CONS} cell. Once this is done we can set or unset the breakpoint on any instruction without worrying of losing any information. 
 
-The idea behind implemented solution is on the first change~(first setting of the breakpoint) make an deep copy of the whole \textbf{BC} code array and attach it into the linked list of the bytecode~(see internal representation of the bytecode~ref{R-internal-bc-representation}). Once this is done we can set or unset the breakpoint on any instruction without worrying of losing any information. The representation of the garbage collector is treating the bytecode as a generic linked list~(it's code is inside src/main/memory.c) so the there are any changes needed for keeping the memory consistent.
+The internal representation of the \code{BCODESXP} is the same as the \code{LISTSXP}~(the \code{BCODESXP} is internally wrapper over \code{LISTSXP}). The changes made by making an cons cell means that there is added one more nested layer. All of these functionality~(going through \code{BCODESXP} and \code{LISTSXP}) is already implemented in the Garbage Collector~(see~\ref{GC}) so there is no need to update it for support this change.
 
 \subsection{Setting and unsetting debug instruction}\label{setting-and-unsetting-debug-instruction}
 
