@@ -1131,19 +1131,6 @@ static void printBrowserHelp(void)
     Rprintf("<expr>     evaluate expression\n");
 }
 
-/*
-static RCNTXT* GetBCDebugContext(){
-  RCNTXT *cntxt = R_GlobalContext;
-  while (cntxt != R_ToplevelContext
-        && !(cntxt->callflag & (CTXT_BREAKPOINT | CTXT_FUNCTION))) {
-  cntxt = cntxt->nextcontext;
-  }
-  if(cntxt == R_ToplevelContext)
-    return NULL;
-  return cntxt;
-}
-*/
-
 static int ParseBrowser(SEXP CExpr, SEXP rho)
 {
     int rval = 0;
@@ -1167,18 +1154,12 @@ static int ParseBrowser(SEXP CExpr, SEXP rho)
         printBrowserHelp();
     } else if (!strcmp(expr, "bcstack")){
         rval = 2;
-//        RCNTXT* cntxt = GetBCDebugContext();
-//        if(cntxt && cntxt->bcintactive)
-//            R_printCurrentBCstack(cntxt->fnbase, cntxt->nodestack);
         if(R_BCIntActive)
             R_printCurrentBCstack(R_BCNodeStackFnBase, R_BCNodeStackTop);
         else
             Rprintf("Debugged context is not bytecode\n");
     } else if (!strcmp(expr, "bc")) {
         rval = 2;
-//        RCNTXT* cntxt = GetBCDebugContext();
-//        if(cntxt && cntxt->bcintactive)
-//            R_printCurrentBCbody(cntxt->bcbody, cntxt->bcpc, FALSE, 1);
         if(R_BCIntActive)
             R_printCurrentBCbody(R_BCbody, R_BCpc, FALSE, 1);
         else
