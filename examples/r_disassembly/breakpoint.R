@@ -7,5 +7,21 @@ f<-function(a){
     d<-c+a
     c-d
 }
+
 compiled <- cmpfun(f)
-print(disassembly(compiled))
+
+#set breakpoints
+
+ #this breakpoint would be set into position 12, because at 11 is argument
+ # and the implemented functionality is setting the breakpoint in that cases
+ # to the first following instruction
+ # notice returned value ( 12 ) describing updated position
+bcSetBreakpoint(compiled, 11);
+ #14 is regular instruction
+bcSetBreakpoint(compiled, 14);
+
+#print the current function - notice the (BR) in the instruction
+print(disassemble(compiled),verbose=2)
+
+#print the bytecode instructions - see the 12 and 14
+print(bcListBreakpoints(compiled))
