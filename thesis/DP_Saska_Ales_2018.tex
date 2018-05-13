@@ -1512,136 +1512,56 @@ Consequential instruction does not necessary mean the following instruction righ
 	\item at the position which were instruction labels pointing at~(see types of labels~\ref{instruction-arguments-labels})
 \end{itemize}
 
-To support this feature there has been developed the\textit{bcSetNextBreakpoint} function inside the \textit{compiler} package. There has been also written internal bindings wrapper inside the \textbf{C} package~(call to the \textbf{R} code) in the function \textit{Rf{\_}breakOnNextBCInst}. 
+To support this feature there has been developed the \code{bcSetNextBreakpoint} function~(inside the \code{compiler} package). This function is used also inside the  \code{C} code in the debugger. To support easier dispatching there it has been also written a \code{Rf{\_}breakOnNextBCInst} function which is internally dispatching an \code{bcSetNextBreakpoint} function by call to the \code{R} code through \code{eval}.
 
-The code is checking all possible locations for the jump locations also with the check if there is already one breakpoint~(in that case it is not adding). If there is no breakpoint on the location it is then setting there breakpoint instructions. For placing the them there it is using the internal call to the C function \textit{modifybcbreakpoint}~(see~\ref{setting-and-unsetting-debug-instruction}).
+The implementation of the \code{bcSetNextBreakpoint} code is checking all possible locations for the jump locations. It is also checking if there is already set breakpoint on that position. If there is no one it is then setting there breakpoint instructions. For placing the breakpoint instruction it is using the internal call to the \code{C} function \code{modifybcbreakpoint}~(see~\ref{setting-and-unsetting-debug-instruction}).
 
-It is also internally generating an array of added breakpoint locations which is then returning. This feature is used in the internal implementation of the breakpoint instruction in the C core~(this returned array is used to keep tracking of the added breakpoints).
-
-The function code:
-
-\begin{lstlisting}
-#simulate next behavior with breakpoints
-# returns the vector of added breakpoints
-bcSetNextBreakpoint <- function(code, pos){
-    if (typeof(code)=="closure")
-        bc <- .Internal(bodyCode(code))
-    else
-        bc <- code
-    if (typeof(bc)!="bytecode")
-        stop("Internal error - code is not bytecode")
-
-    bc        <- .Internal(disassemble(bc))
-    bcode     <- bc[[2]]
-    origbcode <- bc[[3]]
-    consts    <- bc[[4]]
-
-
-    tryAddBreakpoint<-function(pos, ret){
-        #if there is no breakpoint at position pos, 
-        # set breakpoint to that position and add 
-        # append this position into list ret
-        # finally return the list ret 
-        #  of breakpoint positions
-        if(!(pos %in% ret) && pos <= length(bcode)){
-            opcode <- bcode[pos]
-            if(!bcInstrIsBreakpoint(opcode)){
-                .Internal(modifybcbreakpoint(code, 
-                			pos-1, 
-                			TRUE));
-                ret <- append(ret, as.integer(pos-1))
-            }
-        }
-        ret
-    }
-
-    #handle adding breakpoint to the first instruction
-    #  we need this after entering 
-    #  bcEval in case of RDEBUG == 1
-    ret <- vector(mode="integer", length=0);
-    if( pos < 1 ) {
-        return(tryAddBreakpoint(2, ret))
-    }
-
-    opcode    <- origbcode[pos]
-    descr     <- Opcodes.argdescr[[opcode+1]]
-
-    #iterate over all parameters of instruction
-    i <- 1
-    while( i <= length(descr) ){
-        if(descr[[i]] == LABEL.ARGTYPE){
-            #if it is label, add breakpoint to target
-            # instruction and append its position to 
-            # return array
-            ret <- tryAddBreakpoint(
-            			origbcode[i + pos] + 1, 
-            			ret)
-        }else if(descr[[i]] == CONSTANTS_LABEL.ARGTYPE){
-            #the label arguments are through 
-            # constants array
-            labelvals <- consts[[ origbcode[i + pos] + 1 ]]
-            if(!is.null(labelvals)){
-                for( v in 1:length(labelvals) ){
-                    ret <- tryAddBreakpoint(
-                    		labelvals[[v]]+1, 
-                    		ret)
-                }
-            }
-        }
-        i <- i+1
-    }
-    #if instruction has no labels, add breakpoint to 
-    # its following instruction
-    if(opcode != RETURN.OP && 
-    	opcode != RETURNJMP.OP && 
-    	opcode != GOTO.OP) {
-        ret <- tryAddBreakpoint(
-        	pos + 1 + length(descr), ret)
-    }
-
-    ret
-}
-\end{lstlisting}
-
-\textit{bcInstrIsBreakpoint} function is used for checking if the instruction code is breakpoint. Internally it is just wrapper over the condition to limit the code duplication~(this check is used on more places in the whole code).
-
-Its source code is pretty simple:
-
-\begin{lstlisting}
-bcInstrIsBreakpoint <- function(x) {
-  x == BREAKPOINT0.OP ||
-    x == BREAKPOINT1.OP ||
-    x == BREAKPOINT2.OP ||
-    x == BREAKPOINT3.OP ||
-    x == BREAKPOINT4.OP
-}
-\end{lstlisting}
+It is also returning an array of newly added breakpoint locations. This feature is used in the implementation of the \code{BREAKPOINT} instruction~(see~\ref{implementation-of-breakpoint-instruction}) in the \code{C} core - this returned array is used to keep tracking of the added breakpoints.
 
 \subsection{Support in the disassembly tool}\label{debugger-support-in-disassembly}
 
-To visualize the set breakpoints there has been added an support into the disassembly tool. The R disassembly script was modified to getting 3 arrays as an bytecode input~(added field with backup of all bytecode array). So the arrays now contain the constant array, code array possibly containing breakpoints and original code array which never contains any breakpoint instruction. The original array is returned every time no matter if the code array is modified or not~(in case not modified there is returned the same array twice). 
-
-This means that we can just simply modify the disassembler to go always through the original array. Then for every instruction we would be checking in the code array~(which possibly contains breakpoints) if there is breakpoint or not. In case there is we would just simply print an mark \textit{(BR)} as prefix for the instruction name to signalize that this instruction contains breakpoint.
-
-Loading an arrays with breakpoints:
+\begin{figure}[h]
 \begin{lstlisting}
-#can contain BREAKPOINT[0-9] instructions
-code_breakpoint   <- x[[2]]
-#never contains BREAKPOINT[0-9] instruction
-code              <- x[[3]]
-#constant buffer
-constants         <- x[[4]]
+Bytecode ver. 10
+
+ - #2: c<-a+1
+  @ a
+   1: GETVAR              a
+  @ 1
+   3: LDCONST             1
+  @ a + 1
+   5: ADD                 a + 1
+  @ c <- a + 1
+   7: SETVAR              c
+   9: POP                 
+ - #3: d<-c+a
+  @ c
+  10: GETVAR              c
+  @ a
+  12: (BR) GETVAR         a
+  @ c + a
+  14: ADD            c + a
+  @ d <- c + a
+  16: SETVAR              d
+  18: POP                 
+ - #4: c-d
+  @ c
+  19: GETVAR              c
+  @ d
+  21: GETVAR              d
+  @ c - d
+  23: SUB                 c - d
+  25: RETURN 
 \end{lstlisting}
+	\caption{Example of showing an instruction with breakpoint in the disassembly tool - (notice \code{GETVAR} instruction on position 12)}\label{fig:breakpoints-in-disassembly-example}
+\end{figure}
 
 
-Checking for breakpoint:
-\begin{lstlisting}
-if(grepl("^BREAKPOINT[0-9]+\\.OP$", code_breakpoint[[i]])){
-    instrname <- paste0("(BR) ", instrname)
-}
-\end{lstlisting}
+To visualize the set breakpoints there has been added an support into the disassembly tool. The R disassembly script was modified to get 3 arrays as an bytecode input~(added field with the original code array - see~\ref{storing-original-instructions}). So the arrays now contain the constant array, code array possibly containing breakpoints and original code array which never contains any breakpoint instruction. The original array is returned every time no matter if the code array is modified or not~(in case not modified there is returned the same code array twice). 
 
-\subsection{Temporary and regular breakpoints}
+This means that we can just simply modify the disassembler to go always through the original array. Then for every instruction we would be checking in the code array~(which possibly contains breakpoints) if there is breakpoint or not. In case there is we would just simply print an mark \code{(BR)} as prefix for the instruction name to signalize that this instruction contains breakpoint~(see the figure~\ref{fig:breakpoints-in-disassembly-example} for example).
+
+\subsection{Temporary and regular breakpoints}\label{temporary-and-regular-breakpoints}
 
 Currently there are two types of the breakpoint inside the bytecode:
 
@@ -1649,55 +1569,43 @@ Currently there are two types of the breakpoint inside the bytecode:
 	\item temporary breakpoint
 	\item regular breakpoint
 \end{itemize}
-	
-The regular ones are used for user-defined breakpoint~(by calling \textit{bcSetBreakpoint} function from {compiler} package). Once bytecode interpreter reaches them the breakpoint functionality is called and shows the interface for debugger.
 
-The temporary ones are used on the other hand for handling debugger commands. They are implemented with the same instruction except they are also held their locations on the bytecode local stack~(variable in which points global \textit{R{\_}BCtmpBreakpoints} also kept through context in \textit{src/main/context.c}). This value contains an array where each elements is pointing to the location of the breakpoint. These breakpoints always point to the instruction succeeding current the evaluated one~(see~\ref{setting-next-breakpoint}).
+The regular ones are used for user-defined breakpoint, these ones are set by calling \code{bcSetBreakpoint} function~(from \code{compiler} package). Once the bytecode interpreter reaches them the breakpoint functionality is called and the R shows the debugger interface.
 
-In order to keep the garbage collector satisfied and because it is not possible to store the variable in the local protection stack~(through \textit{PROTECT}/\textit{UNPROTECT} function) during \textit{bcEval}, there has been dedicated one field on the bytecode stack for storing this array. The \textit{R{\_}BCtmpBreakpoints} is then pointer~(\textit{SEXP*}) to this location which allows changing of this variable while modifying the bytecode body. Changing this array and not keeping an new one also reflects the fact that the modifications inside the \textbf{BC} code array are also made in-place in destructive manner.
+The temporary ones are used on the other hand for handling debugger commands. They are implemented with the same instruction except there are also held their locations on the bytecode local stack~(variable in which points global \code{R{\_}BCtmpBreakpoints}). This value contains an array in which each elements is representing the location of the currently set temporary breakpoint. These temporary breakpoints always point to the instruction succeeding current the evaluated one~(see~\ref{setting-next-breakpoint}).
+
+In order to keep the garbage collector satisfied and because it is not possible to store the variable in the local protection stack~(through \code{PROTECT}/\code{UNPROTECT} function - see \ref{GC}) during \code{bcEval}, there has been dedicated one field on the bytecode stack for storing this array. The \code{R{\_}BCtmpBreakpoints} variable is then pointer~(\code{SEXP*} type) to this location. This design allows changing of this variable while modifying the bytecode body from the different evaluated context. Changing this array and not keeping an new one also reflects the fact that the modifications inside the bytecode code array are also made in-place by modifying this array.
 
 \subsection{Implementation of the breakpoint instructions}\label{implementation-of-breakpoint-instruction}
 
-The reason why there are implemented separate breakpoint instructions for each number of instruction arguments is its annotation. It allows us that instructions would have different annotation containing the number of arguments. Basically the breakpoint instruction would then contain the information of the number of its arguments in order to not break the structure of bytecode. However the evaluated code inside all of them would be the same. This means that it can be simply generalized by writing single macro for all breakpoint instructions.
-
-The code for instructions ended up like:
-
-\begin{lstlisting}
-    OP(BREAKPOINT0, 0): DO_BREAKPOINT();
-    OP(BREAKPOINT1, 1): DO_BREAKPOINT();
-    OP(BREAKPOINT2, 2): DO_BREAKPOINT();
-    OP(BREAKPOINT3, 3): DO_BREAKPOINT();
-    OP(BREAKPOINT4, 4): DO_BREAKPOINT();
-\end{lstlisting}
-
-The breakpoint instructions algorithm~(\textit{DO{\_}BREAKPOINT} macro) is:
+The reason why there are implemented separate breakpoint instructions for each number of instruction arguments is its annotation. It allows us that breakpoint instruction would have the information of number of its arguments with itself. It would prevent from the breaking the bytecode code array structure. However the evaluated code inside all of the breakpoint instructions would be the same. This means that it can be simply generalized by writing single macro for all breakpoint instructions. This macro was decided to be named \code{DO{\_}BREAKPOINT} and it is containing this algorithm with the functionality for showing the debugger feature:
 
 \begin{itemize}
 	\item Remove all temporary breakpoints from the bytecode
-	\item Print bytecode interpreter internal status (described below)
+	\item Print bytecode interpreter internal status (see~\ref{bytecode-interpreter-internal-status})
 	\item Call debug browser
-	\item Set debug flags~(RDEBUG or mark next bytecode instruction for debugging)
-	\item Call the original instruction
+	\item Set \code{RDEBUG} debug flag~(see~\ref{handling-debugger-user-input})
+	\item Call the original instruction~(see~\ref{threaded-and-non-threaded-design})
 \end{itemize}
 
-As you can see in the time of calling the browser there are all temporary breakpoints removed from the bytecode. It means that just the regular user-defined breakpoints would the printed to the output~(see~\ref{debugger-support-in-disassembly}). It is desired behavior because we do not want to print the user breakpoints which are used just for internal purposes of step-by-step feature of debugger.
+As you can see in the time of calling the browser there are all temporary breakpoints removed from the bytecode code array. It means that just the regular user-defined breakpoints~(see~\ref{temporary-and-regular-breakpoints}) would the printed to the output~(see~\ref{debugger-support-in-disassembly}). It is desired behavior because we do not want to print the user breakpoints which are used just for internal purposes of step-by-step feature of debugger~(see~\ref{handling-debugger-user-input}).
 
 \subsection{Bytecode interpreter internal status}\label{bytecode-interpreter-internal-status}
 
-For user there is useful to know whether the interpreter is in the BC or in the AST mode. In order to achieve this there was put as \code{debugBC} prefix instead of \code{debug} in the AST evaluator.
+Users need to know whether the interpreter is in the BC or in the AST mode. In order to achieve this the \code{"debugBC"} string was put as prefix in the each debugger browser call~(instead of \code{"debug"} in the AST evaluator).
 
-The second thing to think about is the ability to locate the currently evaluated code~(position in code). For achieving this there has to be printed the internal status of interpreter. Which was implemented in two possible ways:
+Thing of importance while debugging the bytecode is the ability to locate the currently evaluated code~(position in code). For achieving this there has to be printed the internal status of interpreter. This was implemented in two possible ways:
 
 \begin{itemize}
-	\item Short compact way inspired by AST status printing
-	\item Long verbose way showing the all information available in the \textbf{BC} interpreter
+	\item \textbf{Short compact way} inspired by AST status printing
+	\item \textbf{Long verbose way} showing the all information available in the \textbf{BC} interpreter
 \end{itemize}
 
 \subsubsection{The short compact way of status printing}\label{short-compact-way-of-status-printing}
-It is used to simulate the AST printing behavior. It printing the data in the same manner to remain the support for the debuggers in other dependent IDEs to keep the backward compatibility. This way is used by default.
+It is used to simulate the AST printing behavior. It is printing the data in the same manner as AST to remain the support for the debuggers in other dependent IDEs. This way is used by default in order to keep the backward compatibility.
 
-\subsubsection{The long verbose way showing all information}
-It is used for the printing the whole internal state bytecode interpreter. To support this feature there has been implemented function \textit{printBCStatus()} for printing the bytecode interpreter status.
+\subsubsection{The long verbose way showing all information}\label{long-verbose-way}
+It is used for the printing the whole internal state bytecode interpreter. To support this feature there has been implemented function \code{printBCStatus()} for printing the bytecode interpreter status.
 
 Its code is:
 \begin{lstlisting}
@@ -1756,7 +1664,7 @@ BCNPUSH(body); /* pushing body is neccesary
 
 \end{lstlisting}
 
-\subsection{Threaded and non-threaded design of the application}
+\subsection{Threaded and non-threaded design of the application}\label{threaded-and-non-threaded-design}
 
 Because of the speedup of the \textbf{GNU R} evaluating there is support for the THREADED code. When it is enabled it causes that there is no the main loop in the bytecode instruction evaluation~(see~\ref{Computed-GOTO}). 
 
@@ -1797,7 +1705,7 @@ It means on the other hand that situation is more complicated. In that case the 
   } while(0)
 \end{lstlisting}
 
-\subsection{Handling of the debugger user input}
+\subsection{Handling of the debugger user input}\label{handling-debugger-user-input}
 
 The original environment browser has inbuilt support for handling and modifying the debugging~(step into, next step, continue etc.) via the user input~(defined in \textit{src/main/main.c}) implemented by setting up the \textit{RDEBUG} flag altogether with \textit{R{\_}BrowserLastCommand} variable on the evaluated environment. The intend of implementing bytecode debugger interface was to reuse as much of this feature so the bytecode debugger is managed also through these variables. Bytecode interpreter provides the more status information, so the user interface has been extended by these commands:
 
