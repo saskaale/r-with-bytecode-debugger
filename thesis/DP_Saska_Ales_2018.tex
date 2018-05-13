@@ -1619,31 +1619,30 @@ void printBCStatus(){
 }
 \end{lstlisting}
 
-For printing current state there is reused the calling \textit{R{\_}printCurrentBCbody} in \textit{src/main/eval.c} which is internally dispatching \textit{print} method~(\code{print.disassembly} function) of bytecode object from the \textit{bctools} package (called with \textit{select} parameter to show current instruction and \textit{peephole} turned to show just surrounding area across the current instruction).
+For printing current state there is reused the calling \code{R{\_}printCurrentBCbody}~(located in \textit{src/main/eval.c}) which is internally dispatching \code{print} method of bytecode \code{disassembly} object from the \textit{bctools} package. It is called with \code{select} parameter setted to position of current evaluated instruction and \code{peephole} argument turned to \code{TRUE} to show just the surrounding area around the current instruction.
 
-To decide control whether to print out the short compact way or the long way is used the \textit{R{\_}DebugVerbose} boolean variable. This flag is accessible for user through the \textit{debugVerbose()} function which acts like getter and setter altogether. It is returning the value of the variable as return value. It has also optional parameter which is used for the setting the variable. 
+To control whether to print out the short compact way or the long way the \code{R{\_}DebugVerbose} boolean variable is used. This flag is accessible for user through the \code{debugVerbose()} function which acts like getter and setter altogether. It is returning the value of the variable as return value while having an optional parameter used for the modifying of the flag. 
 
-As you can see the code is reusing the \textbf{bytecode disassembler}~\ref{implementation-of-disassembler} and \textbf{stack printer}~\ref{implementation-of-stack-printer}.
+As you can see the code is reusing the {bytecode disassembler~(see~\ref{implementation-of-disassembler}) and stack printer~(see~\ref{implementation-of-stack-printer}).
 
 \subsection{Debugger jumping granularity}\label{debugger-jumping-granuality}
 
-The AST debugger is making one jump for every expression. The bytecode debugger on the other hand can jump in much more granular way~(not according to the changes of expression references but one step for each bytecode instruction). Because the short compact way should be simulation of the AST debugger it should also jump according to changes of these locations. This can be implemented by two ways:
+The AST debugger is making one jump for every expression. The bytecode debugger on the other hand can jump in much more granular way~(not according to the changes of expression references but one step for each bytecode instruction). Because the short compact way should be simulation of the AST debugger it should also jump according to changes of these locations and not just by the bytecode instructions. This can be implemented by two ways:
 
 \begin{itemize}
-	\item calculate these in bcSetNextBreakpoint
+	\item calculate these in \code{bcSetNextBreakpoint}
 	\item runtime checking
 \end{itemize}
 
-The first way is more proper in order of performance because there would be placed breakpoint instruction right to the place where should be debugger functionality dispatched. The second one would works by placing the breakpoint instruction to the suceeding one while skipping the debugger functionality unless the change in expression reference occur~(runtime checking). The second one was chosen due to simplicity of this solution because it means just handling and storing one runtime variable of expression reference and checking if it changes. The performance overhead due to runtime checking would be just in case debugger is enabled which is not think we are worried in the first place.
+The first way is more proper in order of performance - the breakpoint would be placed on the right instruction where should be debugger functionality dispatched. The second one would work by placing the breakpoint instruction to the very next one while skipping the debugger functionality unless the change in expression reference occur~(runtime checking). 
 
-On the other hand when the long verbose mode is set up. The debugger would jump directly to the following instruction which would be then visualized for user. It means that there is no need for putting any condition for skipping debug functionality.
+The runtime-checking was chosen due to implementation simplicity. The performance overhead would be just in case debugger is enabled which we are not worried in the first place.
+
+On the other hand when the long verbose mode is set up. The debugger would jump directly to the following instruction which would be then visualized for user. It means that there is no need for putting any condition for skipping debug functionality on certain instructions.
 
 \subsection{Handling of the recursive character of the bytecode}
 
-The debugger implementation is modifying the breakpoint code  while going through the code with adding an temporary breakpoints. This is done in order to support breaking on the next instruction~(see~\ref{setting-next-breakpoint}). However it means that while calling recursive call there can be already set breakpoint instruction in the evaluated code. However we want to have any executed in the recursive call of the function. To solve this there was put an decision to check in the beginning of \textit{bcEval} function whether the code is modified. In that case it is creating an shallow copy of the current code without an modified code array~(taking just an code array and constant array). This would mean that we are sure that after this there are no breakpoints set in the function.
-
-Because of this is allocating an new element it has to have reference to some object for satisfying the \textbf{GC}. This was done by pushing to the bytecode stack. It was decided to push the current evaluated body even when this change is done due to less if-then clauses and better code readability~(the value has to be also popped from the stack at the ending of evaluating).
-
+\begin{figure}[h]
 \begin{lstlisting}
 /* duplicate body in case this 
 	function has modified */
@@ -1663,16 +1662,23 @@ BCNPUSH(body); /* pushing body is neccesary
     readability */
 
 \end{lstlisting}
+	\caption{Modifying the bytecode array in the beginning of bcEval to erase breakpoints from the code}\label{fig:erase-breakpoints-in-bceval}
+\end{figure}
+
+The debugger implementation is modifying the breakpoint code while going through the code with adding an temporary breakpoints. This is done in order to support breaking on the next instruction~(see~\ref{setting-next-breakpoint}). This means that while calling recursive call there can be already set breakpoint instruction in the evaluated code. However we do not want to have any of them executed in the recursive call of the function. To solve this there was done checking~(in the beginning of \code{bcEval} function) whether the code is modified. If yes then we are creating an shallow copy of the current code without an modified byteecode code array by making new \code{BCODESXP} object created from an original code array and constant array~(see figure~\ref{fig:erase-breakpoints-in-bceval}).
+
+Because of this implementation is allocating an new element we have to satisfy the language GC by putting its reference to the bytecode stack. It was decided to push the current evaluated body even when this change is not done. It is creating tiny memory overhead by having one unnecessary element on the stack but it is resulting in better code readability~(the value has to be also popped from the stack at the ending of evaluating).
+
 
 \subsection{Threaded and non-threaded design of the application}\label{threaded-and-non-threaded-design}
 
-Because of the speedup of the \textbf{GNU R} evaluating there is support for the THREADED code. When it is enabled it causes that there is no the main loop in the bytecode instruction evaluation~(see~\ref{Computed-GOTO}). 
+Because of the speedup of the GNU-R evaluating there is support for the THREADED code. When it is on then it causes that there is no the main loop in the bytecode instruction evaluation~(see~\ref{Computed-GOTO}). 
 
-So basically this means there were two different systems which had to be analyzed and modified to support the jumping to the different direction~(jump for calling the original instruction - inside the \textit{DO{\_}BREAKPOINT} macro).
+This means there were two different dispatch systems which had to be analyzed and modified to support the jumping to the different direction~(jump for calling the original instruction - inside the \textit{DO{\_}BREAKPOINT} macro).
 
 \subsubsection{THREADED{\_}CODE defined}
-It means that the needed changes were minimal. It required adding a macro \textbf{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP} for an switching to the instruction defined in the backup array~(\textit{inst} argument). Because of the implementation design of the bytecode instruction in case of the instruction operand it is holding internally position of it's label to jump to~(see~\ref{Computed-GOTO}). All it is doing is then jumping into the location defined in passed instruction value.
 
+\begin{figure}[h]
 \begin{lstlisting}
 #define NEXT() (__extension__ ({ \
     currentpc = pc; goto *(*pc++).v; \
@@ -1686,11 +1692,15 @@ It means that the needed changes were minimal. It required adding a macro \textb
     __extension__ ({goto *(*(inst)).v;}); \
   } while(0)
 \end{lstlisting}
+	\caption{Changes made for instruction handling macros in case \code{THREADED{\_}CODE} defined}\label{fig:instruction-handling-threaded}
+\end{figure}
+
+In this case the needed changes were minimal~(see figure~\ref{fig:instruction-handling-threaded}). It required adding a macro \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP} for an switching to the instruction defined in the backup array~(\code{inst} argument). Because of the implementation design of the bytecode instruction in case of the instruction operand it is holding internally position of it's label to jump to~(see~\ref{Computed-GOTO}). It is then jumping into the location defined in passed instruction value.
 
 
 \subsubsection{THREADED{\_}CODE not defined}
-It means on the other hand that situation is more complicated. In that case the whole evaluator design is one big loop. The loop originally had big switch~(beginning defined in \textit{BEGIN{\_}MACHINE} macro) which was deciding which instruction according to the value of operand~(*op). We changed this behavior that we loaded operand into variable, placed another jump label~(\textit{jmp{\_}opcode}) and after that decided which instruction has to be evaluated according to the value of that variable. In the case of executing BREAKPOINT instruction and evaluating original instruction~(through \textbf{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP}~\ref{}) we set the auxiliary variable~(\textit{jmp{\_}opcode}) to the desired instruction code.  and jumped into jump label which we added~(\textit{jmp{\_}opcode}) which would dispatch the another instruction code~(without increasing program count pointer etc.).
 
+\begin{figure}[h]
 \begin{lstlisting}
 #define NEXT() goto loop
 
@@ -1704,6 +1714,10 @@ It means on the other hand that situation is more complicated. In that case the 
     goto do_instruction; \
   } while(0)
 \end{lstlisting}
+	\caption{Changes made for instruction handling macros in case \code{THREADED{\_}CODE} not defined}\label{fig:instruction-handling-not-threaded}
+\end{figure}
+
+In this situation things are more complicated because the whole evaluator design is one big loop. The changes in this code were described in figure~\ref{fig:instruction-handling-not-threaded}. The loop originally had  one big switch~(its beginning is defined in \code{BEGIN{\_}MACHINE} macro) which was deciding which instruction according to the value of operand~(\code{*op}). We changed this behaviour so that it is loading operand~(\code{*op}) into variable~(\code{jmp{\_}opcode}), then placed another jump label~(\code{do{\_}instruction}) and after that decided which instruction has to be evaluated according to the value of that variable~(by \code{switch} command). In the case of executing breakpoint instruction and evaluating original instruction~(through \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP}) we are setting the auxiliary variable \code{jmp{\_}opcode} to the desired instruction code. Then there is jump to the label which we added~(\code{jmp{\_}opcode}).
 
 \subsection{Handling of the debugger user input}\label{handling-debugger-user-input}
 
@@ -1826,11 +1840,8 @@ The \textbf{CHECK{\_}ADD{\_}BREAKPOINT} function is used for resetting the inter
 
 \section{Simulated conditional breakpoints}\label{conditional-breakpoints}
 
-Due to lack of the the ability of the simple and user-friendly conditional breakpoints there has been put decision to add support for simulating them. It is done through \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being an separate command which would be big change in the language parser it was decided to make it a callable function.
 
-As you can see in the figure~\ref{fig:conditional-breakpoints-breakpoint} this function is modifying the \code{RDEBUG} flag of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context). 
-
-\begin{figure}[h!]
+\begin{figure}[h]
 \begin{lstlisting}
 SEXP attribute_hidden do_breakpoint
 	(SEXP call, SEXP op, SEXP args, SEXP rho)
@@ -1861,7 +1872,7 @@ SEXP attribute_hidden do_breakpoint
 	\caption{Implementation of simulated conditional breakpoints through breakpoint() function}\label{fig:conditional-breakpoints-breakpoint}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[h]
 \begin{lstlisting}
 #setting up the bytecode
 options(keep.source=TRUE)
@@ -1883,6 +1894,10 @@ compiled()
 \end{lstlisting}
 	\caption{Example usage of simulated conditional breakpoints through breakpoint() function}\label{fig:example-of-conditional-breakpoints}
 \end{figure}
+
+Due to lack of the the ability of the simple and user-friendly conditional breakpoints there has been put decision to add support for simulating them. It is done through \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being an separate command which would be big change in the language parser it was decided to make it a callable function.
+
+As you can see in the figure~\ref{fig:conditional-breakpoints-breakpoint} this function is modifying the \code{RDEBUG} flag of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context). 
 
 \chapter{Testing and future work}
 
