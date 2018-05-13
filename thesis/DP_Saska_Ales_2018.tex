@@ -1598,7 +1598,7 @@ Thing of importance while debugging the bytecode is the ability to locate the cu
 
 \begin{itemize}
 	\item \textbf{Short compact way} inspired by AST status printing
-	\item \textbf{Long verbose way} showing the all information available in the \textbf{BC} interpreter
+	\item \textbf{Long verbose way} showing the all information available in the \textbf{BC} interpreter - used by default
 \end{itemize}
 
 \subsubsection{The short compact way of status printing}\label{short-compact-way-of-status-printing}
@@ -1721,14 +1721,7 @@ In this situation things are more complicated because the whole evaluator design
 
 \subsection{Handling of the debugger user input}\label{handling-debugger-user-input}
 
-The original environment browser has inbuilt support for handling and modifying the debugging~(step into, next step, continue etc.) via the user input~(defined in \textit{src/main/main.c}) implemented by setting up the \textit{RDEBUG} flag altogether with \textit{R{\_}BrowserLastCommand} variable on the evaluated environment. The intend of implementing bytecode debugger interface was to reuse as much of this feature so the bytecode debugger is managed also through these variables. Bytecode interpreter provides the more status information, so the user interface has been extended by these commands:
-
-\begin{itemize}
-	\item \textbf{bc} - print current bytecode with the position~(internally calling \textit{R{\_}printCurrentBCbody})
-	\item \textbf{bcstack} - print current bytecode stack~(internally calling \textit{R{\_}printCurrentBCstack})
-\end{itemize}
-
-Implementation inside \textbf{ParseBrowser}:
+\begin{figure}[h]
 \begin{lstlisting}
 ...
 other commands
@@ -1755,24 +1748,21 @@ other commands
 other commands
 ...
 \end{lstlisting}
+	\caption{Implemenation of \code{bcstack} and \code{bc} commands in the debugger interface}\label{fig:implementation-of-bcstack-bc-commands}
+\end{figure}
 
+The original environment browser has inbuilt support for handling and modifying the debugging~(\textit{step into}, \textit{next step}, \textit{continue} etc.) via the user input~(see~\ref{handling-debugger-user-input} implemented by setting up the \code{RDEBUG} flag and \code{R{\_}BrowserLastCommand} variable on the evaluated environment. The intent of implementing bytecode debugger interface was to reuse as much of this feature so the bytecode debugger is managed also through these variables in order to manage the debugger control. Bytecode interpreter the other hand also provides the more status information. It has been decided to extend the user interface to support showing these informations by those commands~(see implementation in figure~\ref{fig:implementation-of-bcstack-bc-commands}):
 
-%Both of these functions are called by the global bytecode arguments (\textit{R{\_}BCbody}, \textit{R{\_}BCpc} etc.) which can be changed~(conditional breakpoints supported through \textit{trace} function are evaluated through R code which can cause another bcEval call which change these variables). 
-
-%\begin{lstlisting}
-%int olddisablebc = R_disable_bytecode; \
-%R_disable_bytecode = TRUE; \
-%do_browser(body, CALL_FRAME_FUN(), R_NilValue, rho); \
-%R_disable_bytecode = olddisablebc; \
-%\end{lstlisting}
-
-\subsection{Default behavior of the bytecode debugger}
-
-The whole bytecode debugger engine was designed in it's default way for the user to behave in the most similar way as the current AST one. The only difference is printing \textit{"debugBC"} instead of printing \textit{debug} in the beginning of the each line used for user command input~(environment browser). Making the debugger output behaving as much similar as the current AST implementation is beneficial for other dependent software which is relying on the specific output format~(such as IDEs etc.).
+\begin{itemize}
+	\item \code{bc} - print current bytecode with the position
+		(internally calling \code{R{\_}printCurrentBCbody})
+	\item \code{bcstack} - print current bytecode stack
+		(internally calling \code{R{\_}printCurrentBCstack})
+\end{itemize}
 
 \subsection{Initial entry points to the bcEval functions}
 
-Because in the during bytecode debugging inside \textbf{bcEval} function there are no runtime checks for the RDEBUG flag due to performance~(avoiding condition instruciton every each evaluated bytecode instruction) there is need for setting the bytecode instruction~\ref{setting-next-breakpoint} in order to dispatch bytecode functionality manually.
+Because in the during bytecode debugging inside \textbf{bcEval} function there are no runtime checks for the RDEBUG flag due to performance reasons there is need for setting the bytecode instruction~\ref{setting-next-breakpoint} in order to dispatch bytecode functionality manually.
 
 Currently there are two cases in which this scenario has to be handled.
 
@@ -1839,7 +1829,6 @@ The \textbf{CHECK{\_}ADD{\_}BREAKPOINT} function is used for resetting the inter
 \end{lstlisting}
 
 \section{Simulated conditional breakpoints}\label{conditional-breakpoints}
-
 
 \begin{figure}[h]
 \begin{lstlisting}
