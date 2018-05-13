@@ -1619,7 +1619,7 @@ void printBCStatus(){
 }
 \end{lstlisting}
 
-For printing current state there is reused the calling \textit{R{\_}printCurrentBCbody} in \textit{src/main/eval.c} internally dispatching \textit{print} method of bytecode object from the \textit{bctools} package (called with \textit{select} parameter to show current instruction and \textit{peephole} turned to show just surrounding area across the current instruction).
+For printing current state there is reused the calling \textit{R{\_}printCurrentBCbody} in \textit{src/main/eval.c} which is internally dispatching \textit{print} method~(\code{print.disassembly} function) of bytecode object from the \textit{bctools} package (called with \textit{select} parameter to show current instruction and \textit{peephole} turned to show just surrounding area across the current instruction).
 
 To decide control whether to print out the short compact way or the long way is used the \textit{R{\_}DebugVerbose} boolean variable. This flag is accessible for user through the \textit{debugVerbose()} function which acts like getter and setter altogether. It is returning the value of the variable as return value. It has also optional parameter which is used for the setting the variable. 
 
