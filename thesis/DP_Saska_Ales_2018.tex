@@ -44,7 +44,9 @@
 \supervisor{Ing. Petr M{\' a}j}
 \acknowledgements{Thanks to my adviser Petr M{\' a}j for help with reviewing thesis, Tom{\' a}{\v s} Kalibera for useful help with the GNU-R code and functionality, my father for assisting with the submission of this work, and big thanks to my girlfriend for psychological support and all the tea required to make this work happen.}
 \abstractEN{This thesis is about analysis and implementation of the advanced bytecode disassembler tool for GNU-R language. Implemented tool is returning the information in human readable compact format for passed function. This second feature was reused in the second part of the thesis which is about native support for bytecode debugger. The current debugging options for the bytecode in GNU-R are very limited because of implementing through AST call. This has been improved in this thesis by implementing an native support for debugging bytecode. Presented implementation shows all internal information of the bytecode evaluator status. The solution written in this thesis is also focused on making any negative impact to overall performance of the language which has been successfully tested and proven with testing.}
-\abstractCS{V n{\v e}kolika v{\v e}t{\' a}ch shr{\v n}te obsah a p{\v r}{\' i}nos t{\' e}to pr{\' a}ce v {\v c}esk{\' e}m jazyce.}
+\abstractCS{Tato pr{\' a}ce se zabývá analýzou a implementací pokročilého bytecode debuggeru pro jazyk GNU-R. Implementovaný systém vypisuje informace v čitelné a uživatelem srozumitelné podobě pro každou instrukci zadané funkce. Druhá část práce se zabývá 
+
+ V n{\v e}kolika v{\v e}t{\' a}ch shr{\v n}te obsah a p{\v r}{\' i}nos t{\' e}to pr{\' a}ce v {\v c}esk{\' e}m jazyce.}
 \placeForDeclarationOfAuthenticity{Prague}
 \keywordsCS{Replace with comma-separated list of keywords in Czech.}
 \keywordsEN{computer language,R,GNU-R,bytecode,disassembler,debugger}
@@ -61,9 +63,9 @@
 % \newacronym{FIT}{FIT}{Fakulta informa{\v c}n{\' i}ch technologi{\' i}}
 
 \setsecnumdepth{part}
-\chapter{Introduction}
+\chapter{Introduction}\label{introduction}
 
-\section{Motivation and objectives}
+\section{Motivation and objectives}\label{motivation-and-objectives}
 
 Almost everyone who has been trying to write computer program has made some logical mistakes in them. To help to solve them we usually run program \textbf{step-by-step} with debugging tools with some sort of debugger. The \mbox{\textbf{GNU-R}} which is one of the most widespread used scientific languages across the whole world also has it's implementation for debugging code.
 
@@ -708,7 +710,7 @@ The difference between the Java \code{javap} and the Python \code{dis} command i
 
 The R can internally combine in memory AST and BC representation of the code, the way how to disassemble code is just for the one specific function. In case there are a lot of information inside GNU-R bytecode it would be also nice to have ability to show these information just as parameters through verbosity level. The inline showing values from the constant pool would be also useful because it can result in compact and shorter output with easily enabling the feature for printing just specified are of function.
 
-\section{Analysis of Bytecode debugger implementation}
+\section{Analysis of Bytecode debugger implementation}\label{analysis-of-debugger}
 
 Currently there is no support for debugging the bytecode evaluation in real time~(just the fallback to the AST one is present) so there is no current implementation of the BC debugger to go through. Instead of it we can inspire ourselves with the current AST implementation which is done in the first part of this section. The following parts are analyzing the implementation of the \textbf{BC} debugger in other VMs~(Python VM and V8 javascript VM).
 
@@ -1808,7 +1810,7 @@ SEXP attribute_hidden do_breakpoint
   return R_NilValue;
 }
 \end{lstlisting}
-	\caption{Implementation of simulated conditional breakpoints through breakpoint() function}\label{fig:conditional-breakpoints-breakpoint}
+	\caption{Implementation of simulated conditional breakpoints through breakpoint() function}\label{fig:conditional-breakpoints-breakpoint}\label{simulated-conditional-breakpoints}
 \end{figure}
 
 \begin{figure}[h]
@@ -1834,19 +1836,19 @@ compiled()
 	\caption{Example usage of simulated conditional breakpoints through breakpoint() function}\label{fig:example-of-conditional-breakpoints}
 \end{figure}
 
-Due to lack of the the ability of the simple and user-friendly conditional breakpoints there has been put decision to add support for simulating them. It gad been done through \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being an separate command which would be big change in the language parser it was decided to make it a callable function.
+Due to lack of the the ability of the simple and user-friendly conditional breakpoints there has been put decision to add support for simulating them. It had been done through \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being an separate command which would be big change in the language parser it was decided to make it a callable function.
 
 As you can see in the figure~\ref{fig:conditional-breakpoints-breakpoint} this function is modifying the \code{RDEBUG} flag of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context). 
 
-\chapter{Testing and future work}
+\chapter{Testing and future work}\label{testing-and-future-work}
 
 The each 3 implemented parts of this thesis were tested separately. The goal was to make as much code as possible to be able to run the automated tests on.
 
 \section{Bytecode disassembler}
 
-The main part of the work was done as the separate \textbf{GNU R} package~(named \textit{bctools}). The R package system has it's testing system which runs every file in the \textit{tests} directory and checks its the return code. 
+The main part of the work was done as the separate GNU-R package \code{bctools}. The R package system has it's test subsystem which runs every file in the \code{tests} directory and checks if it returns with error or not. 
 
-The main test parts include:
+The test files of the \code{bctools} package include:
 \begin{itemize}
 	\item \textbf{basics.R} - basic functionality (printing the different cases - for loop, switch command, while loop etc.)
 	\item \textbf{advanced.R} - advanced functionality
@@ -1857,74 +1859,76 @@ The main test parts include:
 	\item \textbf{bcversion.R} - check if the current GNU R BC version is the supported one in this package~(see~\ref{R-internal-bc-representation})
 \end{itemize}
 
-Because of the simplicity the tests were written without any testing framework. Nowadays if the test fails there is not any more detailed information where the error occurs inside the file. To support this functionality it is possible modify the tests to use \textbf{test{\_}that} framework which supports naming the tests and printing the name in case of it's fail. 
+Because of the simplicity the tests were not written without any testing framework. Nowadays if the test fails there is not any more detailed information where the error occurs inside the file. To support this functionality it is possible modify the tests to use \code{test{\_}that} framework which supports naming the tests and printing the name in case of it's fail.
 
-\section{Bytecode debugger}
+\section{Performance testing}
 
-The \textbf{BC} debugger tests was done to make sure that there are no bugs in the code. The testing was done manually altogether with the writing of the some automated tests. Automated testing was done by step by step simulation of the step-into~(\textbf{"s" command} in the browser) by modifying beginning of the \textbf{Rf{\_}ReplIteration} function~(found in \textbf{src/main/main.c}). 
+%\section{Bytecode debugger}
 
-The modified function:
-\begin{lstlisting}
-int Rf_ReplIteration(
-	SEXP rho, 
-	int savestack, 
-	int browselevel, 
-	R_ReplState *state
-  )
-{
+%The \textbf{BC} debugger tests was done to make sure that there are no bugs in the code. The testing was done manually altogether with the writing of the some automated tests. Automated testing was done by step by step simulation of the step-into~(\textbf{"s" command} in the browser) by modifying beginning of the \textbf{Rf{\_}ReplIteration} function~(found in \textbf{src/main/main.c}). 
 
-  ... variables initialization ...
+%The modified function:
+%\begin{lstlisting}
+%int Rf_ReplIteration(
+%	SEXP rho, 
+%	int savestack, 
+%	int browselevel, 
+%	R_ReplState *state
+%  )
+%{
+%
+%  ... variables initialization ...
+%
+%  if(!*state->bufp) {
+%    R_Busy(0);
+%    if(browselevel){	
+%    	/* environment browser is on */
+%      strcpy((char*)state->buf, "s\n");
+%    }else{
+%      if (R_ReadConsole(
+%      	  R_PromptString(browselevel, state->prompt_type),
+%            state->buf, 
+%            CONSOLE_BUFFER_SIZE, 
+%            1)
+%             == 0)
+%        return(-1);
+%    }
+%    state->bufp = state->buf;
+%  }
+%
+%  ... end of the function ...
+%
+%}
+%\end{lstlisting}
 
-  if(!*state->bufp) {
-    R_Busy(0);
-    if(browselevel){	
-    	/* environment browser is on */
-      strcpy((char*)state->buf, "s\n");
-    }else{
-      if (R_ReadConsole(
-      	  R_PromptString(browselevel, state->prompt_type),
-            state->buf, 
-            CONSOLE_BUFFER_SIZE, 
-            1)
-             == 0)
-        return(-1);
-    }
-    state->bufp = state->buf;
-  }
+%Altogether with these changes there was made an script~(modification of the test feature from the \textit{R CMD test} command) to utilize the R package test files as testing examples. The tool was comparing the output with and without an bytecode debugger support enabled and trying to simulate the same output as normal. Although this tool was not 100\% successful because internally the tests~(tested on the test directory from the \textit{bctools} package) was using catching output with it's internal feature. Running the debugger in this function meant that there was infinite recursion~(catching output which causes another catching of the output). This testing can be considered just partially successful, because it was not able to run across any of the input test cases. 
 
-  ... end of the function ...
+%Next to this automated testing this feature was tested manually, which results were considered successful.
 
-}
-\end{lstlisting}
+%\subsection{Effectiveness of testing}
 
-Altogether with these changes there was made an script~(modification of the test feature from the \textit{R CMD test} command) to utilize the R package test files as testing examples. The tool was comparing the output with and without an bytecode debugger support enabled and trying to simulate the same output as normal. Although this tool was not 100\% successful because internally the tests~(tested on the test directory from the \textit{bctools} package) was using catching output with it's internal feature. Running the debugger in this function meant that there was infinite recursion~(catching output which causes another catching of the output). This testing can be considered just partially successful, because it was not able to run across any of the input test cases. 
+%During the tests there has been observed numerous issues. Some of them were caused by the oversight during %analyzes of the \textbf{BC} compiler and/or evaluator. Example of these are:
+%\begin{itemize}
+%	\item handling of the \textbf{SWITCH} command arguments - lack of support for the \textbf{CONSTANT{\_}LABEL} %type - this feature support has to be also done into the disassembler code
+%	\item memory issues caused by \textbf{Garbage collector} due to forgotten support for the added global %variables (such as \textbf{R{\_}BCNodeStackFnBase})
+%	\item memory issue caused by modification of the body variable while duplication of the current evaluated %one~(see~\ref{setting-and-unsetting-debug-instruction}) - solved by pushing this variable onto the BC stack
+%\end{itemize}
 
-Next to this automated testing this feature was tested manually, which results were considered successful.
+%\subsection{Side effects of the scripts}
 
-\subsection{Effectiveness of testing}
+%There are limited options to debug the memory errors inside the language \textbf{VM}~(and generally any \textbf{C} code) and finding these errors are even more difficult when the  R code is evaluated - in that case the code is internally represented as \textit{SEXP} type parameter in the \textit{eval} or eventually as an bytecode in the \textit{bcEval}. 
 
-During the tests there has been observed numerous issues. Some of them were caused by the oversight during analyzes of the \textbf{BC} compiler and/or evaluator. Example of these are:
-\begin{itemize}
-	\item handling of the \textbf{SWITCH} command arguments - lack of support for the \textbf{CONSTANT{\_}LABEL} type - this feature support has to be also done into the disassembler code
-	\item memory issues caused by \textbf{Garbage collector} due to forgotten support for the added global variables (such as \textbf{R{\_}BCNodeStackFnBase})
-	\item memory issue caused by modification of the body variable while duplication of the current evaluated one~(see~\ref{setting-and-unsetting-debug-instruction}) - solved by pushing this variable onto the BC stack
-\end{itemize}
+%To be able to better understand whether some of the memory issues which occurred were caused by the injected R code and not other changes there has been made decision to rewrite some of the parts to not use \textbf{R} call to the \textbf{compiler} package but use just native \textbf{C} implementation. These parts are not having the full functionality as their \textbf{R} counterparts and were not fully tested. Although of this they can be useful for future performance improvements so they are included in the attached DVD.
 
-\subsection{Side effects of the scripts}
+%These parts of code are:
+%\begin{itemize}
+% \item \textbf{Rf{\_}breakOnNextBCInst}
+% \item \textbf{do{\_}BCdisasm} used in \textbf{R{\_}printCurrentBCbody} function
+%\end{itemize}
 
-There are limited options to debug the memory errors inside the language \textbf{VM}~(and generally any \textbf{C} code) and finding these errors are even more difficult when the  R code is evaluated - in that case the code is internally represented as \textit{SEXP} type parameter in the \textit{eval} or eventually as an bytecode in the \textit{bcEval}. 
+%\section{Conditional breakpoints}
 
-To be able to better understand whether some of the memory issues which occurred were caused by the injected R code and not other changes there has been made decision to rewrite some of the parts to not use \textbf{R} call to the \textbf{compiler} package but use just native \textbf{C} implementation. These parts are not having the full functionality as their \textbf{R} counterparts and were not fully tested. Although of this they can be useful for future performance improvements so they are included in the attached DVD.
-
-These parts of code are:
-\begin{itemize}
- \item \textbf{Rf{\_}breakOnNextBCInst}
- \item \textbf{do{\_}BCdisasm} used in \textbf{R{\_}printCurrentBCbody} function
-\end{itemize}
-
-\section{Conditional breakpoints}
-
-The conditional breakpoints are in term of the code part of the debugger support so the testing was done altogether with other testing of the bytecode debugger support.
+%The conditional breakpoints are in term of the code part of the debugger support so the testing was done altogether with other testing of the bytecode debugger support.
 
 \section{Performance testing}
 
@@ -1934,26 +1938,26 @@ TODO: performance testing
 
 \subsection{Push into working repository}
 
-The big part of the planned future part of the future work is to collaborate with the \textit{GNU R} core team to pushing this work into it's development and potentially even the production code. After this would be done and considering the number of people using \textbf{GNU R} language~(the estimation in the 2013 was approx 2 millions), the work done in this thesis would have big worldwide effect to lot of the people.
+The big part of the planned future part of the future work is to collaborate with the GNU-R core team to pushing this work into it's development and potentially even the production code. After this would be done and considering the number of people using GNU-R language~(the estimation in the 2013 was approx 2 millions), the work done in this thesis would have big worldwide effect to lot of the people.
 
 \subsection{Merging the bctools package into the compilers}
 
-The \textbf{bctools} package was developed independently as an separate disassemble feature with the minimal changes to the \textbf{GNU R} VM core. This tool was also used in the debugger which is part of the \textbf{VM} core. When the debugger would be deployed it is suggested to merge the \textbf{bctools} package into the \textbf{compiler} while the source of the bctools one is relatively short~(approx. 600 lines). The reason why this was not already done but just proposed here as future work is that it would allow to deploy the disassembler into the working branch faster and eventually give a user-feedback for improvements before merging inside the \textbf{compiler} package and deploying the debugger.
+The \code{bctools} package was developed independently as an separate disassemble feature with the minimal changes to the GNU-R VM core. This tool was also used in the debugger which is part of the VM core. When the debugger would be deployed it is suggested to merge the \code{bctools} package into the \code{compiler} while the source of the \code{bctools} one is relatively short~(approx. 600 lines). The reason why this was not already done but just proposed here as future work is that it would allow to deploy the disassembler into the working branch faster and eventually give a user-feedback for improvements before merging inside the \code{compiler} package and deploying the debugger.
 
 \subsection{GNU R Memory optimization}
 
-Some of the parts of the errors which were done and fixed during the development of this thesis were memory-based. During investigation of these errors there has been noticed one thing. The core of the \textbf{GNU R} language is heavy dependent on the linked list memory data structure. During the modern computer implementation of the memory system this can cause a lot of memory cache misses which affect the performance. The most straightforward way to do this is to use an smallvector technique~(inspired by an \textbf{llvm} compiler) but the more appropriate way would be to do analysis of whole \textbf{GNU R} memory subsystem optimization with focus on cache locality.
+Some of the parts of the errors which were done and fixed during the development of this thesis were memory-based. During investigation of these errors there has been noticed one thing. The core of the GNU-R language is heavy dependent on the linked list memory data structure. During the modern computer implementation of the memory system this can cause a lot of memory cache misses which affect the performance. The most straightforward way to do this is to use an smallvector technique~(inspired by an llvm compiler) but the more appropriate way would be to do analysis of whole GNU-R memory subsystem optimization with focus on cache locality.
 
 \setsecnumdepth{part}
 \begin{conclusion}
 
-The GNU-R language is one of the most popular scientific language using worldwide with not just scientific community but also non-scientiscs. For better evaluation performance it's VM is internally supporting the bytecode alongside with old-fashioned and slow AST interpreter. Since nowadays options for debugging the bytecode were very limited. The disassembler shows just the plain array of instructions and constant buffer and the debugger is internally dispatching the AST debugger so it is not going through the same code as while not debugging. 
+The GNU-R language is one of the most popular scientific language worldwide used~(by not just scientific community). For better evaluation performance its VM internally supports the bytecode alongside with old-fashioned and slow AST interpreter. Since nowadays options for debugging the bytecode were very limited. The old disassembler showed only the raw array of instructions and constant buffer and there was no native implementation of bytecode debugging. Instead of it the evaluator was internally dispatching the AST debugger which technically resulted in code going over different code while debugging. This has changed by features proposed in this thesis.
 
-In this thesis there has been proposed and implemented changes which contains the user friendly easy human readable bytecode disassembler. The second part is about the implementation of the native debugger support for bytecode evaluator. As the additional fun feature there has been added support for conditional breakpoints in the code in very user-friendly manner inspired by the JavaScript breakpoint command.
+There has been proposed and implemented changes which contains the \textbf{user friendly and easy-human readable bytecode disassembler}~\ref{implementation-of-disassembler}. The second part is about the implementation of the \textbf{native debugger support for bytecode evaluator}~\ref{implementation-of-debugger}. As the additional feature there has been added \code{breakpoint()} function which enables to add support for simulating conditional breakpoints~\ref{simulated-conditional-breakpoints}.
 
-In the beginning there is brief introduction to the problem and the motivation part. Following is the analysis of the current implementation of the \textbf{GNU R} bytecode disassembler and debugger alongside with the comparison to similar tools and features in other languages \textbf{VM}. After that there are described implementation details of the work. Firstly there is described implementation of the disassembler followed by the stack printer. As an addition it is described the implementation of the conditional breakpoint support. Finally there is debugger where is shown reuse of two previously described features. The end of the work contains chapter about the testing of all features altogether with possible future work and improvements.
+In the beginning of the work there is brief introduction to the problem with the motivation part~\ref{introduction}. Following is the analysis of the current implementation of the GNU-R bytecode disassembler~\ref{analysis-of-disassembler} and debugger~\ref{analysis-of-debugger} alongside with the comparison to similar tools and features in VMs of other languages. After that there are described implementation details of the work. Firstly there is described implementation of the disassembler~\ref{implementation-of-disassembler} followed by the stack printer~\ref{implementation-of-stack-printer}. Finally there is described debugger implementation~\ref{implementation-of-debugger} where is shown reuse of two previously described features. As an addition it is described the implementation of support for simulated conditional breakpoints~\ref{conditional-breakpoints}. The end of the work contains chapter about the testing of all features altogether with possible future work and improvements~\ref{testing-and-future-work}.
 
-All the features were developed and tested and are included on the enclosed DVD. Personally it was a very good experience to work on the real language \textbf{VM} while implementing feature which would use millions of people. The work done in this thesis can be considered as successful.
+All the features were developed and tested and are included on the enclosed DVD. Personally it was a very good experience to work on the real language VM while implementing feature which would use millions of people. The work done in this thesis can be considered as successful.
 
 \end{conclusion}
 
