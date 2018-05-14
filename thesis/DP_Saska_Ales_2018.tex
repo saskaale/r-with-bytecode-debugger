@@ -18,6 +18,7 @@
 % \usepackage{amssymb} %additional math symbols
 
 \newcommand{\code}[1]{\texttt{#1}}
+\usepackage{float}
 
 \setcounter{tocdepth}{3}% Include \substryAubsection in ToC
 
@@ -965,7 +966,7 @@ The \code{CONSTANT} parameter can have two different meanings in the code. Some 
 
 These arguments are printed by the different functions.
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \begin{itemize}
 	\item \code{BOOL} boolean value
 
@@ -1760,73 +1761,22 @@ The original environment browser has inbuilt support for handling and modifying 
 		(internally calling \code{R{\_}printCurrentBCstack})
 \end{itemize}
 
-\subsection{Initial entry points to the bcEval functions}
+\subsection{Entry points to the bcEval functions}
 
-Because in the during bytecode debugging inside \textbf{bcEval} function there are no runtime checks for the RDEBUG flag due to performance reasons there is need for setting the bytecode instruction~\ref{setting-next-breakpoint} in order to dispatch bytecode functionality manually.
+While debugging bytecode there are no runtime checks inside \code{bcEval} function for the \code{RDEBUG} flag due to performance reasons. Because of this and the nature of dispatching breakpoint functionality through the special \code{BREAKPOINT} instructions~(see~\ref{instruction-for-debugging}) there is need for setting the bytecode instruction~\ref{setting-next-breakpoint} in order to dispatch bytecode functionality. This means that we have to check and pootentially apply the breakpoint instruction to the code every time the \code{RDEBUG} flag can be modified.
 
-Currently there are two cases in which this scenario has to be handled.
-
-\begin{itemize}
-	\item At the beginning - the bytecode function was just called
-	\item At the return from the function call
-\end{itemize}
-
-The first case is handled in the start of the bytecode evaluation \textit{bcEval} function. In this case we just call the \textit{Rf{\_}breakOnNextBCInst} which call internally \textit{bcSetNextBreakpoint} function from the \textit{compiler} package. In the start point of the function evaluation \textit{R{\_}execClosure}~(R function implementation is wrapped in closure) is condition if the function has \textit{RDEBUG} flag enabled and there are met criteria to start debugging, the \textit{RDEBUG} flag is set in the current evaluated environment. In the \textit{AST} evaluator there is then checked the environment \textit{RDEBUG} flag. The user interface \textit{debug}, \textit{debugOnce} etc. are changing the function flag~(not the environment one) which implies that there cannot be changed the \textit{RDEBUG} by calling debug on the function while executing the function~(this implies any instruction so also the any function all from this code). It means that for support the current behavior the only place where is need to add BREAKPOINT instruction is in the beginning of the \textit{bcEval}.
-
-Code in the beginning of the \textit{bcEval} function:
-\begin{lstlisting}
-if(RDEBUG(rho)){
-  ptrdiff_t diff = pc - codebase;
-  Rf_breakOnNextBCInst();
-  codebase = BCCODE(body);
-  constants = BCCONSTS(body);
-  pc = codebase + diff;
-}
-\end{lstlisting}
-
-The other entry point would be used just in case of the implementation of the conditional breakpoints~\ref{conditional-breakpoints}. In this case there has to be done the two changes for fully support this feature.
+Currently there are two cases in which this scenario has to be handled:
 
 \begin{itemize}
-	\item If the breakpoint modified the state of the evaluated bytecode function~(the function was not in debug mode and now is due to calling breakpoint), add the debugging instruction to the next following instruction~(see~\ref{conditional-breakpoints}).
-	\item The function described above can possibly change the internal structure of bytecode object structure so there has to be done the update of the changed internal variables after call to the function
+	\item At the beginning of \code{bcEval} - the bytecode function was just called
+	\item Inside \code{bcEval} at the positions of the return from the function calls
 \end{itemize}
 
+The first case is handled in the beginning of the bytecode evaluation~(\code{bcEval} function). In this case there is call to the \code{Rf{\_}breakOnNextBCInst} which is setting the breakpoint to the first instruction. 
 
-Marking following instruction as breakpoint:
-\begin{lstlisting}
-SEXP attribute_hidden do_breakpoint
-	(SEXP call, SEXP op, SEXP args, SEXP rho)
-{
-	... setting debugging flags ( described above ) ...
+The other entry point after \code{bcEval} function would be used just in case of the implementation of the conditional breakpoints~\ref{conditional-breakpoints}. If the debugger modified the state of the evaluated bytecode function~(the function was not in debug mode and now is due to calling breakpoint), add the debugging instruction to the next following instruction~(see~\ref{conditional-breakpoints}).
 
-    if(!R_is_bc_debug_enabled() && R_BCIntActive)
-  warning(_("Calling breakpoint in the BC 
-  		while bytecode debugger disabled"));
-
-    /* Support for bytecode debugger */
-    if(R_BCIntActive && !oldrdebug){
-      R_RemoveBCtmpBreakpoints(
-          R_BCbody, *R_BCtmpBreakpoints);
-      Rf_breakOnNextBCInst(
-          R_BCbody, R_BCpc, R_BCtmpBreakpoints);
-    }
-
-    return R_NilValue;
-}
-\end{lstlisting}
-
-The \textbf{CHECK{\_}ADD{\_}BREAKPOINT} function is used for resetting the internal variables~(after the) state in the bcEval function. This reset it done in case of the \textit{DEBUG} flag on the function is enabled~(the \textit{do{\_}breakpoint} is turning this flag on). This added function is adding some overhead in case of debugging but in this case we are not worried about the performance. The bigger concern is adding one variable check even if the function is not in \textit{DEBUG} mode.
-\begin{lstlisting}
-#define CHECK_ADD_BREAKPOINT(pcdiff) do { \
-    if(RDEBUG(rho)){ \
-      ptrdiff_t diff = *((BCODE**)R_BCpc) - codebase - 1; \
-      *((BCODE**)R_BCpc) = BCCODE(R_BCbody) + diff + 1; \
-      codebase = BCCODE(R_BCbody); \
-      constants = BCCONSTS(R_BCbody); \
-      pc = *((BCODE**)R_BCpc) + pcdiff + 1; \
-   } \
-} while(0)
-\end{lstlisting}
+Because both of these cases are potentially changing the code array~(see~\ref{storing-original-instructions}) the \code{codebase} and \code{constants} array and also \code{pc} variable~(it is pointer to one of the instruction in the \code{codebase}).
 
 \section{Simulated conditional breakpoints}\label{conditional-breakpoints}
 
@@ -1884,7 +1834,7 @@ compiled()
 	\caption{Example usage of simulated conditional breakpoints through breakpoint() function}\label{fig:example-of-conditional-breakpoints}
 \end{figure}
 
-Due to lack of the the ability of the simple and user-friendly conditional breakpoints there has been put decision to add support for simulating them. It is done through \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being an separate command which would be big change in the language parser it was decided to make it a callable function.
+Due to lack of the the ability of the simple and user-friendly conditional breakpoints there has been put decision to add support for simulating them. It gad been done through \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being an separate command which would be big change in the language parser it was decided to make it a callable function.
 
 As you can see in the figure~\ref{fig:conditional-breakpoints-breakpoint} this function is modifying the \code{RDEBUG} flag of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context). 
 
