@@ -1,0 +1,199 @@
+5241d5255
+<             CONSTANT_LABEL=CONSTANTS_LABEL.ARGTYPE,
+5249,5253d5262
+<
+< bcOpArgDescr <- function() {
+<     Opcodes.argdescr;
+< }
+<
+5256,5389d5264
+< \subsection{BC debugger support}
+< TODO: to be described
+< <<[[bcBreakpoint]] function>>=
+<
+< bcInstrIsBreakpoint <- function(x) {
+<   x == BREAKPOINT0.OP ||
+<     x == BREAKPOINT1.OP ||
+<     x == BREAKPOINT2.OP ||
+<     x == BREAKPOINT3.OP ||
+<     x == BREAKPOINT4.OP
+< }
+<
+< bcListBreakpoints <- function(code) {
+<     if (typeof(code)!="closure") {
+<         stop("Internal error - bytecode is not encapsulated in closure")
+<     }
+<     bc <- .Internal(bodyCode(code))
+<     bc <- .Internal(disassemble(bc))
+<
+<     bcode <- bc[[2]]
+<
+<     pos <- vector("integer")
+<
+<     i <- 2
+<     while(i <= length(bcode)){
+<         setpos <- i
+<         if(bcInstrIsBreakpoint(bcode[i])) {
+<             pos <- c(pos, i-1)
+<         }
+<         i <- i + 1 + Opcodes.argc[[bcode[i]+1]]
+<     }
+<
+<     pos
+< }
+<
+< bcSetBreakpoint <- function(code, pos, is=TRUE) {
+<     if (typeof(code)=="closure")
+<         bc <- .Internal(bodyCode(code))
+<     else
+<         bc <- code
+<     if (typeof(bc)!="bytecode")
+<         stop("Internal error - code is not bytecode")
+<
+<     bc <- .Internal(disassemble(bc))
+<     bcode <- bc[[2]]
+<
+<     newbcode <- rep(bcode) #replicate original bytecode
+<
+<     #loop through bytecode over instructions and find matching instruction
+<     setpos <- 2
+<     repeat{
+<         if(!(setpos < length(bcode) && setpos <= pos)) break
+<         setpos <- setpos + 1 + Opcodes.argc[[bcode[setpos]+1]]
+<     }
+<
+<     .Internal(modifybcbreakpoint(code, setpos-1, is));
+<
+<     setpos-1
+< }
+<
+< #simulate next behavior with breakpoints
+< # returns the vector of added breakpoints
+< bcSetNextBreakpoint <- function(code, pos){
+<     if (typeof(code)=="closure")
+<         bc <- .Internal(bodyCode(code))
+<     else
+<         bc <- code
+<     if (typeof(bc)!="bytecode")
+<         stop("Internal error - code is not bytecode")
+<
+<     bc        <- .Internal(disassemble(bc))
+<     bcode     <- bc[[2]]
+<     origbcode <- bc[[3]]
+<     consts    <- bc[[4]]
+<
+<
+<     tryAddBreakpoint<-function(pos, ret){
+<         # if there is no breakpoint at position pos,
+<         #   set breakpoint to that position
+<         #   and add append this position into list ret
+<         # finally return the list ret of breakpoint positions
+<         # calling this function would cause quadratic complexity but
+<         #   as long as number of potential jump locations (labels) are
+<         #   low it should not be issue at all
+<         if(!(pos %in% ret) && pos <= length(bcode)){
+<             opcode <- bcode[pos]
+<             if(!bcInstrIsBreakpoint(opcode)){
+<                 .Internal(modifybcbreakpoint(code, pos-1, TRUE));
+<                 ret <- append(ret, as.integer(pos-1))
+<             }
+<         }
+<         ret
+<     }
+<
+<     #handle adding breakpoint to the first instruction
+<     # we need this after entering bcEval in case of RDEBUG == 1
+<     ret <- vector(mode="integer", length=0);
+<     if( pos < 1 ) {
+<         return(tryAddBreakpoint(2, ret))
+<     }
+<
+<     opcode    <- origbcode[pos]
+<     descr     <- Opcodes.argdescr[[opcode+1]]
+<
+<
+<     #iterate over all parameters of instruction
+<     i <- 1
+<     while( i <= length(descr) ){
+<         if(descr[[i]] == LABEL.ARGTYPE){
+<             #if it is label, add breakpoint to target instruction
+<             # and append its position to return array
+<             ret <- tryAddBreakpoint(origbcode[i + pos] + 1, ret)
+<         }else if(descr[[i]] == CONSTANTS_LABEL.ARGTYPE){
+<             #the label arguments are through constants array
+<             labelvals <- consts[[ origbcode[i + pos] + 1 ]]
+<             if(!is.null(labelvals)){
+<                 for( v in 1:length(labelvals) ){
+<                     ret <- tryAddBreakpoint(labelvals[[v]]+1, ret)
+<                 }
+<             }
+<         }
+<         i <- i+1
+<     }
+<     #if instruction has no labels, add breakpoint to its following instruction
+<     if(opcode != RETURN.OP && opcode != RETURNJMP.OP && opcode != GOTO.OP) {
+<         ret <- tryAddBreakpoint(pos + 1 + length(descr), ret)
+<     }
+<
+<     ret
+< }
+<
+<
+< @ %def bcBreakpoint
+<
+5404,5405c5279
+<         code[[3]]<-bcDecode(code[[3]])
+<         code[[4]]<-lapply(code[[4]], disasm.const)
+---
+>         code[[3]]<-lapply(code[[3]], disasm.const)
+6139,6144c6012
+< BREAKPOINT0.OP <- 124
+< BREAKPOINT1.OP <- 125
+< BREAKPOINT2.OP <- 126
+< BREAKPOINT3.OP <- 127
+< BREAKPOINT4.OP <- 128
+< @
+---
+> @
+6149,6155c6017,6022
+< SKIP.ARGTYPE<--1L
+< LABEL.ARGTYPE<-0L
+< CONSTANTS.ARGTYPE<-3L
+< CONSTANTS_DBG.ARGTYPE<-4L
+< CONSTANTS_LABEL.ARGTYPE<-5L
+< BOOL.ARGTYPE<-6L
+< INT.ARGTYPE<-7L
+---
+> SKIP.ARGTYPE<--1
+> LABEL.ARGTYPE<-0
+> CONSTANTS.ARGTYPE<-3
+> CONSTANTS_DBG.ARGTYPE<-4
+> BOOL.ARGTYPE<-11
+> INT.ARGTYPE<-10
+6261c6128
+< SWITCH.OP = c(CONSTANTS.ARGTYPE, CONSTANTS.ARGTYPE, CONSTANTS_LABEL.ARGTYPE, CONSTANTS_LABEL.ARGTYPE),
+---
+> SWITCH.OP = c(CONSTANTS.ARGTYPE, CONSTANTS.ARGTYPE, CONSTANTS.ARGTYPE, CONSTANTS.ARGTYPE),
+6282,6287c6149
+< BASEGUARD.OP = c(CONSTANTS.ARGTYPE, LABEL.ARGTYPE),
+< BREAKPOINT0.OP = c(),
+< BREAKPOINT1.OP = c(SKIP.ARGTYPE),
+< BREAKPOINT2.OP = c(SKIP.ARGTYPE, SKIP.ARGTYPE),
+< BREAKPOINT3.OP = c(SKIP.ARGTYPE, SKIP.ARGTYPE, SKIP.ARGTYPE),
+< BREAKPOINT4.OP = c(SKIP.ARGTYPE, SKIP.ARGTYPE, SKIP.ARGTYPE, SKIP.ARGTYPE)
+---
+> BASEGUARD.OP = c(CONSTANTS.ARGTYPE, LABEL.ARGTYPE)
+6289c6151
+< @
+---
+> @
+6831,6835d6692
+< ##
+< ## Debugger functions
+< ##
+<
+< <<[[bcBreakpoint]] function>>
+6861c6718
+< @
+---
+> @
