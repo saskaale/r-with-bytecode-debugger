@@ -613,7 +613,7 @@ In the following paragraphs, there is a detailed analysis of other implementatio
 
 \subsection{Java bytecode disassembler}
 
-The nice example of disassembler is in Java language~(\code{javap} command of Java package). The Java bytecode is although very specific and each file contains the one class. The whole file~(classfile) contains the representation of the file just as the bytecode. Although the GNU-R implementation is different - there can be mixed up the non-compiled~(AST) and compiled~(BC) code. It means that the bytecode printer is showing just the one function at once.
+The nice example of the disassembler is in Java language~(\code{javap} command of Java package). However, it works with the Java bytecode which is very specific because each file contains the one class~(the file is named classfile). Although the GNU-R implementation is different - there can be mixed up the non-compiled~(AST) and compiled~(BC) code. It means that the bytecode printer is showing just the one function at once.
 
 %TODO: place the figure to the correct place
 
@@ -692,7 +692,7 @@ SourceFile: "HelloWorld.java"
 
 \subsection{Python bytecode disassembler}
 
-\textbf{Python} has in-built support of disassembler for it's internal BC~\ref{fig:python-dis-output-example}. It is provided inside package \code{dis} which is part of python~(no need to manually installing). Source code location is in the \textit{Lib/dis.py}. As you can see the code is showing just one function at once. It is also showing the combined output of constant array at one line~(not printing any separate array for constant array).
+\textbf{Python} has inbuilt support of disassembler for it's internal BC~\ref{fig:python-dis-output-example}. It is provided inside package \code{dis} which is part of the package~(no need to manually installing). Source code location is in the \textit{Lib/dis.py}. As you can see the code is showing just one function at once. It is also showing the combined output of constant array at one line~(not printing separately code and constant array). See the figure~\ref{fig:python-dis-output-example} for example.
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -714,7 +714,7 @@ dis.dis(myfunc)
 
 \subsection{Summary}
 
-The difference between the Java \code{javap} and the Python \code{dis} command is that \code{javap} works on the whole file instead of the Python \code{dis} which is printing just one function. They both dumps the BC in the human-readable form with \textbf{instructions line-by-line}. The Python one is showing the parameters from the constant pool altogether with the instruction. The \code{javap} tool on the other hand supports \textbf{more levels of verbosity}.
+The difference between the Java \code{javap} and the Python \code{dis} command is that \code{javap} works on the whole file instead of the Python \code{dis} which is printing just one function. They both dump the BC in the human-readable form with \textbf{instructions line-by-line}. The Python one is showing the parameters from the constant pool altogether with the instruction. The \code{javap} tool, on the other hand, supports \textbf{more levels of verbosity}.
 
 The R can internally combine in memory AST and BC representation of the code, the way how to disassemble code is just for the one specific function. In case there are a lot of information inside GNU-R bytecode it would be also nice to have ability to show these information just as parameters through verbosity level. The inline showing values from the constant pool would be also useful because it can result in compact and shorter output with easily enabling the feature for printing just specified are of function.
 
