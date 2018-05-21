@@ -716,15 +716,15 @@ dis.dis(myfunc)
 
 The difference between the Java \code{javap} and the Python \code{dis} command is that \code{javap} works on the whole file instead of the Python \code{dis} which is printing just one function. They both dump the BC in the human-readable form with \textbf{instructions line-by-line}. The Python one is showing the parameters from the constant pool altogether with the instruction. The \code{javap} tool, on the other hand, supports \textbf{more levels of verbosity}.
 
-The R can internally combine in memory AST and BC representation of the code, the way how to disassemble code is just for the one specific function. In case there are a lot of information inside GNU-R bytecode it would be also nice to have ability to show these information just as parameters through verbosity level. The inline showing values from the constant pool would be also useful because it can result in compact and shorter output with easily enabling the feature for printing just specified are of function.
+The R can internally combine AST and BC representation of the code. It means that the architecture of the disassembler output cannot be the same as in the \code{javap} command which shows the whole file. Instead of it we can print out to the user the information provided by the old disassemble function which works over the whole functions~(instead of files as the \code{javap command}). The printed out information also have lot of information which are additional information for the user~(not necessary needed to interpret the code). To show these it would be nice if the GNU-R bytecode would have the ability to show these information conditionally according to the verbosity level. The inline showing values from the constant pool~(inspiration by the Python \code{dis} function) would be also useful because it would enable the result to be printed in compact and shorter way.%  with easily enabling the feature for printing just specified are of function.
 
 \section{Analysis of Bytecode debugger implementation}\label{analysis-of-debugger}
 
-Currently there is no support for debugging the bytecode evaluation in real time~(just the fallback to the AST one is present) so there is no current implementation of the BC debugger to go through. Instead of it we can inspire ourselves with the current AST implementation which is done in the first part of this section. The following parts are analyzing the implementation of the \textbf{BC} debugger in other VMs~(Python VM and V8 javascript VM).
+Currently, there is no support for debugging the bytecode evaluation in real time~(just the fallback to the AST one is present) so there is no current implementation of the BC debugger to go through. To improve this it should be done the full native implementation of bytecode debugger. User interface of that native debugger implementation can be inspired with the current AST implementation - which is described part~\ref{inspiration-with-current-implementation}. The following parts~(\ref{bcdebug-implementation-in-python} and \ref{bcdebug-implementation-in-v8}) are analyzing the implementation of the \textbf{BC} debugger in other VMs~(Python VM~\ref{bcdebug-implementation-in-python} and V8 javascript VM~ref{bcdebug-implementation-in-v8}).
 
-\subsection{Inspiration with current AST implementation}
+\subsection{Inspiration with current AST implementation}\label{inspiration-with-current-implementation}
 
-The general idea how to run the is taken from the current implementation of the AST debugger. Its implementation of the debug code~\ref{fig:ast-implementation-of-debugger} check if there is \code{RDEBUG} flag on the current executed function and if there is it would print information about the current evaluated code~(source reference if available + evaluated expression). Following command is the \code{do{\_}browser()} which is internally calling the environment browser with support for evaluating expression~(seeing what is value of which variable + evaluating functions) and inbuilt handling of debugger commands~(\textit{next step}, \textit{step into}, \textit{continue} etc.). It also has support for showing backtrace~(\code{where} command). The environment browser is internally reusing the \textbf{REPL}~\ref{REPL} functionality of whole language~(implemented by the function \code{Rf{\_}ReplIteration} or \code{ParseBuffer} inside \textit{src/main/main.c}).
+The general idea how to implement the debugger features is taken from the current implementation of the AST debugger~\ref{fig:ast-implementation-of-debugger}. Its implementation of the debug code check if there is \code{RDEBUG} flag on the current executed function. It yes, then it prints information about the current evaluated code~(source reference if available + evaluated expression). After that the \code{do{\_}browser()} command is called which is internally showing the environment browser. The browser has in-build support for evaluating user-entered expressions altogether with support for handling the debugger commands~(\textit{next step}, \textit{step into}, \textit{continue} etc.). It also has support for showing backtrace~(\code{where} command). The environment browser is internally reusing the REPL~\ref{REPL} functionality of whole language~(implemented by the function \code{Rf{\_}ReplIteration} or \code{ParseBuffer} inside \textit{src/main/main.c}).
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -743,21 +743,21 @@ if (RDEBUG(rho) && !R_GlobalContext->browserfinish) {
 
 \subsection{Implementation inside Python VM}\label{bcdebug-implementation-in-python}
 
-One of the good examples of the similar language and VM is the Python one.
+One of the good examples of the similar VM is the CPython one which is the most popular Python VM. It is internally supporting just the BC interpreter~(not even having AST evaluator) with the instruction set similar to the GNU-R.
 
-In the following paragraph there is description of \textit{cpython} VM~(Python itself is language and not a VM) - there are different VMs supporting evaluation of the language but the \textit{cpython} is the most common used one. It is supporting just the \textbf{BC} interpreter with the quite similar instruction set to the GNU-R.
+The BC implementation of the its debugger is straightforward. There is implemented runtime checking of the debug flag in the label \code{fast{\_}next{\_}opcode}. To speed up the language evaluation there is a shortcut for dispatching computed goto~(see~\ref{Computed-GOTO}) through dispatch table inside \code{FAST{\_}DISPATCH} macro. Inside this macro is check for the \code{{\!}{\_}Py{\_}TracingPossible} {\&\&} \code{{\!}PyDTrace{\_}LINE{\_}ENABLED()}~(eventually also combined with the \code{!lltrace} flag). This design of the implementation implicates that debugger implementation is causing performance overhead even while function not being debugged~(for every evaluated BC instruction there is at least one value comparison and conditional jump needed for a processor to compute). However, this implementation is easy to implement, does not require any specific debug instruction and does not cause any changes to the memory subsystem~(potential GC issues). Also, the overhead would in the real-world usage not be huge due to branch prediction feature in the modern CPUs.
 
-The BC implementation of the debugger inside this VM is pretty straightforward. There is implemented runtime checking of the debug flag in the label \code{fast{\_}next{\_}opcode}. To speedup this there is shortcut for dispatching computed goto~(see~\ref{Computed-GOTO}) through dispatch table inside \code{FAST{\_}DISPATCH} macro. Inside this macro is check for the \code{{\!}{\_}Py{\_}TracingPossible} {\&\&} \code{{\!}PyDTrace{\_}LINE{\_}ENABLED()}~(eventually also combined with the \code{!lltrace} flag). This design of the implementation implicates that debugger implementation is causing performance overhead even while function not being debugged~(for every evaluated BC instruction there is at least one value comparison and conditional jump needed for processor compute). However this implementation is easy to implement, does not require any specific debug instruction and does not cause any changes to the memory subsystem~(potential GC issues). Also the overhead would in real world usage not be huge due to branch prediction feature in the modern CPUs.
+%todo add citation for the branch prediction
 
 \subsection{Implementation inside V8 VM}\label{bcdebug-implementation-in-v8}
 
-V8 is Javascript VM developed by the Google initially to be used for Chrome browser. By the time it has been also used for desktop~(for example Electron framework) / server applications using the Node.js which is the V8 engine with written filesystem access, networking etc.
+V8 is Javascript VM developed by the Google. It was initially used by the Chrome browser. By the time it has been also used for desktop~(for example Electron framework) / server applications using the Node.js which is the V8 engine with written filesystem access, networking etc.
 
-The V8 internal implementation is consisting of the BC interpreter~(\textit{Ignition}) and JIT x86 compiler~(\textit{TurboFan}).
+The V8 internal implementation is consisting of the BC interpreter~(\textit{Ignition}) and JIT x86 compiler~(\textit{TurboFan})~-see the figure~\ref{fig:ast-v8-architecture}.
 
-The bytecode interpreter is single stack registed based VM~(similarly to the GNU-R and \textit{cpython} VM). Its core functionality of the debugger works on the BC instruction level in the way that VM defines separate \textbf{Debug instruction for every number of the arguments}~(e.g. \code{DebugBreak0}, \code{DebugBreak1}, \code{DebugBreak2} etc.)~\ref{fig:v8-bc-breakpoint-definitions}.
+The bytecode interpreter is single stack registed based VM~(similarly to the GNU-R and \textit{CPython} VM). Its core functionality of the debugger works on the BC instruction level. The VM defines separate \textbf{Debug instruction for every number of the arguments}~(e.g. \code{DebugBreak0}, \code{DebugBreak1}, \code{DebugBreak2} etc.)~\ref{fig:v8-bc-breakpoint-definitions}.
 
-If the breakpoint is set on the instruction~(for example \textit{ShiftRight} instruction with the 2 parameters) it causes its replacement by the corresponding breakpoint instruction according to number of the parameters~(\textit{DebugBreak2} for \textit{ShiftRight} because it has 2 parameters). These BC instructions works like special instructions~\ref{fig:v8-breakpoint-instruction-implementation} which internally calls the handler for debugger and also dispatch the original instruction to maintain the same behavior~(consistency) of the original code.
+If the breakpoint is set on some specific instruction~(for example \textit{ShiftRight} instruction with the 2 parameters) it causes its the replacement of the original instruction by the corresponding breakpoint one according to the number of the parameters of original one~(\textit{DebugBreak2} for \textit{ShiftRight} because it has 2 parameters). These BC instructions work like special instructions~\ref{fig:v8-breakpoint-instruction-implementation} which internally calls the handler for the debugger and also dispatch the original instruction to maintain the same behavior~(consistency) of the original code.
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -819,41 +819,43 @@ DEBUG_BREAK_BYTECODE_LIST(DEBUG_BREAK);
 	\caption{V8 internal architecture}\label{fig:ast-v8-architecture}
 \end{figure}
 
-\subsection{User interace and state of the BC evaluator}\label{user-interface-and-state-of-the-bc-eval}
+%TODO: add citation for the v8 internal representation
 
-To keep the implementation consistent from the user perspective BC debugger should use the the same user-interface as the AST. There can also be visible distinguishing between the internal state of the language~(if the language is currently inside the AST or BC evaluation mode). In the current AST implementation there is used
+\subsection{User interface and state of the BC evaluator}\label{user-interface-and-state-of-the-bc-eval}
+
+To keep the implementation consistent from the user perspective BC debugger should use the same user-interface as the AST. There can also be visible distinguishing between the internal state of the language~(if the language is currently inside the AST or BC evaluation mode). In the current AST implementation, there is used
 \code{"debug"} as prefix printed while showing the environment browser in the debugger. This could be modified to the \code{"debugBC"} to signalize the user that the BC debugger is active.
 
 The internal state of the GNU-R BC stack machine should be printed out to the output while the debugging. This state consists of:
 
 \begin{itemize}
-	\item Current position inside code
+	\item Current position inside the code
 	\item Stack content
 \end{itemize}
 
-Alongside the showing the current position there would be also need to show the function BC source code. For this feature we can use the disassembler feature~\ref{implementation-of-disassembler} proposed in the first part of the analysis~\ref{analysis-of-disassembler}. Showing current position inside code can be implemented as an feature inside the disassembler but for the stack content there has to be implemented an separate tool~(function).
+Alongside the showing the current position, there would also be need to show the function bytecode. For this feature we can use the disassembler feature~\ref{implementation-of-disassembler} proposed in the first part of the analysis~\ref{analysis-of-disassembler}. Showing current position inside code can be implemented as a feature inside the disassembler but for the stack content, there has to be implemented a separate tool.
 
-\subsection{Summary}
+\section{Summary}
 
-In order to improve bytecode debugging there is need for improving~(implementing the human-readable) disassembler. There was decided that in order to keep better maintainability and more flexibility of the tool it would be implemented as separate \code{print.disassembly} function inside the new \code{bctools} package.
+In order to improve bytecode debugging, there is a need for improving~(implementing the human-readable) disassembler. There was decided that the disassembler would be implemented as the separate \code{print.disassembly} function inside the new \code{bctools} package.
 
-The another part of the thesis is to implement the native bytecode debugger into the GNU-R. The solution proposed in this thesis was inspired by the JS~V8~VM~\ref{bcdebug-implementation-in-v8} and Python~VM~\ref{bcdebug-implementation-in-python}. It consists of the implementing set of bytecode instructions~(\code{BREAKPOINT0} through \code{BREAKPOINT4}) alongside with storing of the original instructions in the separate array. This proposed solution is performance oriented because the bytecode debugger architecture should not have any negative effect on overall language performance.
+Another part of the thesis is about implementing the native bytecode debugger support into the GNU-R. The solution proposed in this thesis was inspired by the JS~V8~VM~\ref{bcdebug-implementation-in-v8} and Python~VM~\ref{bcdebug-implementation-in-python}. It consists of the implementing set of bytecode instructions~(\code{BREAKPOINT0} through \code{BREAKPOINT4}) alongside with storing of the original instructions in the separate array. This proposed solution is performance oriented because the bytecode debugger architecture should not have any negative effect on overall language performance.
 
-Finally in the debugger there has to be done some showing of the evaluator internal status to the user. The status consists of the bytecode of the function, current evaluated instruction and stack content. For showing the function bytecode and printing the current evaluator position in the code there can be reused the disassembler tool~(see~\ref{analysis-of-disassembler}) but for the dumping of the stack content there has to be implemented an separate tool.
+Finally in the debugger, there has to be done some showing of the evaluator internal status to the user. The status consists of the bytecode of the function, current evaluated instruction, and the stack content. For showing the function bytecode and printing the current evaluator position in the code there can be reused the disassembler tool~(see~\ref{analysis-of-disassembler}) but for the dumping of the stack content, there has to be implemented completely new and separate tool.
 
 \chapter{Realization}\label{realization}
 
-There are three different things which has to been done - disassembler, stack printer and finally the BC debugger itself.
+There are three different things which have to be implemented - disassembler, stack printer and finally the BC debugger itself.
 
 \section{Implementation of the disassembler}\label{implementation-of-disassembler}
 
-The whole project was structured that \textbf{disassembler can be easily released to the CRAN repository} without the debugger. This is affecting the whole structuring of the project. \textbf{As much as possible code in the R} language~(most of it in separate package \code{bctools}, but some also to the \code{compiler} one~\label{internal-parts-of-vm}) and just necessary \textbf{minimum in C} for keeping the changes into the GNU-R core code simple.
+The whole project was structured the way that \textbf{disassembler can be easily released to the CRAN repository} without the debugger. \textbf{As much as possible code is written in the R} language~(most of it in separate package \code{bctools}, but some also to the \code{compiler} one~\label{internal-parts-of-vm}) and just necessary \textbf{minimum in C} for keeping the changes into the GNU-R core code simple.
 
-In the GNU-R language there is the \code{compiler} package written in R which is lying the current BC compiler and BC disassembler~(very minimal - see~\ref{current-bc-disassembler}). The changes made in order to realize the implementation of the disassembler code involved also modifying the \code{compiler} package. This package lies inside the GNU-R core code so the general idea about implementation was to put the just the bare minimum inside it~(it results in the inserting annotation of instructions~\ref{annotation-of-instructions} and putting class into the disassembly code \ref{user-interface}). The most of the functionality was implemented then in the \code{bctools} package.
+In the GNU-R language, there is the \code{compiler} package written in R. Inside it there is lying the current BC compiler and BC disassembler~(very minimal - see~\ref{current-bc-disassembler}). The changes made in order to realize the implementation of the advanced disassembler involved also modifying the \code{compiler} package. This package lies inside the GNU-R core code so the general idea about implementation was to put the just the bare minimum inside it~(the annotation of instructions~\ref{annotation-of-instructions} and putting a class into the disassembly code \ref{user-interface}). The most of the functionality was implemented then in the \code{bctools} package.
 
 \subsection{User interface}\label{user-interface}
 
-For better user friendliness of the BC print function there has been made an decision to use advantage of the S3 class system~(see~\ref{R-Classes}). The old \code{disassemble} function inside the \code{compiler} package was kept intact except of the \textbf{putting class into the disasembly code}. The name of the class has been decided to be the \code{"disassembly"}. This allows us to have \textit{print.disassembly} function~(\textit{print} method of \textit{disassembly} class) inside our \code{bctools} package. That function would be then automatically dispatched once user call the \code{print} function on the object~(if the \code{bctools} package would be loaded inside user library).
+For better user-friendliness of the BC print function there has been made an decision to use advantage of the S3 class system~(see~\ref{R-Classes}). The old \code{disassemble} function inside the \code{compiler} package was kept intact except of the \textbf{putting class into the disasembly code}. The name of the class has been decided to be the \code{"disassembly"}. This allows us to have \textit{print.disassembly} function~(\textit{print} method of \textit{disassembly} class) inside our \code{bctools} package. That function would be then automatically dispatched once user call the \code{print} function on the object~(if the \code{bctools} package would be loaded inside user library).
 
 The usage then changed from simple list (see figure~\ref{fig:old-disassembly-ui}) to the user friendly disassembly code~(see figure~\ref{fig:new-disassembly-ui}):
 
