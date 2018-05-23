@@ -1293,7 +1293,7 @@ In the application, there are different types of the actions to print~(e.g. Cons
 
 		formatting notation - $@$\code{EXPRESSION}~(e.g.,~$@a+1$)
 
-		The expressions are stored in the constant pool, so technically they are a special type of the constant expressions. For printing them, we can reuse the print function for constant expressions~(the \code{dput} and eventually even \code{print} functions has internal support for printing out the expression references). The only difference we need to print the $@$ as prefix. So final implementation of the print function is to dump $@$ to the output and then call the function for printing out the constant expression.
+		The expressions are stored in the constant pool, so technically they are a special type of the constant expressions. For printing them, we can reuse the print function for the constant expressions-\code{dumpConstants}. The only difference we need to print the \code{$@$} as prefix. So final implementation of the dump function is printing the $@$ to the output and after that calling the \code{dumpConstants}.
 
 \end{itemize}
 
@@ -1303,7 +1303,7 @@ In the application, there are different types of the actions to print~(e.g. Cons
 
 The \code{compiler} package has documentation written altogether with the code. It is managed through \code{noweb} tool~(see~\ref{annotation-of-instructions}).
 
-The \code{bctools} package user-documentation was created with the \code{roxygen} tool~(the GNU-R inbuilt documenting system). There are several ways for developer to rebuild the documentation~(run \code{roxygen}):
+The \code{bctools} package user-documentation was created with the \code{roxygen} tool~(the GNU-R inbuilt documenting system). There are several ways for a developer to rebuild the documentation~(run the \code{roxygen}):
 \begin{itemize}
  \item \code{roxygen2::roxygenise()}, or
  \item \code{devtools::document()}, if the \code{devtools} are used, or
@@ -1314,22 +1314,22 @@ The second listed~(calling \code{devtools::document()}) was used during an devel
 
 \section{Implementation of the bytecode stack printer}\label{implementation-of-stack-printer}
 
-In order to implement the BC debugger we need to be able to print the \code{BC} stack content~(see~\ref{user-interface-and-state-of-the-bc-eval}). The way how the implementation was designed was that it was written in the C language~(GNU-R language core) a printing function capable of stack of current pointer.
+To implement the BC debugger we need to be able to print the \code{BC} stack content~(see~\ref{user-interface-and-state-of-the-bc-eval}). The way how the implementation was designed is that it was written in the C language~(GNU-R language core).
 
 \subsection{Stack definition}\label{stack-definition}
 
-Stack definition depends on the \code{TYPED{\_}STACK} typedef conditional~(see figure~\ref{fig:stack-elements-definition}). Once it is defined, the option for saved unboxed values enabled. It causes that instead of the \code{SEXP} stored in the stack every time~(which is more expensive to handle), there could be also stored raw values~(\code{int} / \code{double}). There is also \code{RAWMEM} memory which is used in the BC evaluator to store for example evaluation context frame~(but generally speaking this data type can be out of any other data type). Once the stack is enables, the stack values could be then out of these types:
+Stack definition depends on the \code{TYPED{\_}STACK} typedef conditional~(see figure~\ref{fig:stack-elements-definition}). Once it is defined, the ability to save the unboxed values on the stack is enabled. It causes that instead of the \code{SEXP} stored in the stack every time~(which is more expensive to handle), there could also be stored raw values~(\code{int} or \code{double}). There is also \code{RAWMEM} memory which is used in the BC evaluator to store any data chunk - for example evaluation context frame. Once the stack is enabled, the stack values could be then out of these types:
 
 \begin{itemize}
 	\item \textbf{\code{int}}
 	\item \textbf{\code{double}}
-	\item \textbf{\code{RAWMEM}} - piece of raw memory
+	\item \textbf{\code{RAWMEM}} - a piece of raw memory
 
-		its size is defined in number of \code{sizeof(SEXP)} sized  chunks
+		its size is defined in a number of \code{sizeof(SEXP)} sized chunks
 	\item \textbf{\code{SEXP}} - internal representation of the boxed object storing any value
 \end{itemize}
 
-To be able to not have to write specific code for each stack type there is implemented an macro \code{GETSTACK{\_}PTR} returning an boxed \code{SEXP} type equivalent of stack position~(no matter if the value in stack is boxed or not).
+To be able not to have to write a specific code for each stack type there is used a macro \code{GETSTACK{\_}PTR} returning an boxed \code{SEXP} type equivalent of stack position~(no matter if the value in stack is boxed or not). Ability to get the boxed value of the stack means that we can handle every place on the stack the same (except the \code{RAWMEM}).
 
 \subsection{Printing of the stack values}\label{printing-stack-values}
 
