@@ -855,9 +855,9 @@ In the GNU-R language, there is the \code{compiler} package written in R. Inside
 
 \subsection{User interface}\label{user-interface}
 
-For better user-friendliness of the BC print function there has been made an decision to use advantage of the S3 class system~(see~\ref{R-Classes}). The old \code{disassemble} function inside the \code{compiler} package was kept intact except of the \textbf{putting class into the disasembly code}. The name of the class has been decided to be the \code{"disassembly"}. This allows us to have \textit{print.disassembly} function~(\textit{print} method of \textit{disassembly} class) inside our \code{bctools} package. That function would be then automatically dispatched once user call the \code{print} function on the object~(if the \code{bctools} package would be loaded inside user library).
+For better user-friendliness of the BC disassembler there has been made a decision to use the advantage of the S3 class system~(see~\ref{R-Classes}). The old \code{disassemble} function inside the \code{compiler} package was kept intact except the \textbf{putting class into the disassembly code}. The name of the class has been decided to be the \code{"disassembly"}. Having this class then allows us to have \textit{print.disassembly} function~(\textit{print} method of \textit{disassembly} class) inside our \code{bctools} package. That function would be then automatically dispatched once the user calls the \code{print} function on the object~(if the \code{bctools} package would be loaded inside user library).
 
-The usage then changed from simple list (see figure~\ref{fig:old-disassembly-ui}) to the user friendly disassembly code~(see figure~\ref{fig:new-disassembly-ui}):
+The usage then changed from simple list (see figure~\ref{fig:old-disassembly-ui}) to the user-friendly disassembly code~(see figure~\ref{fig:new-disassembly-ui}):
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -972,11 +972,11 @@ disassemble(compiled)
 %TODO: REDO THIS EXAMPLE
 
 \subsection{Instruction arguments}\label{instruction-arguments}
-The \textbf{BC} instruction contains the integer code identifying it followed by variable number of arguments. These arguments can be of different 5 basic types~-~-see\ref{fig:bytecode-argument-types}~(\code{BOOL}, \code{INT}, \code{LABEL}, \code{CONSTANT{\_}LABEL} and \code{CONSTANT}). The printing of the output was
+The \textbf{BC} instruction contains an integer code identifying it followed by a variable number of arguments. These arguments can be of different 5 basic types~-~see\ref{fig:bytecode-argument-types}~(\code{BOOL}, \code{INT}, \code{LABEL}, \code{CONSTANT{\_}LABEL} and \code{CONSTANT}).
 
-The \code{CONSTANT} parameter can have two different meanings in the code. Some of the arguments could be just whole expression~(e.g. a+b+c) kept due to usage in some corner cases during evaluation~( e.g. \code{ADD} instruction is in the most cases taking the two topmost arguments. Just in some corner cases it is calling the other internal functions which are originally designed to work on the AST evaluator so they expect the expression as an input). This means that some arguments are stored because the internal implementation of the bytecode evaluator and they contains the duplicate information. The optional parameter kept due to internal purposes of evaluator was named an \code{CONSTANT{\_}DBG}.
+The \code{CONSTANT} parameter can have two different meanings in the code. Some of the arguments could be a whole expression~(e.g. a+b+c) kept due to usage in some corner cases during evaluation~( e.g., \code{ADD} instruction is in the most cases taking the two topmost variables from the stack. Just in some corner cases, it is calling the internal functions which were initially designed to work on the AST evaluator, so they expect the expression as an input). These additional arguments are then stored only because the internal implementation of the bytecode evaluator and they contain the duplicate information. The optional parameter kept due to internal purposes of evaluator was named a \code{CONSTANT{\_}DBG}.
 
-These arguments are printed by the different functions.
+These arguments are printed by the different functions in the disassembler~(see~\ref{printing-of-different-types}).
 
 \begin{figure}[H]
 \begin{itemize}
@@ -1001,11 +1001,11 @@ These arguments are printed by the different functions.
 
 
 \subsection{Annotation of instructions}\label{annotation-of-instructions}
-These 6 types should be printed in different way according to the annotation. There has been created an definition for each instruction argument~(annotation of the instructions). The pretty printing disasembly function~(\code{print.disassembly} method in the \code{bctools} package) would be then taking instruction definition and printing the arguments according to the definition.
+These 6 types~(see figure~\ref{fig:bytecode-argument-types}) should be printed in different way according to the annotation. There has been created a definition for each instruction argument~(annotation of the instructions - see figure~\ref{fig:instruction-annotation-example}). The pretty printing disassembly function~(\code{print.disassembly} method in the \code{bctools} package) can then take instruction definition and print out the arguments accordingly.
 
-In the compiler package there is already some sort of annotation annotation specifying the number of arguments for each instruction~(\code{Opcodes.argc} list). This was list was replaced by the \code{Opcodes.descr} list containing the fully annotated instruction was named \code{Opcodes.argdescr}~(see the figure~\ref{fig:computation-of-argdescr}). To keep the old behavior the old previous \code{Opcodes.argc} list was computed from \code{Opcodes.argdescr} by applying the \code{length} function to each element~(see figure~\ref{fig:computation-of-argc}). This solution is not duplicating any information in the \code{compiler} package.
+In the compiler package, there is already basic annotation specifying the number of arguments for each instruction~(\code{Opcodes.argc} list). This list was replaced by the \code{Opcodes.descr} list containing the fully annotated instruction~(see the figure~\ref{fig:computation-of-argdescr}). To keep the old behavior the old \code{Opcodes.argc} list was computed from \code{Opcodes.argdescr} by applying the \code{length} function to each element~(see figure~\ref{fig:computation-of-argc}). This solution was chosen due to the fact that the definition is made just at one place and there is no need to maintain the two lists.
 
-The \code{compiler} package is made with the \code{noweb} tool which is the tool to write documentation alongside with the code. Its source is written in the \textit{src/library/compiler/noweb/compiler.nw} file. Because of the fact that build command~\code{make} is not written to re-generate the source code from \code{noweb} each time the compiling is provided, we have to rerun the \code{make from-noweb} command inside the \code{compiler} to regenerate the R sources for the \code{compiler} package.
+The \code{compiler} package is made with the \code{noweb} tool which is the tool used for writing documentation alongside with the code. Its source is written in the \textit{src/library/compiler/noweb/compiler.nw} file. Because the build command~(\code{make}) is not written to re-generate the source code from \code{noweb} each time the compiling is provided, we have to rerun the \code{make from-noweb} command inside the \code{compiler} to regenerate the R sources for the \code{compiler} package.
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -1033,7 +1033,7 @@ STARTLOOPCNTXT.OP = c(BOOL.ARGTYPE, LABEL.ARGTYPE),
 .... all remaining instructions ....
 )
 \end{lstlisting}
-	\caption{Example of instruction annotation}\label{fig:computation-of-argdescr}
+	\caption{Example of instruction annotation}\label{fig:instruction-annotation-example}
 \end{figure}
 
 \begin{figure}[!h]
@@ -1045,22 +1045,22 @@ Opcodes.argc <- lapply(Opcodes.argdescr, length)
 
 \subsection{Instruction arguments and labels}\label{instruction-arguments-labels}
 
-Label is form of representation of the reference to the code. It is used in the jumps through the code.
+A label is a form of representation of the reference to the code which is used in the jumps through the code.
 
 \subsection{Computing of labels}
 
-Labels are shown in the code in specific styling~(usually incrementally numbered from the 1, e.g. \code{2:}). Arguments are then referencing to these locations~(e.g. \code{{\$}2}).
+Labels are shown in the code in specific styling~(usually incrementally numbered from the 1, e.g., \code{2:}). Arguments are then referencing to these locations~(e.g., \code{{\$}2}).
 
-There is no direct list containing locations of the labels, but it can be computed from the code. Generating of this list was done in the two-pass linear lookup through code~(see figure \ref{fig:code-generating-labels}). The result is auxiliary array containing the information direct information of number of the label~(the list is expressed as this array).
+There is no direct list containing locations of the labels, but this list can be computed from the code. Its generating was done in the two-pass linear lookup through code~(see figure \ref{fig:code-generating-labels}). The result is an auxiliary array containing the number of the label.
 
 Steps to generate labels are then:
 \begin{enumerate}
-	\item \textbf{Initialize auxiliary array} with the size of code buffer. The each element has the default value representing, that there is no instruction which argument is pointing to that position.
-	\item \textbf{Go through all instruction} in forward direction. For each argument if it contains any label~(see labels inside arguments~\ref{instruction-arguments-labels}) label then mark the according instruction on its location inside the auxiliary array.
-	\item \textbf{Go through the auxiliary array} and set on each position marked as target for some instruction number of label. This number of label is calculated incrementally~(in the beginning set counter to 1, and on each marked position set the value of counter to the array and increment the counter)
+	\item \textbf{Initialize the auxiliary array} with the size of code buffer. Each element has the default value representing the fact, that there is no instruction which argument is pointing to that position.
+	\item \textbf{Go through all instruction} in a forward direction. For each argument, if it contains any label~(see labels inside arguments~\ref{instruction-arguments-labels}) mark the position~(which it is pointing to) with information that there is label pointing to that position.
+	\item \textbf{Go through the auxiliary array}. If the instruction is marked then replace the mark with the unique number of the label. This number is calculated incrementally~(at the beginning set a counter to 1, and on each marked position set the value of the counter to the array and increment the counter).
 \end{enumerate}
 
-This array then would contain the information whether there is no label at the instruction~(\code{-2}) or the label~(number \code{>=0}).
+The result of this algorithm is an array containing the information whether there is no label at the instruction~(\code{-2}) or the label~(number \code{>=0}).
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -1114,12 +1114,12 @@ while( i <= n ) {
 
 \subsection{Verbosity and formatting}
 
-Bytecode compiled function has optionally the information about location of the source. These informations are not neccesary for the evaluation of the code but are good for human-readability~(see~\ref{Exprref-and-srcref}). Alongside with this there are also some of the instruction arguments which are used just for the reason of the internal implementation and have duplicate value~(see previous~chapter~\ref{instruction-arguments}). All of these information are not necessary to be displayed for the user for the basic information but it is nice for them to provide ability to display even these information. To provide this conditional ability to show more basic or more advanced information there has been put an decision to implement more levels of the verbosity in the disassembly tool.
+Bytecode compiled function can contain the information about a location of the source code~(they are optional).  These data are not necessary for the evaluation of the code but are good for human-readability~(see~\ref{Exprref-and-srcref}). Alongside with this, there are also some of the instruction arguments which are used just for the reason of the internal implementation and have duplicate value~(see the previous~chapter~\ref{instruction-arguments}). All of this information is not necessary to be displayed to the user by default, but it would be nice for them to provide an ability to display even these information. To provide this optional ability to show more basic or more advanced information there has been put a decision to implement more levels of the verbosity in the disassembly tool.
 
 The levels are:
 
 \begin{itemize}
-	\item \code{0} - display only source references~(if they are available, if they aren't print expression references instead)
+	\item \code{0} - display only source references~(In case they are available. When not they aren't print expression references instead)
 
 	see figure~\ref{fig:disassembly-verbose-0}
 
@@ -1127,13 +1127,13 @@ The levels are:
 
 	see figure~\ref{fig:disassembly-verbose-1}
 
-	\item \code{2} - the same as 1 + display every operand's argument~(including ones used just for debugging)
+	\item \code{2} - the same as 1 + display every operand's argument~(including ones used only for internal uses - see~\ref{})
 
 	see figure~\ref{fig:disassembly-verbose-2}
 
 \end{itemize}
 
-Default value can be pre-set by \code{bcverbose} function~(provided in the \code{bctools} package).
+The default value can be pre-set by \code{bcverbose} function~(provided in the \code{bctools} package).
 
 \begin{figure}[h]
 \begin{lstlisting}
@@ -1217,27 +1217,27 @@ Bytecode ver. 10
 
 \subsection{Function types in the constant pool}
 
-The constant expressions in the constant pool can of more 3 types:
+The constant expressions in the constant pool can be of more 3 types:
 
 \begin{itemize}
-	\item regular~(ordinary) constant expressions~(e.g. numbers, array of numbers etc.)
-	\item native functions~(calls to inside of the GNU R C implementation)
+	\item regular~(ordinary) constant expressions~(e.g. numbers, an array of numbers etc.)
+	\item native functions~(calls to the inside of the GNU R C implementation)
 	\item BC compiler function code
 \end{itemize}
 
-There is no way how to print out the native functions because its structure is written and compiled inside the runtime core in C language and the R interpreter knows just the location~(function pointer) to call. These functions are printed as an \textit{$<$INTERNAL{\_}FUNCTION$>$}.
+There is no way how to print out the native functions because its structure is written inside the GNU-R runtime core in C language~(the R interpreter knows just the location/function pointer/ to call). These native functions are printed in the bytecode disassembly as an \code{$<$INTERNAL{\_}FUNCTION$>$}.
 
-There are also stored the \textbf{BC} compiled functions which should be also printed. One way is to print out flag like \textit{$<$BYTECODE{\_}FUNCTION$>$}. The second approach is to be able to print it out nested with some indentation. The second described approach was chosen. In order to implement this feature there were introduced these 3 parameters in the disassembly tool:
+There are also stored the BC compiled functions in the constant bool. This means that there is recursion of the bytecode functions which we need to solve in the disassembler. The first approach is to print out flag like \code{$<$BYTECODE{\_}FUNCTION$>$}. The second approach is to be able to print it out nested with some indentation. The second one was chosen due to the ability to print out more information. In order to implement this feature there were introduced these 3 parameters in the disassembly tool:
 
 \begin{itemize}
-	\item \code{prefix} - the string prefix which is putted before each line printed in the whole function
+	\item \code{prefix} - the string prefix which is put before each line printed in the whole function
 
-	\item \code{depth} - current depthness of the recursion.
+	\item \code{depth} - current depth of the recursion.
 
-	\item \code{maxdepth} - maximal depthness for recursion~(once the \code{depth} reaches this level, the \code{$<$FUNCTION$>$} instead of calling the disassembly print would be shown in the output)
+	\item \code{maxdepth} - maximal depth for the recursion~(once the \code{depth} reaches this level, the \code{$<$FUNCTION$>$} instead of calling the disassembly print would be shown in the output)
 \end{itemize}
 
-If the \code{maxdepth} would be set to the 0, the disassembly tool would print out just the \textit{$<$BYTECODE{\_}FUNCTION$>$} for every nested bytecode~(the nested BC printing would be disabled).
+This condiguration allows us to have one feature. If the \code{maxdepth} would be set to the 0, the disassembly tool would print out just the \code{$<$BYTECODE{\_}FUNCTION$>$} for every nested bytecode~(the nested BC printing would be disabled).
 
 %TODO: add examples
 
@@ -1245,20 +1245,20 @@ If the \code{maxdepth} would be set to the 0, the disassembly tool would print o
 
 %The printing of the functions were done by calling an
 
-One type of the constant expressions in the constant array are the functions written as an expression references~(non-byte-compiled and being able to potentially evaluate with \code{eval} function). They have to be printed in user-friendly way which would not break the consistency of disassembly output. One way how to achieves that is to call the \code{dput} function printing the but it would format them line by line which is not desired output. For making the arguments look as dense as possible~(and not break consistency and compactness of the disassemble function) there has been put decision to write the function in single line. There are 2 ways how to solve this:
+One type of the constant expressions in the constant array are the functions written as an expression references~(non-byte-compiled and being able to evaluate with \code{eval} function). They have to be printed in a user-friendly way which however would not break the consistency of disassembly output. One way how to achieves that behavior is to call the \code{dput} function. However, it would format the functions line by line which is not the desired output. For making the arguments look as dense as possible~(and not break consistency and compactness of the disassemble function), there has been put decision to write the function in a single line. There are 2 ways how to solve this:
 
 \begin{itemize}
-	\item Write an specific call into the \textit{print.c}~(\textit{src/main/print.c}) - \textit{deparse1} function
-	\item Call an \textit{dput} to print out line-by-line into the buffer by \textit{capture.output} and after that make string modifications over this output.
+	\item Write a specific call into the \textit{print.c}~(\textit{src/main/print.c}) - \textit{deparse1} function
+	\item Call a \code{dput} to print out line-by-line into the buffer by \code{capture.output} and after that make string modifications over this output.
 \end{itemize}
 
-The first approach is more clean in order of the code but because there has been put the decision to make just minimal amount of the changes into the C core of the language~(for being able to release the disassembler in separate package) the second way was chosen.
+The first approach is cleaner that the other in sense of the code. However, it was previously decided to make only a minimal amount of the changes into the C core of the language~(for being able to release the disassembler in the separate package \code{bctools}) so the second way was chosen.
 
 %TODO: maybe add code example
 
-\subsection{Printing of different types}
+\subsection{Printing of different types}\label{printing-of-different-types}
 
-In the application there are different types of the actions to print~(e.g. Constants, Operators etc.). The corresponding implementation of printing functions in the disassembler is named by the dump\textit{NAME}~(e.g. \textit{dumpConstant} ) convention. The complete list of types to print:
+In the application, there are different types of the actions to print~(e.g. Constants, Operators etc.). The corresponding implementation of printing functions in the disassembler is named by the \code{dumpNAME} convention~(e.g. \code{dumpConstant} ). The complete list of types to print is:
 
 \begin{itemize}
 	\item \textbf{Constant}
@@ -1271,29 +1271,29 @@ In the application there are different types of the actions to print~(e.g. Const
 
 		used for printing the operator name
 
-		The operator names are received by the \textit{bcinfo} function from \textit{compiler} package with the \textit{.OP}~(e.g.~\textit{ADD.OP}). The knowledge that it is operator is obvious so we do not want to print it. Because of it function for printing operands is extracting the \textit{.OP} suffix and printing just the actual name~(e.g.~\textit{ADD}).
+		The operator names are received by the \code{bcinfo} function from the \textit{compiler} package with the \code{.OP} suffix~(e.g.,~\code{ADD.OP}). It means that after extracting the suffix these names can be printed.
 
 	\item \textbf{Value}
 
-		used for printing the \textit{INT} and \textit{BOOL} argument types
+		used for printing the \code{INT} and the \code{BOOL} argument types
 
-		printing the expression by calling directly the \textit{cat} function
+		printing the expression by calling the \textit{cat} function directly
 
-	formatting notation - directly the \textit{NUMBER}~(e.g.~1)
+		formatting notation - directly the \code{NUMBER}~(e.g.,~1)
 
 	\item \textbf{Label}
 
-	formatting notation - \$\textit{LABEL{\_}NO}~(e.g.~\$1)
+		formatting notation - \$\code{LABEL{\_}NO}~(e.g.,~\$1)
 
 	\item \textbf{\code{SrcRef}} a.k.a. \textbf{source reference}
 
-	formatting notation - \textit{SRCREF}~(e.g.~simple{\_}bc{\_}verbosity1.R{\#}4)
+		formatting notation - \code{SRCREF}~(e.g.,~simple{\_}bc{\_}verbosity1.R{\#}4)
 
 	\item \textbf{\code{ExprRef}} a.k.a. \textbf{expression reference}
 
-	formatting notation - $@$\textit{EXPRESSION}~(e.g.~$@a+1$)
+		formatting notation - $@$\code{EXPRESSION}~(e.g.,~$@a+1$)
 
-	the expressions are stored in the constant pool so technically they are special type of the constant expressions. For printing them we can reuse then the print function for constant ones~(the \textit{dput} and eventually even \textit{print} functions has internal support for printing out the expression references). The only difference we need to print the $@$ as prefix. So final implementation of the print function is to dump $@$ to the output and then call the function for printing out the constant expression.
+		The expressions are stored in the constant pool, so technically they are a special type of the constant expressions. For printing them, we can reuse the print function for constant expressions~(the \code{dput} and eventually even \code{print} functions has internal support for printing out the expression references). The only difference we need to print the $@$ as prefix. So final implementation of the print function is to dump $@$ to the output and then call the function for printing out the constant expression.
 
 \end{itemize}
 
