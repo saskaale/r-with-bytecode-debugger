@@ -1333,51 +1333,51 @@ To be able not to have to write a specific code for each stack type there is use
 
 \subsection{Printing of the stack values}\label{printing-stack-values}
 
-The printing of stack values is done through direct call of \code{deparse1} function in the C core. It is inspired by the \code{dput} function which is used for writing an \code{ASCII} representation of the R object to the text output or file. The \code{dput} function cannot be reused without any changes because it is internally evaluating the promises while dumping the output~(see~\ref{computer-promises}). However the evaluating of the promises can potentially introduce some unwanted side-effects. In order to disable the evaluating the promises the \code{deparse1} function was then called with the \code{DELAYPROMISES} argument~(instead of evaluting the promises it is showing \code{$<$promise$>$} text).
+The printing of stack values is done through a direct call of \code{deparse1} function in the C core. It is inspired by the \code{dput} function which is used for writing an \code{ASCII} representation of the R object to the text output or file. The \code{dput} function cannot be reused without any changes because it is internally evaluating the promises while dumping the output~(see~\ref{computer-promises}). However the evaluating of the promises can potentially introduce some unwanted side-effects. To disable the evaluating the promises, the \code{deparse1} function was then called with the \code{DELAYPROMISES} argument~(instead of evaluating the promises it is showing \code{$<$promise$>$} text).
 
-\subsection{RAWMEM stack type tag}
+\subsection{RAWMEM stack type tag}\label{rawmem-stack-tag}
 
 \begin{figure}[h!]
 	\includegraphics[width=90mm]{stack-rawmem.png}
 	\caption{Definition of stack elements and generated auxiliary array showing the pritable elements}\label{fig:stack-elements-definition}
 \end{figure}
 
-In case the \code{TYPED{\_}STACK} is defined~(see~\ref{stack-definition}) then the stack values can contain raw memory chunks which cannot be printed~(see figure~\ref{fig:stack-elements-definition}). Information about size of these chunks is directed to the top of the stack. However we want to print the values in the direction from the top to the down. It results in the unsolved question whether the cell is printable or not. To be able to answer this question there has been created an auxiliary array containing the values if the cell is printable~(see figure~\ref{fig:stack-elements-definition}). It is causing some additionally complexity by running one more linear pass through the stack to fill out this array. This pass is in the forward order~(from bottom to top of the stack) so we are able to tell whether the memory is the raw or not.
+In case the \code{TYPED{\_}STACK} is defined~(see~\ref{stack-definition}) then the stack values can contain raw memory chunks which cannot be printed~(see figure~\ref{fig:stack-elements-definition}). Information about the size of these chunks is directed to the top of the stack~(from bottom to the top). However we want to print the values in the direction from the top to the down. It results in the question whether the cell is printable or not. To be able to answer this question there has been created an auxiliary array containing the values if the cell is printable~(see figure~\ref{fig:stack-elements-definition}). It is causing some additional complexity by running one more linear pass through the stack~(to fill out this array). This pass is in the forward order~(from bottom to top of the stack), so we can tell whether the memory is the raw or not.
 
-The whole algorithm to dump the stack is then having two passes:
+The whole algorithm to dump the stack then has two passes:
 
 \begin{itemize}
-	\item \textbf{First pass} from bottom to top to fill out the auxiliary array
+	\item The \textbf{first pass} from bottom to top to fill out the auxiliary array.
 
-			sets the \code{TRUE} value on the visited value. If the visited value is the \code{RAWMEM} type, then mark the n following~(size parameter of the \code{RAWMEM} cell) cells \code{FALSE}
+			Sets the \code{TRUE} value on the visited value. If the visited value is the \code{RAWMEM} type, then mark the n following~(size parameter of the \code{RAWMEM} cell) cells \code{FALSE}.
 
-	\item \textbf{Second pass} from top to bottom to actually print out the values on the stack
+	\item The \textbf{second pass} from top to bottom to print out the values on the stack.
 
-			works in the way that skip values for every place where the are auxiliary value is set to FALSE. If TRUE then look to the tag~(if \code{TYPED{\_}STACK} available) if is \code{RAWMEM}, then print \code{$<$rawmem of size \%d$>$} otherwise call the print function for the value~(see~\ref{printing-stack-values}).
+			Works in the way that skip values for every place where there are set auxiliary value to FALSE. If it is set to TRUE then look at the tag~(if \code{TYPED{\_}STACK} available) whether is \code{RAWMEM}. In case it is \code{RAWMEM} then print the \code{$<$rawmem of size \%d$>$}, otherwise call the \code{print} function for the \code{SEXP} value~(see~\ref{printing-stack-values}) to print out the value laying on the position.
 \end{itemize}
 
-The \code{TYPED{\_}STACK} however could also be disabled. It means that there cannot be \code{RAWMEM} stored on the stack. Even though we decided to keep the whole algorithm intact which would result in the auxiliary array having just the \code{TRUE} values~(every item is pritable). This decision would cause better maintainability of the code because there are less \code{IFDEF} compiler conditions.
+The \code{TYPED{\_}STACK}, however, could also be disabled. It means that there cannot be \code{RAWMEM} stored on the stack. Even though we decided to keep the whole algorithm intact which would result in the auxiliary array having just the \code{TRUE} values~(every item is printable). This decision would cause better maintainability of the code because there are less \code{IFDEF} preprocessor conditions.
 
 \subsection{Persisting stack pointers}\label{persisting-stack-pointers}
 
-In regards of the \textbf{BC} stack information there are currently these~(global) variables representing the current state.
+In regards to the \textbf{BC} stack information, there are currently these~(global) variables representing the current state.
 
 \begin{itemize}
 	\item \textbf{R{\_}BCNodeStackBase} - the bottom of the stack
 	\item \textbf{R{\_}BCNodeStackTop} - current top of the stack
-	\item \textbf{R{\_}BCNodeStackEnd} - the end of allocate space for the stack~(stack is represented internally as an array)
+	\item \textbf{R{\_}BCNodeStackEnd} - the end of allocated space for the stack~(stack is represented internally as an array)
 \end{itemize}
 
-all of these satisfying a equation:
+all of these satisfying an equation:
 
 $R{\_}BCNodeStackBase <= R{\_}BCNodeStackTop <= R{\_}BCNodeStackEnd$
 
 
-To be able to print values on the current evaluating bytecode stack we need to know when function stack frame starts and ends~(\textit{R{\_}BCNodeStackBase} points to the bottom of the whole stack and not function). There is currently not any enough information from which easily we can get an start of stack frame. To achieve this there has been added the \code{R{\_}BCNodeStackFnBase} variable representing an begin of function stack frame. It is global variable but kept and managed through context handling~(in the \textit{src/main/context.c}) to simulate the CPU function register stack frame.
+To be able to print values on the current evaluating bytecode stack we need to know when function stack frame starts and ends~(\textit{R{\_}BCNodeStackBase} points to the bottom of the whole stack and not function). There is currently not any enough information from which easily we can get a start of the function stack frame. To achieve this, there has been added the \code{R{\_}BCNodeStackFnBase} variable representing a begin of function stack frame. It is global variable but kept and managed through context handling~(in the \textit{src/main/context.c}) to simulate the CPU function register stack frame.
 
 \section{Implementation of the debugger}\label{implementation-of-debugger}
 
-The main purpose of this work is enable to do the bytecode debugging. In order to do debugging we need to visualize the current bytecode internal state of the evaluating function~(debugger work in the each function separately) which consists of:
+The primary purpose of this work is to enable the bytecode debugging in a user-friendly way. To do debugging we need to visualize the current bytecode internal state of the evaluating function~(debugger work in each function separately) which consists of:
 
 \begin{itemize}
 	\item Bytecode
@@ -1385,7 +1385,7 @@ The main purpose of this work is enable to do the bytecode debugging. In order t
 	\item Bytecode stack content
 \end{itemize}
 
-The position inside bytecode can be printed alongside alongside with the bytecode~(we can re-use already implemented bytecode disassembler~\ref{implementation-of-disassembler}). For the second part we already implemented the stack printer function.
+The position inside bytecode can be printed alongside with the bytecode~(we can re-use already implemented bytecode disassembler~\ref{implementation-of-disassembler}). For the second part, we already implemented the stack printer function.
 
 \subsection{Main idea}
 
@@ -1411,13 +1411,13 @@ compiled(2)
 	\caption{Example of debugged function with bytecode debugger enabled}\label{fig:debugged-bcdebug-enabled}
 \end{figure}
 
-The idea used behind the debugger implementation is \textbf{inspired by the JS V8 VM}~(see~\ref{bcdebug-implementation-in-v8}). It is to replace the original instruction with special breakpoint instruction together with backuping~(saving) the original instruction alongside the bytecode. This would enable the dispatching of bytecode debug features with evaluating the same code while not causing any performance overhead in case the code is not debugged.
+The idea used behind the debugger implementation is \textbf{inspired by the JS V8 VM}~(see~\ref{bcdebug-implementation-in-v8}). It is to replace the original instruction with the special breakpoint instruction together with saving~ the original instruction alongside the bytecode. The whole idea to make separate instruction and not the run-time check for debug flag would enable the dispatching of bytecode debug features with evaluating the same code while not causing any performance overhead in case the code is not debugged.
 
-This feature is by default disabled. Managing the state for enabling it is done by \textit{enableBCDebug} function~(written in \textit{src/main/debug.c}) which is internally handling an \code{R{\_}is{\_}bc{\_}debug{\_}enabled} variable. See the figure~\ref{fig:debugged-bcdebug-enabled} for example.
+The bytecode debugger feature is by default disabled. Managing the state for enabling it is done by \textit{enableBCDebug} function~(written in \textit{src/main/debug.c}). This function is is internally handling a \code{R{\_}is{\_}bc{\_}debug{\_}enabled} variable. See the figure~\ref{fig:debugged-bcdebug-enabled} for example.
 
 \subsection{Instruction for debugging}\label{instruction-for-debugging}
 
-To be able to dispatch breakpoints there has been created an specialized set of debug instructions. For dispatching breakpoint on the instruction the original instruction is replaced with it's equivalent~(according to the number of arguments) breakpoint one. The debugging instructions are:
+To be able to dispatch breakpoints there has been created a specific set of debug instructions. For dispatching breakpoint on the instruction, the original instruction is replaced with its equivalent~(according to the number of arguments) breakpoint one. The debugging instructions are:
 
 \begin{itemize}
 	\item \textbf{\code{BREAKPOINT0}}
