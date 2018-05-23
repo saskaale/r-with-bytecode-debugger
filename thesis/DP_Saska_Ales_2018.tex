@@ -1329,7 +1329,7 @@ Stack definition depends on the \code{TYPED{\_}STACK} typedef conditional~(see f
 	\item \textbf{\code{SEXP}} - internal representation of the boxed object storing any value
 \end{itemize}
 
-To be able not to have to write a specific code for each stack type there is used a macro \code{GETSTACK{\_}PTR} returning an boxed \code{SEXP} type equivalent of stack position~(no matter if the value in stack is boxed or not). Ability to get the boxed value of the stack means that we can handle every place on the stack the same (except the \code{RAWMEM}).
+To be able not to have to write a specific code for each stack type there is used a macro \code{GETSTACK{\_}PTR} returning a boxed \code{SEXP} type equivalent of stack position~(no matter if the value in stack is boxed or not). Ability to get the boxed value of the stack means that we can handle every place on the stack the same (except the \code{RAWMEM}).
 
 \subsection{Printing of the stack values}\label{printing-stack-values}
 
