@@ -1427,16 +1427,15 @@ To be able to dispatch breakpoints there has been created a specific set of debu
 	\item \textbf{\code{BREAKPOINT4}}
 \end{itemize}
 
-The decision to make separate instruction for each argument count was made because of simplicity and forward compatibility. Because the normal instruction is replaced with the debug we would want to information about the number of arguments after the instruction. This would allow to have unchanged all of the functions which are iterating over the argument count instructions~(like breakpoint debugger). It is also possible that number of these function would increase in future releases of the GNU R~(by adding some feature to the BC).
+The decision to make a separate instruction for each argument count was made because of simplicity and forward compatibility. Because the normal instruction is replaced with the debug one but as long as the debug instructions are for each number of the arguments we know the number of the arguments of the previous instruction. This knowledge would allow us to keep all of the functions iterating over the argument count intact.
 
-%The other possible option~(which was not chosen) would have been to have just one debug instruction for whole bytecode set of instructions. This solution would save bytecode instruction space~(instead of 4 for now at least 4 instructions) and allow more simple implementation of the setting/unsetting breakpoint~(no need to look up original instruction argument count) but would add more complexity to the all functions working with the \textbf{BC} instructions argument count~(\textit{bcEncode}/\textit{bcDecode}/disassembler etc.).
+\subsection{Storing of the original instruction when the breakpoint is set}\label{storing-original-instructions}
 
-\subsection{Storing of the original instruction when the breakpoint is setted}\label{storing-original-instructions}
+In case the breakpoint is set~(the breakpoint instruction overwrites the corresponding original one) we need to store the original instruction~(to keep the functionality of the evaluated function intact).
 
-In case the breakpoint is set~(the original instruction is overwritten by the corresponding breakpoint) we need to store the original instruction. It is necessary to keep the functionality of the evaluated BC function intact.
-The idea begin implemented solution is to make an deep copy of unchanged code array to preserve the original instruction list. This copy is made the first change of the breakpoint~(first setting of the breakpoint) and attached to the \code{BCODESXP} by making new \code{CONS} cell. Once this is done we can set or unset the breakpoint on any instruction without worrying of losing any information. The setting is done by assigning the corresponding breakpoint instruction and removing is done by copying the function from the . This functionality in the \code{modifybcbreakpoint} function written in \code{C}~(the \textit{src/main/main.c} file). First passed argument is the \code{BCODESXP} object to change and the second one is the position of the instruction which has to be removed~(this position in BC code array has to have instruction and not an argument on it). The third argument is boolean flag telling whether to set or reset the breakpoint~(\code{TRUE} for setting, \code{FALSE} for removing).
+The idea begin implemented solution is to make a deep copy of unchanged code array to preserve the original instruction list. This copy is made the first change of the breakpoint~(first replacing with the breakpoint instruction) and attached to the \code{BCODESXP} by making new \code{CONS} cell. Once this is done, we can set or unset the breakpoint on any instruction without worrying about losing any information. The placing / removing of the breakpoint instruction is done in the \code{modifybcbreakpoint} function~(written in the \textit{src/main/main.c} file).
 
-The internal representation of the \code{BCODESXP} memory object holding an GNU R bytecode is the same as the \code{LISTSXP}~(the \code{BCODESXP} is internally wrapper over \code{LISTSXP}). The changes made by making an cons cell means that there is added one more nested layer. All of these functionality~(going through \code{BCODESXP} and \code{LISTSXP}) is already implemented in the Garbage Collector~(see~\ref{GC}) so there is no need to update it for support this change.
+The internal representation of the \code{BCODESXP} memory object holding the GNU-R bytecode is the same as the \code{LISTSXP}~(the \code{BCODESXP} is internally wrapper over \code{LISTSXP}). The changes made by making an cons cell means that there is added one more nested layer. All of these functionality~(going through \code{BCODESXP} and \code{LISTSXP}) is already implemented in the Garbage Collector~(see~\ref{GC}), so there is no need to update it to support this change.
 
 \subsection{Setting and removing debug instruction}\label{setting-and-unsetting-debug-instruction}
 
@@ -1470,8 +1469,8 @@ bcSetBreakpoint <- function(code, pos, is=TRUE) {
 	\caption{Source code of bcSetBreakpoint function}\label{fig:bcsetbreakpoint-source}
 \end{figure}
 
-To be able to set~(and unset) the debug instruction on the bytecode there has been created an \code{bcSetBreakpoint} function inside compiler package~(see fig.~\ref{fig:bcsetbreakpoint-source} for source code). It has support for both setting and removing the breakpoint on instruction~(parameter \code{is}). It is returning the position of newly set instruction which is used in the setting next breakpoint~\ref{setting-next-breakpoint}. The setted position is not usually the first of the position to set in the parameter. The reeason behind this is that this function needs to be fail-proof and cannot break the code by modifying the argument instead of the instruction~(the function is exposed to the end-user). It is internally
-finding the first instruction which position~(index) is the first after the position given through \code{code} argument~(satisfies the \code{$>= code$} condition). This function is internally calling the \textit{modifybcbreakpoint} which is modifying by setting / removing the bytecode on the specified location while storing the original BC code array~(see~\ref{storing-original-instructions}).
+To be able to set~(and unset) the debug instruction on the bytecode there has been created a \code{bcSetBreakpoint} function inside \code{compiler} package~(see fig.~\ref{fig:bcsetbreakpoint-source} for source code). It has support for both setting and removing the breakpoint on instruction~(parameter \code{is}). It is returning the position of newly set instruction which is used in the setting next breakpoint~\ref{setting-next-breakpoint}. This returned position can be different than the position passed through the parameter. The reason behind this is that this function needs to be fail-proof. It means that it cannot break the code by modifying the argument instead of the instruction~(the function is exposed to the end-user). The way to solve is to implement finding of the first instruction which position~(index) is the first after the position given through \code{code} argument~(satisfies the \code{$>= code$} condition). Then the \code{bcSetBreakpoint} function can place the breakpoint to the founded position and return that position.
+%This function is internally calling the \textit{modifybcbreakpoint} which is modifying by setting or removing the bytecode on the specified location while storing the original BC code array~(see~\ref{storing-original-instructions}).
 
 \subsection{Listing breakpoints}\label{listing-breakpoints}
 
@@ -1512,22 +1511,22 @@ print(bcListBreakpoints(compiled))
 	\caption{Example usage of bcListBreakpoints function}\label{fig:bclistbreakpoints-example}
 \end{figure}
 
-In order to manage the breakpoint status there has been implemented a \code{bcListBreakpoints} function for listing the set ones~(it is implemented inside \code{compiler} package). This function is returning an array which contains these positions~(see figure~\ref{fig:bclistbreakpoints-example} for usage example).
+To manage the breakpoint status, there has been implemented a \code{bcListBreakpoints} function~(implemented inside the \code{compiler} package). It is returning the array of the instruction positions which contains breakpoint~(see figure~\ref{fig:bclistbreakpoints-example} for usage example).
 
 %TODO: move this somewhere to end
 
 \subsection{Setting the next breakpoint}\label{setting-next-breakpoint}
 
-Consequential instruction does not necessary mean the following instruction right next in the bytecode array due to labels. The breakpoint for the next instruction can be either one of these:
+The consequential instruction does not necessarily mean the following instruction right next to each other in the bytecode array~(due to labels - see~\ref{instruction-arguments-labels}). The breakpoint for the next instruction can be either one of these:
 
 \begin{itemize}
 	\item following in the bytecode array
-	\item at the position which were instruction labels pointing at~(see types of labels~\ref{instruction-arguments-labels})
+	\item at the position where are the instruction labels pointing to~(see types of labels~\ref{instruction-arguments-labels})
 \end{itemize}
 
-To support this feature there has been developed the \code{bcSetNextBreakpoint} function~(inside the \code{compiler} package). This function is used also inside the  \code{C} code in the debugger. To support easier dispatching there it has been also written a \code{Rf{\_}breakOnNextBCInst} function which is internally dispatching an \code{bcSetNextBreakpoint} function by call to the \code{R} code through \code{eval}.
+The handling of this fact was implemented inside the\code{bcSetNextBreakpoint} function~(inside the \code{compiler} package). This function is also used inside the  \code{C} code in the debugger. To support easier dispatching it has been also written a \code{Rf{\_}breakOnNextBCInst} function which is internally dispatching a \code{bcSetNextBreakpoint} function by a call to the \code{R} code through \code{eval}.
 
-The implementation of the \code{bcSetNextBreakpoint} code is checking all possible locations for the jump locations. It is also checking if there is already set breakpoint on that position. If there is no one it is then setting there breakpoint instructions. For placing the breakpoint instruction it is using the internal call to the \code{C} function \code{modifybcbreakpoint}~(see~\ref{setting-and-unsetting-debug-instruction}).
+The implementation of the \code{bcSetNextBreakpoint} function is checking all possible locations for the jump locations. It is also checking if there is already set a breakpoint in that position. If no, then it is setting there breakpoint instruction. For placing the breakpoint instruction it is using the internal call to the \code{C} function \code{modifybcbreakpoint}~(see~\ref{setting-and-unsetting-debug-instruction}).
 
 It is also returning an array of newly added breakpoint locations. This feature is used in the implementation of the \code{BREAKPOINT} instruction~(see~\ref{implementation-of-breakpoint-instruction}) in the \code{C} core - this returned array is used to keep tracking of the added breakpoints.
 
@@ -1570,7 +1569,7 @@ Bytecode ver. 10
 \end{figure}
 
 
-To visualize the set breakpoints there has been added an support into the disassembly tool. The R disassembly script was modified to get 3 arrays as an bytecode input~(added field with the original code array - see~\ref{storing-original-instructions}). So the arrays now contain the constant array, code array possibly containing breakpoints and original code array which never contains any breakpoint instruction. The original array is returned every time no matter if the code array is modified or not~(in case not modified there is returned the same code array twice).
+There has been added support for visualizing the breakpoints set on the instruction into the disassembly tool. The R disassembly script was modified to get 3 arrays as a input~(added field with the original code array - see~\ref{storing-original-instructions}). The original array is returned every time no matter if the \code{BCODESXP} code array is modified or not~(in case not modified there is returned the same code array twice).
 
 This means that we can just simply modify the disassembler to go always through the original array. Then for every instruction we would be checking in the code array~(which possibly contains breakpoints) if there is breakpoint or not. In case there is we would just simply print an mark \code{(BR)} as prefix for the instruction name to signalize that this instruction contains breakpoint~(see the figure~\ref{fig:breakpoints-in-disassembly-example} for example).
 
