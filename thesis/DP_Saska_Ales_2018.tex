@@ -1677,14 +1677,14 @@ BCNPUSH(body); /* pushing body is neccesary
 	\caption{Modifying the bytecode array in the beginning of bcEval to erase breakpoints from the code}\label{fig:erase-breakpoints-in-bceval}
 \end{figure}
 
-The debugger implementation is modifying the breakpoint code by adding temporary breakpoint instructions~(see~\ref{setting-next-breakpoint}). This means that while calling recursive call there can be already set breakpoint instruction in the evaluated code. However, we do not want to have any of them executed in the recursive call of the function. To solve this there was done checking~(at the beginning of the \code{bcEval} function) whether the code is modified. If yes then we are creating an shallow copy of the current code without an modified byteecode code array by making new \code{BCODESXP} object created from an original code array and constant array~(see figure~\ref{fig:erase-breakpoints-in-bceval}).
+The debugger implementation is modifying the breakpoint code by adding temporary breakpoint instructions~(see~\ref{setting-next-breakpoint}). This means that while calling recursive call there can be already set breakpoint instruction in the evaluated code. However, we do not want to have any of them executed in the recursive call of the function. To solve this there was done checking~(at the beginning of the \code{bcEval} function) whether the code is modified. If yes then we are creating a shallow copy of the current code without a modified bytecode code array by making new \code{BCODESXP} object created from an original code array and constant array~(see figure~\ref{fig:erase-breakpoints-in-bceval}).
 
-Because of this implementation is allocating an new element we have to satisfy the language GC by putting its reference to the bytecode stack. It was decided to push the current evaluated body even when this change is not done. It is creating tiny memory overhead by having one unnecessary element on the stack but it is resulting in better code readability~(the value has to be also popped from the stack at the ending of evaluating).
+Because of this implementation is allocating a new element we have to satisfy the language GC by putting its reference to the bytecode stack. It was decided to push the current evaluated body even when this change is not done. It is creating tiny memory overhead by having one unnecessary element on the stack but it is resulting in better code readability because of less conditions in the code.
 
 
 \subsection{Threaded and non-threaded design of the application}\label{threaded-and-non-threaded-design}
 
-Because of the speedup of the GNU-R evaluating there is support for the THREADED code. When it is on then it causes that there is no the main loop in the bytecode instruction evaluation~(see~\ref{Computed-GOTO}).
+Because of the speedup of the GNU-R evaluating there is support for the \code{THREADED} code~(see~\ref{Computed-GOTO}).
 
 This means there were two different dispatch systems which had to be analyzed and modified to support the jumping to the different direction~(jump for calling the original instruction - inside the \textit{DO{\_}BREAKPOINT} macro).
 
@@ -1707,7 +1707,7 @@ This means there were two different dispatch systems which had to be analyzed an
 	\caption{Changes made for instruction handling macros in case \code{THREADED{\_}CODE} defined}\label{fig:instruction-handling-threaded}
 \end{figure}
 
-In this case the needed changes were minimal~(see figure~\ref{fig:instruction-handling-threaded}). It required adding a macro \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP} for an switching to the instruction defined in the backup array~(\code{inst} argument). Because of the implementation design of the bytecode instruction in case of the instruction operand it is holding internally position of it's label to jump to~(see~\ref{Computed-GOTO}). It is then jumping into the location defined in passed instruction value.
+In this case, the needed changes were minimal~(see figure~\ref{fig:instruction-handling-threaded}). It required adding a macro \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP} for a switching to the different instruction. In this case, the original bytecode instruction is represented with the location inside the code~(see~\ref{Computed-GOTO}) so the jump is being executed directly to that location.
 
 
 \subsubsection{THREADED{\_}CODE not defined}
@@ -1729,7 +1729,7 @@ In this case the needed changes were minimal~(see figure~\ref{fig:instruction-ha
 	\caption{Changes made for instruction handling macros in case \code{THREADED{\_}CODE} not defined}\label{fig:instruction-handling-not-threaded}
 \end{figure}
 
-In this situation things are more complicated because the whole evaluator design is one big loop. The changes in this code were described in figure~\ref{fig:instruction-handling-not-threaded}. The loop originally had  one big switch~(its beginning is defined in \code{BEGIN{\_}MACHINE} macro) which was deciding which instruction according to the value of operand~(\code{*op}). We changed this behaviour so that it is loading operand~(\code{*op}) into variable~(\code{jmp{\_}opcode}), then placed another jump label~(\code{do{\_}instruction}) and after that decided which instruction has to be evaluated according to the value of that variable~(by \code{switch} command). In the case of executing breakpoint instruction and evaluating original instruction~(through \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP}) we are setting the auxiliary variable \code{jmp{\_}opcode} to the desired instruction code. Then there is jump to the label which we added~(\code{jmp{\_}opcode}).
+In this situation, things are more complicated because the whole evaluator design is one big loop. The changes in this code were described in the figure~\ref{fig:instruction-handling-not-threaded}. The loop originally had one big switch~(its beginning is defined in \code{BEGIN{\_}MACHINE} macro) which was deciding which instruction to execute according to the value of operand~(\code{*op}). We changed this behavior so that it is loading operand~(\code{*op}) into a variable~(\code{jmp{\_}opcode}), then placed another jump label~(\code{do{\_}instruction}) and after that finally decided which instruction has to be evaluated according to the value of that variable~(by \code{switch} command). In the case of executing breakpoint instruction and evaluating original instruction~(jumping to another instruction through \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP}) we are setting the auxiliary variable \code{jmp{\_}opcode} to the desired instruction code and evaluating the switch statement for instruction~(jumping to the \code{jmp{\_}opcode} label).
 
 \subsection{Handling of the debugger user input}\label{handling-debugger-user-input}
 
