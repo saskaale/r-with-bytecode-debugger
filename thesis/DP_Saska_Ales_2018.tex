@@ -1600,26 +1600,28 @@ The reason why there are implemented separate breakpoint instructions for each n
 	\item Call the original instruction~(see~\ref{threaded-and-non-threaded-design})
 \end{itemize}
 
-As you can see in the time of calling the browser there are all temporary breakpoints removed from the bytecode code array. It means that just the regular user-defined breakpoints~(see~\ref{temporary-and-regular-breakpoints}) would the printed to the output~(see~\ref{debugger-support-in-disassembly}). It is desired behavior because we do not want to print the user breakpoints which are used just for internal purposes of step-by-step feature of debugger~(see~\ref{handling-debugger-user-input}).
+As you can see in the time of calling the browser there are all temporary breakpoints removed from the bytecode code array. It means that just the regular user-defined breakpoints~(see~\ref{temporary-and-regular-breakpoints}) would the printed to the output~(see~\ref{debugger-support-in-disassembly}). It is desired behavior because we do not want to print the user breakpoints which are used just for internal purposes of a step-by-step feature of the debugger~(see~\ref{handling-debugger-user-input}).
 
 \subsection{Bytecode interpreter internal status}\label{bytecode-interpreter-internal-status}
 
-Users need to know whether the interpreter is in the BC or in the AST mode. In order to achieve this the \code{"debugBC"} string was put as prefix in the each debugger browser call~(instead of \code{"debug"} in the AST evaluator).
+Users need to know whether the interpreter is in the BC or in the AST mode. In order to achieve this, the \code{"debugBC"} string was put as a prefix in the each debugger step~(instead of \code{"debug"} in the AST evaluator).
 
-Thing of importance while debugging the bytecode is the ability to locate the currently evaluated code~(position in code). For achieving this there has to be printed the internal status of interpreter. This was implemented in two possible ways:
+Thing of importance while debugging the bytecode is the ability to locate the currently evaluated code~(position inside the code). For achieving this there has to be printed the internal status of the BC interpreter. This was implemented in two possible ways:
 
 \begin{itemize}
 	\item \textbf{Short compact way} inspired by AST status printing
 	\item \textbf{Long verbose way} showing the all information available in the \textbf{BC} interpreter - used by default
 \end{itemize}
 
+To control whether to print out the short compact way or the long way the \code{R{\_}DebugVerbose} boolean variable is used. This flag is accessible for the user through the \code{debugVerbose()} function which acts as getter and setter altogether. It is returning the value of the variable as return value while having an optional parameter used for the modifying of the flag.
+
 \subsubsection{The short compact way of status printing}\label{short-compact-way-of-status-printing}
-It is used to simulate the AST printing behavior. It is printing the data in the same manner as AST to remain the support for the debuggers in other dependent IDEs. This way is used by default in order to keep the backward compatibility.
+It is used to simulate the AST printing behavior. It is printing the data in the same way as AST to remain the backward compatibility support~(for example for the debuggers in IDEs). This way is used by default.
 
-\subsubsection{The long verbose way showing all information}\label{long-verbose-way}
-It is used for the printing the whole internal state bytecode interpreter. To support this feature there has been implemented function \code{printBCStatus()} for printing the bytecode interpreter status.
+\subsubsection{The long verbose way of showing all information}\label{long-verbose-way}
+It is used for the printing of the whole internal state bytecode interpreter. To support this feature there has been implemented function \code{printBCStatus()}~(see the figure~\ref{fig:printbcstatus-code}).
 
-Its code is:
+\begin{figure}[H]
 \begin{lstlisting}
 void printBCStatus(){
     Rprintf("     --- Evaluating bytecode --- \n");
@@ -1630,27 +1632,25 @@ void printBCStatus(){
     	R_BCNodeStackTop);
 }
 \end{lstlisting}
-
-For printing current state there is reused the calling \code{R{\_}printCurrentBCbody}~(located in \textit{src/main/eval.c}) which is internally dispatching \code{print} method of bytecode \code{disassembly} object from the \textit{bctools} package. It is called with \code{select} parameter setted to position of current evaluated instruction and \code{peephole} argument turned to \code{TRUE} to show just the surrounding area around the current instruction.
-
-To control whether to print out the short compact way or the long way the \code{R{\_}DebugVerbose} boolean variable is used. This flag is accessible for user through the \code{debugVerbose()} function which acts like getter and setter altogether. It is returning the value of the variable as return value while having an optional parameter used for the modifying of the flag.
+	\caption{printBCStatus function for printing the whole BC status information}\label{fig:printbcstatus-code}
+\end{figure}
 
 As you can see the code is reusing the {bytecode disassembler~(see~\ref{implementation-of-disassembler}) and stack printer~(see~\ref{implementation-of-stack-printer}).
 
+The bytecode disassembler function is printing the current bytecode instruction with the surrounding instructions~(\code{R{\_}printCurrentBCbody}. It is calling the bytecode  with the \code{select} parameter set to the selected instruction position~(to print out the \code{>>>} string) and the \code{peephole} argument set to \code{TRUE} to show just the surrounding instructions instead of the whole function~(current instruction and the 5 following ones).
+
 \subsection{Debugger jumping granularity}\label{debugger-jumping-granuality}
 
-The AST debugger is making one jump for every expression. The bytecode debugger on the other hand can jump in much more granular way~(not according to the changes of expression references but one step for each bytecode instruction). Because the short compact way should be simulation of the AST debugger it should also jump according to changes of these locations and not just by the bytecode instructions. This can be implemented by two ways:
+The AST debugger is making one jump for every AST expression. The bytecode debugger, on the other hand, can jump in the much more granular way~(not according to the changes of expression references but one step for each bytecode instruction). Because the short compact way should be a simulation of the AST debugger it means that the debugger should also jump in similar way as the AST~(according to changes of expressions and not just by the bytecode instructions). This can be implemented in two ways:
 
 \begin{itemize}
-	\item calculate these in \code{bcSetNextBreakpoint}
-	\item runtime checking
+	\item calculate the next breakpoint location in the \code{bcSetNextBreakpoint}
+	\item runtime checking by skipping the debug functionality in case the expression reference has not changed
 \end{itemize}
 
-The first way is more proper in order of performance - the breakpoint would be placed on the right instruction where should be debugger functionality dispatched. The second one would work by placing the breakpoint instruction to the very next one while skipping the debugger functionality unless the change in expression reference occur~(runtime checking).
+The first way has better performance - the breakpoint would be placed on the right instruction where should be debugger functionality dispatched and there would be no runtime checking. The second one would work by placing the breakpoint instruction to the very next one while skipping the debugger functionality unless the change in expression reference occur~(runtime checking).
 
-The runtime-checking was chosen due to implementation simplicity. The performance overhead would be just in case debugger is enabled which we are not worried in the first place.
-
-On the other hand when the long verbose mode is set up. The debugger would jump directly to the following instruction which would be then visualized for user. It means that there is no need for putting any condition for skipping debug functionality on certain instructions.
+The runtime-checking was chosen due to implementation simplicity. The performance overhead would be only when the debugger is enabled which we are not worried in the first place.
 
 \subsection{Handling of the recursive character of the bytecode}
 
@@ -1677,7 +1677,7 @@ BCNPUSH(body); /* pushing body is neccesary
 	\caption{Modifying the bytecode array in the beginning of bcEval to erase breakpoints from the code}\label{fig:erase-breakpoints-in-bceval}
 \end{figure}
 
-The debugger implementation is modifying the breakpoint code while going through the code with adding an temporary breakpoints. This is done in order to support breaking on the next instruction~(see~\ref{setting-next-breakpoint}). This means that while calling recursive call there can be already set breakpoint instruction in the evaluated code. However we do not want to have any of them executed in the recursive call of the function. To solve this there was done checking~(in the beginning of \code{bcEval} function) whether the code is modified. If yes then we are creating an shallow copy of the current code without an modified byteecode code array by making new \code{BCODESXP} object created from an original code array and constant array~(see figure~\ref{fig:erase-breakpoints-in-bceval}).
+The debugger implementation is modifying the breakpoint code by adding temporary breakpoint instructions~(see~\ref{setting-next-breakpoint}). This means that while calling recursive call there can be already set breakpoint instruction in the evaluated code. However, we do not want to have any of them executed in the recursive call of the function. To solve this there was done checking~(at the beginning of the \code{bcEval} function) whether the code is modified. If yes then we are creating an shallow copy of the current code without an modified byteecode code array by making new \code{BCODESXP} object created from an original code array and constant array~(see figure~\ref{fig:erase-breakpoints-in-bceval}).
 
 Because of this implementation is allocating an new element we have to satisfy the language GC by putting its reference to the bytecode stack. It was decided to push the current evaluated body even when this change is not done. It is creating tiny memory overhead by having one unnecessary element on the stack but it is resulting in better code readability~(the value has to be also popped from the stack at the ending of evaluating).
 
