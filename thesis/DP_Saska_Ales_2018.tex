@@ -1763,31 +1763,31 @@ other commands
 	\caption{Implemenation of \code{bcstack} and \code{bc} commands in the debugger interface}\label{fig:implementation-of-bcstack-bc-commands}
 \end{figure}
 
-The original environment browser has inbuilt support for handling and modifying the debugging~(\textit{step into}, \textit{next step}, \textit{continue} etc.) via the user input~(see~\ref{handling-debugger-user-input} implemented by setting up the \code{RDEBUG} flag and \code{R{\_}BrowserLastCommand} variable on the evaluated environment. The intent of implementing bytecode debugger interface was to reuse as much of this feature so the bytecode debugger is managed also through these variables in order to manage the debugger control. Bytecode interpreter the other hand also provides the more status information. It has been decided to extend the user interface to support showing these informations by those commands~(see implementation in figure~\ref{fig:implementation-of-bcstack-bc-commands}):
+The original environment browser has inbuilt support for handling the debugging~(\textit{step into}, \textit{next step}, \textit{continue} etc.) via the user input~(see~\ref{handling-debugger-user-input}). It is managed by setting up the \code{RDEBUG} flag and the \code{R{\_}BrowserLastCommand} variable on the evaluated environment. The intent of implementing bytecode debugger interface was to reuse as much of this feature. It resulted in the fact that the bytecode debugger control is also managed through these variables. 
+
+Bytecode interpreter also provides the more status information~(see~\ref{long-verbose-way}). It has been decided to extend the user interface to support showing these pieces of information by those commands~(see implementation in the figure~\ref{fig:implementation-of-bcstack-bc-commands}):
 
 \begin{itemize}
-	\item \code{bc} - print current bytecode with the position
-		(internally calling \code{R{\_}printCurrentBCbody})
-	\item \code{bcstack} - print current bytecode stack
-		(internally calling \code{R{\_}printCurrentBCstack})
+	\item \code{bc} - print the current bytecode with marked the current evaluated position~(see~\ref{implementation-of-disassembler})
+	\item \code{bcstack} - print current bytecode stack~(see~\ref{implementation-of-stack-printer})
 \end{itemize}
 
-\subsection{Entry points to the bcEval functions}
+\subsection{Entry points to the bcEval function}
 
-While debugging bytecode there are no runtime checks inside \code{bcEval} function for the \code{RDEBUG} flag due to performance reasons. Because of this and the nature of dispatching breakpoint functionality through the special \code{BREAKPOINT} instructions~(see~\ref{instruction-for-debugging}) there is need for setting the bytecode instruction~\ref{setting-next-breakpoint} in order to dispatch bytecode functionality. This means that we have to check and pootentially apply the breakpoint instruction to the code every time the \code{RDEBUG} flag can be modified.
+While debugging bytecode, there are no runtime checks inside the \code{bcEval} function for the \code{RDEBUG} flag~(due to performance reasons - see~\ref{instruction-for-debugging}). Because of this and the nature of dispatching breakpoint functionality through the special \code{BREAKPOINT} instructions~(see~\ref{instruction-for-debugging}) there is need for setting the bytecode instruction~\ref{setting-next-breakpoint} to dispatch bytecode functionality. The modifying of the flag of the debugger functionality~(\code{RDEBUG}) means that we have to check and potentially apply the breakpoint instruction to the code every time the \code{RDEBUG} flag can be modified.
 
-Currently there are two cases in which this scenario has to be handled:
+Currently, there are two places where this change can happen~(entry places into the \code{bcEval} function):
 
 \begin{itemize}
 	\item At the beginning of \code{bcEval} - the bytecode function was just called
 	\item Inside \code{bcEval} at the positions of the return from the function calls
 \end{itemize}
 
-The first case is handled in the beginning of the bytecode evaluation~(\code{bcEval} function). In this case there is call to the \code{Rf{\_}breakOnNextBCInst} which is setting the breakpoint to the first instruction.
+The first case is handled at the beginning of the bytecode evaluation function~(\code{bcEval} function). In this case, there is a call to the \code{Rf{\_}breakOnNextBCInst} which is setting the breakpoint to the first instruction.
 
-The other entry point after \code{bcEval} function would be used just in case of the implementation of the conditional breakpoints~\ref{conditional-breakpoints}. If the debugger modified the state of the evaluated bytecode function~(the function was not in debug mode and now is due to calling breakpoint), add the debugging instruction to the next following instruction~(see~\ref{conditional-breakpoints}).
+The other entry point~(after the return from the function calls) would be used just because of the conditional breakpoints implementation~\ref{conditional-breakpoints}. If the debugger modified the state of the evaluated bytecode function~(the function was not in debug mode and now is due to calling breakpoint), add the debugging instruction to the next following instruction~(see~\ref{conditional-breakpoints}).
 
-Because both of these cases are potentially changing the code array~(see~\ref{storing-original-instructions}) the \code{codebase} and \code{constants} array and also \code{pc} variable~(it is pointer to one of the instruction in the \code{codebase}).
+%Because both of these cases are potentially changing the code array~(see~\ref{storing-original-instructions}) the \code{codebase} and \code{constants} array and also \code{pc} variable~(it is pointer to one of the instruction in the \code{codebase}).
 
 \section{Simulated conditional breakpoints}\label{conditional-breakpoints}
 
@@ -1845,9 +1845,9 @@ compiled()
 	\caption{Example usage of simulated conditional breakpoints through breakpoint() function}\label{fig:example-of-conditional-breakpoints}
 \end{figure}
 
-Due to lack of the the ability of the simple and user-friendly conditional breakpoints there has been put decision to add support for simulating them. It had been done through \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser as in the breakpoint instruction~(if you'd call the environment browser manually through \code{browse()} the handling of debugger through \textit{next step}, \textit{continue} etc. is not provided). The \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being an separate command which would be big change in the language parser it was decided to make it a callable function.
+Due to lack of the ability of the simple and user-friendly conditional breakpoints, there has been put a decision to add support for simulating them. This feature was implemented via \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser. This \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being a separate command~(which would be big change in the language parser) it is a callable function.
 
-As you can see in the figure~\ref{fig:conditional-breakpoints-breakpoint} this function is modifying the \code{RDEBUG} flag of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context).
+As you can see in the figure~\ref{fig:conditional-breakpoints-breakpoint}, this function is modifying the \code{RDEBUG} flag of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context).
 
 \chapter{Testing and future work}\label{testing-and-future-work}
 
@@ -1855,7 +1855,7 @@ The each 3 implemented parts of this thesis were tested separately. The goal was
 
 \section{Bytecode disassembler}
 
-The main part of the work was done as the separate GNU-R package \code{bctools}. The R package system has it's test subsystem which runs every file in the \code{tests} directory and checks if it returns with error or not.
+The main part of the work was done as the separate GNU-R package \code{bctools}. The R package system has its test subsystem which runs every file in the \code{tests} directory and checks if it returns an error or not.
 
 The test files of the \code{bctools} package include:
 \begin{itemize}
@@ -1868,9 +1868,7 @@ The test files of the \code{bctools} package include:
 	\item \textbf{bcversion.R} - check if the current GNU R BC version is the supported one in this package~(see~\ref{R-internal-bc-representation})
 \end{itemize}
 
-Because of the simplicity the tests were not written without any testing framework. Nowadays if the test fails there is not any more detailed information where the error occurs inside the file. To support this functionality it is possible modify the tests to use \code{test{\_}that} framework which supports naming the tests and printing the name in case of it's fail.
-
-\section{Performance testing}
+Because of the simplicity, the tests were not written without any testing framework. Nowadays if the test fails, there is not any more detailed information where the error occurs inside the file. To support this functionality, it is possible to modify the tests to use \code{test{\_}that} framework which supports naming the tests and printing the name in the test fails.
 
 %\section{Bytecode debugger}
 
@@ -1947,15 +1945,18 @@ TODO: performance testing
 
 \subsection{Push into working repository}
 
-The big part of the planned future part of the future work is to collaborate with the GNU-R core team to pushing this work into it's development and potentially even the production code. After this would be done and considering the number of people using GNU-R language~(the estimation in the 2013 was approx 2 millions), the work done in this thesis would have big worldwide effect to lot of the people.
+The big part of the planned future part of the work is to collaborate with the GNU-R core team to push this thesis code into their development and potentially even the production code. After this would be done, and considering the number of people using GNU-R language~(the estimation in 2013 was approx 2 million), the work done in this thesis would have a significant worldwide effect to a lot of the people.
+
+%TODO: ADD USAGE OF R IN REFERENCES
 
 \subsection{Merging the bctools package into the compilers}
 
-The \code{bctools} package was developed independently as an separate disassemble feature with the minimal changes to the GNU-R VM core. This tool was also used in the debugger which is part of the VM core. When the debugger would be deployed it is suggested to merge the \code{bctools} package into the \code{compiler} while the source of the \code{bctools} one is relatively short~(approx. 600 lines). The reason why this was not already done but just proposed here as future work is that it would allow to deploy the disassembler into the working branch faster and eventually give a user-feedback for improvements before merging inside the \code{compiler} package and deploying the debugger.
+The \code{bctools} package was developed independently as add separate disassemble feature with the minimal changes to the GNU-R VM core. This tool was also used in the debugger which is part of the VM core. When the debugger would be deployed it is suggested to merge the \code{bctools} package into the \code{compiler} because the source code of the \code{bctools} package is short~(approx. 600 lines). The reason why this was not already done, but just proposed as a future work, is that it would allow to deploy the disassembler into the working branch faster and eventually give a user-feedback for improvements before merging inside the \code{compiler} package and deploying the debugger.
 
 \subsection{GNU R Memory optimization}
 
-Some of the parts of the errors which were done and fixed during the development of this thesis were memory-based. During investigation of these errors there has been noticed one thing. The core of the GNU-R language is heavy dependent on the linked list memory data structure. During the modern computer implementation of the memory system this can cause a lot of memory cache misses which affect the performance. The most straightforward way to do this is to use an smallvector technique~(inspired by an llvm compiler) but the more appropriate way would be to do analysis of whole GNU-R memory subsystem optimization with focus on cache locality.
+Some of the parts of the errors which were done and fixed during the development of this thesis were memory-based. During an investigation of these errors, there has been noticed one thing. The core of the GNU-R language is heavily dependent on the linked list memory data structure. Because of the modern computer memory system cache implementation %TODO:CACHING REFERENCE
+), this can cause a lot of memory cache misses which affect the performance. The most straightforward way to do this is to use a \code{smallvector} technique~(inspired by a llvm compiler), but the more appropriate way would be to do analysis of whole GNU-R memory subsystem optimization with focus on cache locality.
 
 \setsecnumdepth{part}
 \begin{conclusion}
