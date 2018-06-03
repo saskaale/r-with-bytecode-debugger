@@ -73,7 +73,7 @@ GNU-R language is dynamically typed interpreted language which usually means tha
 
 While the abstract syntax evaluator is the slowest of the two analyzers it already contains the debugging features GNU-R implemented. However, it was previously difficult to analyze and debug the other analyzer, bytecode. The only method provided to analyze the bytecode is very basic disassembler showing the data in human unfriendly way. It means that there is currently no support for real-time debugging of GNU-R bytecode evaluation. Instead of it there is implemented switching into the AST interpreter once user requests the debugging features. The whole lack of the native bytecode debugger is causing potential issues because the code used for bytecode can be slightly different than the code used while not-debugging~(AST one) even if it produces the same result. Eventually, this can also cause an issue when there is an error inside AST or BC interpreter core. This can result in confusing and very hard to solve issue.
 
-The work done in this thesis is solving the insufficient \textbf{bytecode disassembler} by replacing it with a \textbf{new easy-to-use and human-friendly one}. The another implemented feature is \textbf{advanced and user-friendly native support for bytecode debugger} which is significantly improving the options for analysis and debugging any program code running on the bytecode engine of the language. This implementation was written with the focus on having any performance slowdown of the bytecode engine which was proven in the performance testing part on the ending of the work. On top of this, there was implemented the feature containing \textbf{breakpoint instruction} which is used for the \textbf{simulation of the conditional breakpoints}.
+The work done in this thesis is solving the insufficient \textbf{bytecode disassembler} by replacing it with a \textbf{new easy-to-use and human-friendly one}. The another implemented feature is \textbf{advanced and user-friendly native support for bytecode debugger} which is significantly improving the options for analysis and debugging any program code running on the bytecode engine of the language. This implementation was written with the focus on having any performance slowdown of the bytecode engine which was proven in the performance testing part on the ending of the work~(see~\ref{performance-testing}). On top of this, there was implemented the feature containing \textbf{breakpoint instruction} which is used for the \textbf{simulation of the conditional breakpoints}.
 
 All the implemented features were successfully tested. The disassembler \code{bctools} package has written automated tests and there was concluded an performance testing of the GNU-R engine. 
 
@@ -1937,9 +1937,24 @@ Because of the simplicity, the tests were not written without any testing framew
 
 %The conditional breakpoints are in term of the code part of the debugger support so the testing was done altogether with other testing of the bytecode debugger support.
 
-\section{Performance testing}
+\section{Performance testing}\label{performance-testing}
 
-TODO: performance testing
+There was done performance a performance testing to prove that the changes done in the GNU-R language bytecode evaluator did not caused any slowdown. The testing was done through the set of the micro-benchmarks executing the computationally expensive bytecode functions. 
+
+Data were taken on the computer with these specifications~(the system was running just the test scripts one at the time):
+
+\begin{itemize}
+	\item Windows 10 Home - Ubuntu 16.04.4 Xenial subsystem
+	\item Intel Core i7 8550u - 1.8GHz, 4 cores, 8 threads
+	\item 16GB RAM
+\end{itemize}
+
+The result~(see the fig.~\ref{fig:performance-testing}) showed just minimal fluctuations which are caused by inacurracy during the measuring. This means that there is no performance difference caused by implementation of the BC debugger.
+
+\begin{figure}[H]\centering
+	\includegraphics[width=\textwidth]{performance-testing}
+	\caption{Performance testing}\label{fig:performance-testing}
+\end{figure}
 
 \section{Future work}
 
@@ -1965,7 +1980,7 @@ The GNU-R language is one of the most popular scientific language worldwide used
 
 There has been proposed and implemented changes which contains the \textbf{user friendly and easy-human readable bytecode disassembler}~\ref{implementation-of-disassembler}. The second part is about the implementation of the \textbf{native debugger support for bytecode evaluator}~\ref{implementation-of-debugger}. As the additional feature there has been added \code{breakpoint()} function which enables to add support for simulating conditional breakpoints~\ref{simulated-conditional-breakpoints}.
 
-In the beginning of the work there is brief introduction to the problem with the motivation part~\ref{introduction}. Following is the analysis of the current implementation of the GNU-R bytecode disassembler~\ref{analysis-of-disassembler} and debugger~\ref{analysis-of-debugger} alongside with the comparison to similar tools and features in VMs of other languages. After that there are described implementation details of the work. Firstly there is described implementation of the disassembler~\ref{implementation-of-disassembler} followed by the stack printer~\ref{implementation-of-stack-printer}. Finally there is described debugger implementation~\ref{implementation-of-debugger} where is shown reuse of two previously described features. As an addition it is described the implementation of support for simulated conditional breakpoints~\ref{conditional-breakpoints}. The end of the work contains chapter about the testing of all features altogether with possible future work and improvements~\ref{testing-and-future-work}.
+In the beginning of the work there is brief introduction to the problem with the motivation part~\ref{introduction}. Following is the analysis of the current implementation of the GNU-R bytecode disassembler~\ref{analysis-of-disassembler} and debugger~\ref{analysis-of-debugger} alongside with the comparison to similar tools and features in VMs of other languages. After that there are described implementation details of the work. Firstly there is described implementation of the disassembler~\ref{implementation-of-disassembler} followed by the stack printer~\ref{implementation-of-stack-printer}. Finally there is described debugger implementation~\ref{implementation-of-debugger} where is shown reuse of two previously described features. As an addition it is described the implementation of support for simulated conditional breakpoints~\ref{conditional-breakpoints}. The end of the work contains chapter about the testing of all features~\ref{performance-testing} altogether with possible future work and improvements~\ref{testing-and-future-work}.
 
 All the features were developed and tested and are included on the enclosed DVD. Personally it was a very good experience to work on the real language VM while implementing feature which would use millions of people. The work done in this thesis can be considered as successful.
 
