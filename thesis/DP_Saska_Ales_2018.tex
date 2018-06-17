@@ -41,9 +41,9 @@
 \authorFN{Saska} %author's surname
 \author{Ale{\v s} Saska} %author's name without academic degrees
 \authorWithDegrees{Bc. Ale{\v s} Saska} %author's name with academic degrees
-\supervisor{Ing. Petr M{\' a}j}
-\acknowledgements{Thanks to my adviser Petr M{\' a}j for help with reviewing thesis, Tom{\' a}{\v s} Kalibera for useful help with the GNU-R code and functionality, my father for assisting with the submission of this work, and big thanks to my girlfriend for psychological support and all the tea required to make this work happen.}
-\abstractEN{This thesis is about analysis and implementation of the advanced bytecode disassembler tool for GNU-R language. The implemented tool is returning the information in a human readable, compact format for passed function. This second feature was reused in the second part of the thesis which is about native support for bytecode debugger. The current debugging options for the bytecode in GNU-R are insufficient because of implementing through AST call. The debugging capabilities of the languare are improved in this thesis by implementing native support for debugging bytecode. Presented implementation shows all internal information of the bytecode evaluator status. The solution written in this thesis is focusing on making any negative impact to the overall performance of the language which has been successfully tested and proven with testing.}
+\supervisor{Ing. Petr M{\%' a}j}
+\acknowledgements{Thanks to my adviser Petr M{\' a}j for help with reviewing thesis, Tom{\' a}{\v s} Kalibera for useful help with the GNU-R code and functionality, my father for assisting with the submission of this work, and big thanks to my girlfriend for psychological support and all the tea required to make this work happen.}%be
+\abstractEN{This thesis is about analysis and implementation of the advanced bytecode disassembler tool for GNU-R language. The implemented tool is returning the information in a human readable, compact format for passed function. This second feature was reused in the second part of the thesis which is about native support for bytecode debugger. The current debugging options for the bytecode in GNU-R are insufficient because of implementing through AST call. The debugging capabilities of the language are improved in this thesis by implementing native support for debugging bytecode. Presented implementation shows all internal information of the bytecode evaluator status. The solution written in this thesis is focusing on making any negative impact to the overall performance of the language which has been successfully tested and proven with testing.}
 \abstractCS{Tato pr{\' a}ce se zabývá analýzou a implementací pokročilého bytecode debuggeru pro jazyk GNU-R. Implementovaný systém vypisuje informace v čitelné a uživatelem srozumitelné podobě pro každou instrukci zadané funkce. Druhá část práce se zabývá
 
  V n{\v e}kolika v{\v e}t{\' a}ch shr{\v n}te obsah a p{\v r}{\' i}nos t{\' e}to pr{\' a}ce v {\v c}esk{\' e}m jazyce.}
@@ -67,22 +67,24 @@
 
 \section{Motivation and objectives}\label{motivation-and-objectives}
 
-Almost everyone who has been trying to write computer program has made some logical mistakes in them. To help to solve them, we usually run program \textbf{step-by-step} with debugging tools with some debugger. The \mbox{\textbf{GNU-R}} which is one of the most widely used scientific languages across the whole world also has its implementation for debugging code.
+Almost everyone who has been trying to write computer program has made some logical mistakes in them. To help to solve them, we usually run program \textbf{step-by-step} with debugging tools with some debugger. The \mbox{GNU-R} which is one of the most widely used scientific languages across the whole world also has its implementation for debugging code.
 
-GNU-R language is dynamically typed interpreted language which usually means that it needs \textbf{Virtual Machine} to interpret. There are more ways to represent and implement its evaluation. The first one \textbf{Abstract Syntax Tree}~(see~\ref{AST}) evaluation is the simplest one. To make speedup of its internal evaluation, there has been introduced the \textbf{Bytecode}~(see~\ref{BC}) compiler and interpreter into \mbox{GNU-R} in 1998.
+GNU-R language is dynamically typed interpreted language which usually means that it needs Virtual Machine to interpret. There are more ways to represent and implement its evaluation. The first one Abstract Syntax Tree~(see~\ref{AST}) evaluation is the simplest one. To make speedup of its internal evaluation, there has been introduced the Bytecode~(see~\ref{BC}) compiler and interpreter into \mbox{GNU-R}.
 
-While the abstract syntax evaluator is the slowest of the two analyzers it already contains the debugging features GNU-R implemented. However, it was previously difficult to analyze and debug the other analyzer, bytecode. The only method provided to analyze the bytecode is very basic disassembler showing the data in human unfriendly way. It means that there is currently no support for real-time debugging of GNU-R bytecode evaluation. Instead of it there is implemented switching into the AST interpreter once user requests the debugging features. The whole lack of the native bytecode debugger is causing potential issues because the code used for bytecode can be slightly different than the code used while not-debugging~(AST one) even if it produces the same result. Eventually, this can also cause an issue when there is an error inside AST or BC interpreter core. This can result in confusing and very hard to solve issue.
+%TODO:UPDATE REFERENCE
 
-The work done in this thesis is solving the insufficient \textbf{bytecode disassembler} by replacing it with a \textbf{new easy-to-use and human-friendly one}. The another implemented feature is \textbf{advanced and user-friendly native support for bytecode debugger} which is significantly improving the options for analysis and debugging any program code running on the bytecode engine of the language. This implementation was written with the focus on having any performance slowdown of the bytecode engine which was proven in the performance testing part on the ending of the work~(see~\ref{performance-testing}). On top of this, there was implemented the feature containing \textbf{breakpoint instruction} which is used for the \textbf{simulation of the conditional breakpoints}.
+While the abstract syntax evaluator is the slowest of the two GNU-R interpreters it already contains the debugging features implemented. However, it was previously difficult to analyze and debug the other analyzer, bytecode. The only method provided to analyze the bytecode is very basic disassembler showing the data in human unfriendly way. It means that there is currently no support for debugging of the GNU-R bytecode evaluation. Instead of it there is implemented switching into the AST interpreter once user requests the debugging features. The whole lack of the native bytecode debugger is causing potential issues because the code used for bytecode can be slightly different than the code used while not-debugging~(AST one) even if it produces the same result. Eventually, this can also cause an issue when there is an error inside AST or BC interpreter core. This can result in confusing and very hard to solve issue.
 
-All the implemented features were successfully tested. The disassembler \code{bctools} package has written automated tests and there was concluded an performance testing of the GNU-R engine. 
+The work done in this thesis is solving the insufficient bytecode disassembler by replacing it with a new easy-to-use and human-friendly one. The another implemented feature is the advanced and user-friendly native support for bytecode debugger which is significantly improving the options for analysis and debugging any program code running on the bytecode engine of the language. On top of this, there was implemented the feature containing breakpoint instruction which is used for the simulation of the conditional breakpoints. The implementation was written with the focus on having any performance slowdown of the language~(the bytecode engine). This was proven in the performance testing part on the ending of the work~(see~\ref{performance-testing}). 
+
+All the implemented features were successfully tested~\ref{testing-and-future-work}. The disassembler \code{bctools} package has written automated tests and there was concluded an performance testing of the GNU-R engine~\ref{performance-testing}. 
 
 This thesis is organized as follows: Section~\ref{introduction} is the introduction into problems of dynamic languages evaluation. Section~\ref{analysis-of-disassembler} contains the analysis of possible solutions how to implement the bytecode disassembler and the debugger. Section~\ref{realization} is describing design of current implementation. Section~\ref{testing-and-future-work} describes what type of testing has been done on the work. Section~\ref{testing-and-future-work} proposing work for the future improvements of the work followed by thesis summarization in conclusion.
 
 %\section{Problem statements}
 
 %There are two main types of programming languages. Dynamic typed and static typed ones.
-%Static such as \textbf{C} / \textbf{C++} / \textbf{FORTRAN} languages has strictly defined types and are usually more machine inspired/focused. Dynamic ones usually do not have strict type inference so they allow the user~(programmer) more freedom. As trade-off they usually needs Virtual Machine~(\textbf{VM}, see~\ref{VM}) to runs efficiently which cause possible performance slowdown. \textbf{GNU R} language was primarily developed for the scientists so user-friendliness and no need to necessary care about data types was one of the decision to make the language dynamic typed.
+%Static such as \textbf{C} / \textbf{C++} / \textbf{FORTRAN} languages has strictly defined types and are usually more machine inspired/focused. Dynamic ones usually do not have strict type inference so they allow the user~(programmer) more freedom. As trade-off they usually needs Virtual Machine~(\textbf{VM}, see~\ref{VM}) to runs efficiently which cause possible performance slowdown. \textbf{GNU-R} language was primarily developed for the scientists so user-friendliness and no need to necessary care about data types was one of the decision to make the language dynamic typed.
 
 %TODO: add more of some good shit
 
@@ -91,17 +93,17 @@ This thesis is organized as follows: Section~\ref{introduction} is the introduct
 
 \chapter{Analysis and design}
 
-\section{GNU R from user perspective}\label{R-UI}
+\section{GNU-R from user perspective}\label{R-UI}
 
 \subsection{Basis usage~(main commands and REPL loop)}\label{REPL}
 
-The main \textbf{GNU R} language is written as the console application evaluating the infinite \textbf{REPL} - Read Eval Print Loop. As the abbreviation says, it is evaluating the expressions right as is entered by the user~(of the \code{R} program) to the program standard input~(\code{stdin}). Alongside of this, there is also the \code{Rscript} command in the package which supports running the program from the input file. However, it is internally implemented just as wrapper piping the file content into the \code{R} command.
+The main GNU-R language is written as the console application evaluating the infinite REPL - Read Eval Print Loop. As the abbreviation says, it is evaluating the expressions right as is entered by the user~(of the \code{R} program) to the program standard input~(\code{stdin}). Alongside of this, there is also the \code{Rscript} command in the package which supports running the program from the input file. However, it is internally implemented just as wrapper piping the file content into the \code{R} command.
 
-\subsection{GNU R package system}\label{R-Packages}
+\subsection{GNU-R package system}\label{R-Packages}
 
-The \textbf{GNU-R} has integrated package subsystem \textbf{CRAN} with plenty of inbuilt packages. These packages are intended to be the easy way for developers~(R users) how to make a user-friendly extension for other people. The bytecode compiler is written in the GNU-R in the separate package named \code{compiler}. This package comes already pre-installed so users don't need to manipulate with it as with the other user-installed libraries. However, the bytecode disassembler in this thesis is written as the separate package named \code{bctools} because it is better to keep the language core minimal and the disassembly tool can be implemented as a plugin into the language.
+The bytecode disassembler in this thesis is written as the separate package named \code{bctools}. It allows the disassembly tool to be implemented as a plugin into the language. This design is helping to keep the language core minimal. 
 
-Because we would be creating our package we need to be able to manipulate and work with it. These are few basic commands to work with packages:
+Because of this we need to be able to manipulate the packages and work with them. These are few basic commands used for this purpose:
 
 \begin{itemize}
 	\item \code{R CMD INSTALL $<$pkgs$>$ } - install specified packages
@@ -111,102 +113,29 @@ Because we would be creating our package we need to be able to manipulate and wo
 
 
 
-\subsection{GNU R class system}\label{R-Classes}
+\subsection{GNU-R class system}\label{R-Classes}
 
-Classes are way how to in Object-oriented Programming (OOP) group functionality of one meaning. For example instead of the two functions \code{drawButton} and \code{pressButton} we can have the two methods \code{draw} and \code{press} belonging to the object \code{button}. The GNU-R is dynamic language it is variable can be any type. It means that once we'd call method of class (function on the variable), the language engine has to look up the specific code for the class which would be then evaluated. This functionality also is used in the printing of the values or objects via the \code{print} method which we can use for the disassembler. The user would then be able to print out the disassembly in the same way as he is used with other data types. The \code{print} method is also dispatched by default in the REPL loop in printing phase.
+According to the Hadley Wickham's article~\cite{R-OO}, the GNU-R has 4 possible class systems - \code{S3}, \code{S4}, Reference classes and Base classes~(internally used). It means that the R class system is not strictly defined as in languages like Java, C++, Python, etc. The whole system provides the end user to more flexibility, but on the other hand, it can be a little bit more confusing for the programmers who are used to conventional programming languages.
 
-According to the Hadley Wickham's article about GNU-R	 has 4 possible class systems - \textbf{\code{S3}}, \textbf{\code{S4}}, \textbf{Reference classes} and \textbf{Base classes}~(internally used). It means that the \textbf{R} class system is not strictly defined as in languages like Java, C++, \textbf{Python}, etc. The whole system provides the end user to more flexibility, but on the other hand, it can be a little bit more confusing for the programmers who are used to conventional programming languages.
+\section{GNU-R Virtual Machine internal structure}\label{R-internal-structure}
 
-The system used in the print method is \code{S3}. It implements a style of OO programming called generic-function OO. This is different from most programming languages, like Java, C++, and C{\#}, which implement message-passing OO. With message-passing, messages~(methods) are sent to objects and the object determines which function to call. Typically, this object has a special appearance in the method call, usually appearing before the name of the method/message: e.g., \code{canvas.drawRect("blue")}. S3 is different. While computations are still carried out via methods, a special type of function called a generic function decides which method to call, e.g., \code{drawRect(canvas, "blue")}. S3 is a very casual system. It has no formal definition of classes.
+Static languages compilers usually use directly the computer operating system as the running environment. However, the GNU-R is the dynamically typed computer language with the internal Virtual Machine~(VM) providing the running environment.
+It is simulating the environment by executing code, managing memory, and providing communication layer with the underlying computer and its external devices ( accessing the filesystem, network communication, etc. ). The nature of all being simulated usually results in performance slowdown, but on the other hand, there is s significant safety advantage of isolation which results of the code being much safer.
 
-%\item \textbf{S4} works similarly to S3, but is more formal. There are two major differences to S3. S4 has formal class definitions, which describe the representation and inheritance for each class, and has special helper functions for defining generics and methods. S4 also has multiple dispatch, which means that generic functions can pick methods based on the class of any number of arguments, not just one.
+The GNU-R stack-based Virtual Machine. They are the simpler ones because every instruction arguments lie on the top of the stack in the specified order (for example \code{ADD} instruction removes two topmost arguments from the stack, make the addition, and push back the result to the stack). The simplicity of instruction coding implies easier instructions and also easier implementation of both compiler and evaluation code.
 
-%\item \textbf{Reference classes}, called RC for short, are quite different from S3 and S4. RC implements message-passing OO, so methods belong to classes, not functions. {\$} is used to separate objects and methods, so method calls look like \textit{canvas{\$}drawRect("blue")}. RC objects are also mutable: they don't use R's usual copy-on-modify semantics, but are modified in place. This makes them harder to reason about, but allows them to solve problems that are difficult to solve with S3 or S4.
-
-
-%There's also one other system that's not quite OO, but it's important to mention here:
-
-
-%\item \textbf{base types}, the internal C-level types that underlie the other OO systems. Base types are mostly manipulated using C code, but they're important to know about because they provide the building blocks for the other OO systems.
-%\end{itemize}
-
-
-\section{GNU R internal structure}\label{R-internal-structure}
+\subsection{Source code of the GNU-R}\label{source-code-of-gnu-r}
 
 The core GNU-R VM core is written in C language with the broad number of supported platforms~(Windows/MAC/Linux...) and computer architectures~(ARM/x86/x64...). The multi-compiler support also means that there could be the difference in supported features which would need conditional checks for supporting this feature in the compiler code. One of the examples is support for the Computed GOTO~\ref{Computed-GOTO}.
 
 \subsection{Implementation of the core features of the language in R itself}
 
-The GNU-R has internally written the loading mechanism in the way that the \code{base} package is loaded first and then all of the packages contained in list \code{getOption("defaultPackages")} are loaded into the global environment. This mechanism allows that just the core features and language constructs are written in performance-optimized \code{C}, and the rest can be written inside R language itself. It means that inside these packages there is substantial amount of functionality for the whole language. The \code{compiler} package is little different than the other packages because it needs to be loaded due to internal bytecode compiler usage~(see JIT chapter~\ref{JIT}). However, it's loading mechanism is different because it is hardcoded in the code. It is hardcoded in \code{loadCompilerNamespace}~(in the \textit{src/main/eval.c} file) to be independent on the whole code.
-
-%TODO: clean it up
+The GNU-R has internally written the loading mechanism in the way that the \code{base} package is loaded first and then all of the packages contained in list \code{getOption("defaultPackages")} are loaded into the global environment. This mechanism allows that just the core features and language constructs are written in performance-optimized \code{C}, and the rest can be written inside R language itself. It means that these packages there is substantial amount of functionality for the whole language. The \code{compiler} package is different than the other packages because its code is used inside the language core interpreter. It means that the \code{compiler} package needs to be loaded before any of the other packages. It causes the the loading mechanism to be hardcoded in the language evaluator code~(which makes it different to the other packages). Its loading is inside \code{loadCompilerNamespace} function~(in the \textit{src/main/eval.c} file). The same concept about loading to the language intepreter core has to be used for our bytecode disassembler \code{bctools}~\ref{implementation-of-disassembler} package~(because the disassembler functionality is used inside bytecode evaluator engine).
 
 \subsection{Calling internal C functions from R}
 
-%TODO: REWRITE IT
-
-\textbf{C code} compiled into R at build time can be called directly in what are termed primitives or via the \code{.Internal} interface, which is very similar to the \code{.External} interface except in syntax. More precisely, R keeps a table of function names and corresponding C functions to call, which by convention all start with \code{do{\_}} and return a \code{SEXP}. This table (\code{R{\_}FunTab} sitting in file \textit{src/main/names.c}) also specifies how many arguments to a function are required or allowed, whether or not the arguments are to be evaluated before calling, and whether the function is internal in the sense that it must be accessed via the \textbf{.Internal} interface, or directly accessible in which case it is printed in \textbf{R} as \textbf{.Primitive}.
-
-\section{Computer Program Compiler Structure}
-
-%\subsection{Internal structure}\label{Compiler-internal-structure}
-
-%To make compilers structure internally more organized most of the compilers or \textbf{VM}s are divided into separate passes.
-
-%The common basic ones are:
-%\begin{itemize}
-%	\item Frontend - parsing source code into %\textbf{IR} or \textbf{AST}~(see chapter~%\ref{AST} )
-%	\item Optimizer - optimizing \textbf{IR} or \textbf{AST}~(can be left out)
-%	\item Backend - generating machine code or running \textbf{VM}~(see chapter~\ref{VM})
-%\end{itemize}
-%Each step can be also divided into more steps (for example frontend consists usually of lexer and parser).
-
-%As long as the \textbf{GNU R} is dynamic language it is build over the internal Virtual Machine. It does an on-demand parsing of the source code which directly evaluates.
-
-%The optimization problem is very difficult inside the \textbf{GNU R}. One of its' example why this is not possible is extreme dynamism of the language. For example you can:
-%\begin{itemize}
-%	\item Change the body, arguments, and %environment of functions.
-%	\item Change the S4 methods for a generic.
-%	\item Add new fields to an S3 object, or %even change its class.
-%	\item Modify objects outside of the local %environment with <<-.
-%\end{itemize}
-
-%Basically the \textbf{GNU R} is monolithic structure built in over the Virtual Machine. This design is not ideal but it came up from to historic reasons.
-
-\subsection{Virtual Machine}\label{VM}
-
-Static languages compilers usually use directly the computer operating system as the running environment. However, the GNU-R is the dynamically typed computer language with the internal Virtual Machine~(VM) providing the \textbf{running environment}.
-It is simulating the environment by executing code, managing memory, and providing communication layer with the underlying computer and its external devices ( accessing the filesystem, network communication, etc. ). The nature of all being simulated usually results in performance slowdown, but on the other hand, there is s significant safety advantage of isolation which results of the code being much safer.
-
-There are more types of virtual machines. The most common ones are stack machines followed by the register-based machines.
-
-The \textbf{register-based} ones simulate register processors (such as \textbf{x86} architecture Intel or \textbf{ARM} ones) with instructions which are capable of working with more registers. The bigger number of registers implicates more sophisticated instructions because they needs to contain information about what registers should be accessed (for example Android \textbf{Dalvik VM} \code{add-int} instruction has 3 parameters - Destination parameter, the first source register, and second source register ). The more information which the instruction needs to contain results in longer instruction sizes and more expensive instruction decoding which both negatively impacts execution speed. However, they can profit from the nature of the register-based hardware of the most common processor architectures~(ARM, x86, etc.) so they should get better evaluation performance.
-
-The \textbf{stack-based} ones, on the other hand, are simpler ones because every instruction arguments lie on the top of the stack in the specified order (for example ADD instruction removes two topmost arguments from the stack, make the addition, and push back the result to the stack). The simplicity of instruction coding implies easier instructions and also easier implementation of both compiler and evaluator code. This type is one of the most common and also the GNU R Bytecode engine one of its representative.
-
-The examples of virtual machines are
-\begin{itemize}
-	\item JVM - Java VM
-	\item Python
-	\item GNU R
-	\item Dalvik VM - Android VM ( the only register one based in this list )
-	\item JavaScript V8
-	\item Chakra ( JavaScript inside MS Edge browser)
-\end{itemize}
-
-\subsubsection{Internal parts of the VM}\label{internal-parts-of-vm}
-
-\textbf{GNU R} virtual machine is stack based one. Due to simplicity it consists of these parts:
-\begin{itemize}
-	\item \textbf{Parser} (mainly in src/main/gram.y which generates src/main/gram.c)
-	\item \textbf{Memory management} ( mainly in src/main/memory.c )
-	\item \textbf{AST evaluator} ( eval function inside src/main/eval.c )
-	\item \textbf{Bytecode Compiler} ( inside R package Compiler )
-	\item \textbf{Bytecode evaluator} ( bcEval function inside src/main/eval.c )
-	\item \textbf{Runtime environment}
-\end{itemize}
-
-\subsection{GNU R memory types and memory management}\label{memory-management}
+According to the GNU-R documentation~\cite{R_INTERNAL} the C code compiled into R at build time can be called directly in what are termed primitives or via the \code{.Internal} interface. More precisely, R keeps a table of function names and corresponding C functions to call, which by convention all start with \code{do{\_}} and return the result value. This table (\code{R{\_}FunTab} sitting in file \textit{src/main/names.c}) also specifies how many arguments to a function are required or allowed, whether or not the arguments are to be evaluated before calling, and whether the function is internal in the sense that it must be accessed via the \code{.Internal} interface, or directly accessible in which case it is printed in R as \code{.Primitive}. The function table was used in this thesis for defining the native calls for the functions mostly used for manipulating the bytecode~(\ref{setting-and-unsetting-debug-instruction}) and for handling of the status variables for the debugger~(\ref{verbosity-and-formatting}).
+\subsection{GNU-R memory types and memory management}\label{memory-management}
 
 Each memory node is represented as \code{SEXP} type. It contains internal representations such as code definition ( \code{LANGSXP}, \code{BCOSESXP}, \code{WEAKREFSXP}, promises, etc. ) and also regular memory types (such as logical vectors, integer vectors, strings vectors, etc.). GNU-R is a vector language, so every value is internally represented as a vector (e.g., integer 3 is represented and boxed as \code{INTSXP} vector of size 1 containing value 3).
 
@@ -249,17 +178,19 @@ Types of memory nodes are
 
 These types are holding values which can be printed in the disassembler function~\ref{implementation-of-disassembler} and also inside the stack printer~\ref{printing-stack-values} in this thesis.
 
-\subsection{GNU R garbage collector}\label{GC}
+\subsection{GNU-R garbage collector}\label{GC}
 
-The memory management in dynamic languages is maintained by  \textbf{Garbage Collector}. It releases allocated memory once it is no longer used by program. GNU R implementation of memory management lies inside \textit{src/main/memory.c}. It implements a non-moving generational garbage collector with two or three generations. Memory is allocated by \code{R{\_}alloc} and is maintained in a stack. There is also protection stack managed by \code{PROTECT}~(and \code{UNPROTECT}) functions which is used inside C code for internal purposes~(widely used in~\ref{implementation-of-debugger}). It allows to push locally allocated variables into it so they are reachable by the garbage collector and would not get removed during a garbage collection run~(memory cleanup).
+The memory management in dynamic languages is maintained by  \textbf{Garbage Collector}. It releases allocated memory once it is no longer used by program. GNU-R implementation of memory management lies inside \textit{src/main/memory.c}. It implements a non-moving generational garbage collector with two or three generations. Memory is allocated by \code{R{\_}alloc} and is maintained in a stack. There is also protection stack managed by \code{PROTECT}~(and \code{UNPROTECT}) functions which is used inside C code for internal purposes~(widely used in~\ref{implementation-of-debugger}). It allows to push locally allocated variables into it so they are reachable by the garbage collector and would not get removed during a garbage collection run~(memory cleanup).
 
 \subsection{Computed GOTO}\label{Computed-GOTO}
 
-The Computed GOTO technique is used in the VM for code \textbf{evaluation speedup}. Also, the GNU-R VM has its internal support for this feature~(managed by macro \code{THREADED{\_}CODE}). Because the DEBUG instruction is internally dispatching an old previous instruction after execution of debug features there was a need to understand the whole bytecode instruction jumping.
+The Computed GOTO technique is used in the VM for code evaluation speedup. Also, the GNU-R VM has its internal support for this feature~(managed by macro \code{THREADED{\_}CODE}). Because the DEBUG instruction is internally dispatching an old previous instruction after execution of debug features there was a need to understand the whole bytecode instruction jumping. 
 
-\textbf{GNU R} has the support of threaded code~(implemented by the \textbf{computed GOTO} technique) although there is still support for non-GCC compilers~(and compilers which does not support this feature) - see~\ref{VM}. Enabling or disabling of this feature is managed by (\code{THREADED{\_}CODE} \code{define} preprocessor command.
+GNU-R has the support of threaded code~(implemented by the computed GOTO technique) although there is still support for non-GCC compilers~(and compilers which does not support this feature) - see~\ref{source-code-of-gnu-r}. Enabling or disabling of this feature is managed by (\code{THREADED{\_}CODE} \code{define} preprocessor command. 
 
-The all of the while loop and switch cases are in the GNU-R code then defined with macros~(\code{INITIALIZE{\_}MACHINE}, \code{BEGIN{\_}MACHINE}, \code{OP}, \code{NEXT} and \code{LASTOP}). They are conditionally defined to either be compiled for supporting Computed GOTO~\ref{computed-goto-used} or not~\ref{computed-goto-used}~(according to the \code{THREADED{\_}CODE} flag).
+The all of the while loop and switch cases are in the GNU-R code defined with macros~(\code{INITIALIZE{\_}MACHINE}, \code{BEGIN{\_}MACHINE}, \code{OP}, \code{NEXT} and \code{LASTOP}). They are conditionally defined to either be compiled for supporting Computed GOTO~\ref{computed-goto-used} or not~\ref{computed-goto-used}~(according to the \code{THREADED{\_}CODE} flag).
+
+This feature has impact on the implementation of the bytecode breakpoint instruction jumping to the specified instruction~(see~\ref{threaded-and-non-threaded-design}). It means that this jumping feature has to be implemented and tested for both dispatch systems~(both \code{THREADED{\_}CODE} enabled and disabled).
 
 \subsubsection{Computed GOTO not used - Switch dispatch}\label{computed-goto-not-used}
 
@@ -286,7 +217,7 @@ while(1){
 
 \subsubsection{Computed GOTO used - threaded code}\label{computed-goto-used}
 
-The \code{switch} statement should be implemented very efficiently by C compilers - the condition serves as an offset into a lookup table that says where to jump next which means that it is evaluated for every bytecode instruction. However, it turns out that there's a popular GCC extension that allows the compiler to generate even \textbf{faster code}. The main idea behind this is to store the address of the label into the value of a variable which allows the dynamic lookup of the next value.
+The \code{switch} statement should be implemented very efficiently by C compilers - the condition serves as an offset into a lookup table that says where to jump next which means that it is evaluated for every bytecode instruction. However, it turns out that there's a popular GCC extension that allows the compiler to generate even faster code. The main idea behind this is to store the address of the label into the value of a variable which allows the dynamic lookup of the next value.
 
 %Example of computed-goto code:
 \begin{figure}[!htb]
@@ -320,11 +251,11 @@ while (1) {
 \caption{\label{fig:goto-used-table} Example of the VM with computed goto architecture through dispatch table.}
 \end{figure}
 
-In the GNU-R implementation of bytecode interpreter, there is performance optimization called \textbf{direct threaded code}  associated with dispatch table and the \textbf{computed GOTO}. In process of loading bytecode into the VM internal structure~(done by \code{R{\_}bcDecode} and \code{R{\_}bcEncode} functions inside \textit{src/main/eval.c}) there is translation between instruction codes~(integer codes) and the current location of jump labels inside \code{bcEval} - see \textit{computed goto}~\ref{AST}(\code{void*} type). The nature of the operating system loader would cause that this position can~(and usually is) changed every time the program is started~(R VM is loaded into memory by a operating system) - so value has to be computed every time again. This allows BC interpreter to jump directly at the position which is stored inside the code array. It would cause saving one array lookup every step of BC interpreter compared to the classic interpreter~(implemented for example inside \textbf{CPython} VM).
+In the GNU-R implementation of bytecode interpreter, there is performance optimization called \textit{direct threaded code} associated with dispatch table and the computed GOTO. In process of loading bytecode into the VM internal structure~(done by \code{R{\_}bcDecode} and \code{R{\_}bcEncode} functions inside \textit{src/main/eval.c}) there is translation between instruction codes~(integer codes) and the current location of jump labels inside \code{bcEval} - see \textit{computed goto}~\ref{AST}(\code{void*} type). The nature of the operating system loader would cause that this position can~(and usually is) changed every time the program is started~(R VM is loaded into memory by a operating system) - so value has to be computed every time again. This allows BC interpreter to jump directly at the position which is stored inside the code array. It would cause saving one array lookup every step of BC interpreter compared to the classic interpreter~(implemented for example inside CPython VM).
 
 \subsection{Abstract Syntax Tree}\label{AST}
 
-To be able to internally interpret the syntax of every language the code is first parsed into abstract syntax tree~(\textbf{AST}, see the example in fig.~\ref{fig:ast-while}). Tree in the GNU-R contains nodes of LANGSXP type with references to the symbol table~(pointers to the function). These references are represented as an pointers to functions which have implemented the evaluation of the code. This tree is then traversed and evaluated inside \code{eval} function~(which lies in file \textit{src/main/eval.c}). The evaluator also has built-in support for debugging which is done internally by the checking of the \code{RDEBUG} flag of the current executed environment. The flag is checked every evaluator step which creates performance overhead even though the debug mode is not active. However this checking overhead is usually minimized by branch prediction feature of current CPUs. 
+To be able to internally interpret the syntax of every language the code is first parsed into abstract syntax tree~(AST, see the example in fig.~\ref{fig:ast-while}). Tree in the GNU-R contains nodes of LANGSXP type with references to the symbol table~(pointers to the function). These references are represented as an pointers to functions which have implemented the evaluation of the code. This tree is then traversed and evaluated inside \code{eval} function~(which lies in file \textit{src/main/eval.c}). The evaluator also has built-in support for debugging which is done internally by the checking of the \code{RDEBUG} flag of the current executed environment. The flag is checked every evaluator step which creates performance overhead even though the debug mode is not active. However this checking overhead is usually minimized by branch prediction feature of current CPUs. 
 
 The current AST evaluator debugging implementation was in this thesis used as an inspiration for the functionality of the newly implemented features~\ref{implementation-of-debugger}. The other thing inspired by the this debugger is the user-output in case the bytecode debugger is in the non-verbose mode. In that case the bytecode debugger is simulating the command-line behavior of the AST - see section~\ref{short-compact-way-of-status-printing}.
 
@@ -332,60 +263,22 @@ The current AST evaluator debugging implementation was in this thesis used as an
 
 \begin{figure}[H]\centering
 	\includegraphics{Abstract-syntax-tree-of-the-while-loop}
-	\caption{While loop example}\label{fig:ast-while}
+	\caption{While loop example - taken from~\cite{WHILE_LOOP_EXAMPLE}}\label{fig:ast-while}
 \end{figure}
 
 \subsection{Bytecode}\label{BC}
 
-Another option how to represent the source code to evaluate is the \textbf{bytecode}. It has an array of transferable instruction codes and constants designed for easy evaluation. The name bytecode stems from the the instruction set that have one byte operation code. Structure contains the instruction code which follows parameters (depending on how many / if parameter given instruction have ). This thesis content is about an implementation of support for the bytecode evaluator of an GNU-R language.
+Another option how to represent the source code to evaluate is the bytecode. It has an array of transferable instruction codes and constants designed for easy evaluation. The name bytecode stems from the the instruction set that have one byte operation code. Structure contains the instruction code which follows parameters (depending on how many / if parameter given instruction have ). This thesis content is about an implementation of support for the bytecode evaluator of an GNU-R language.
 
 \subsection{Just in Time compilation}\label{JIT}
 
-In order to speed-up evaluation of inside \textbf{VM}, there have been developed various techniques of the \textbf{performance optimization}. One of them is Just in Time~(JIT) compilation of code. The underlying idea is to internally translate code into some more efficient representation ( from \textbf{AST} to either \textbf{Bytecode} or to the native machine code ). However, this transformation (compilation) is usually pretty expensive so it is called once the execution of a specified piece of code reached some limit.
-GNU-R has the basic internal support of \textbf{JIT}. Implementation lies inside \code{src/main/eval.c} mainly in functions \code{R{\_}CheckJIT} and \code{R{\_}cmpfun} ). It is executing the \code{Compiler::tryCmpfun} to compile function \textbf{AST} into \textbf{bytecode}. According to the posts from running code with ByteCode, the JIT enables speedup up to 10 times~(theoretically up to 25 times but these cases are very rare).
+In order to speed-up evaluation of inside VM, there have been developed various techniques of the performance optimization. One of them is Just in Time~(JIT) compilation of code. The underlying idea is to internally translate code into some more efficient representation ( from AST to either Bytecode or to the native machine code ). However, this transformation (compilation) is usually pretty expensive so it is called once the execution of a specified piece of code reached some limit.
+GNU-R has the basic internal support of JIT. Implementation lies inside \code{src/main/eval.c} mainly in functions \code{R{\_}CheckJIT} and \code{R{\_}cmpfun} ). It is executing the \code{Compiler::tryCmpfun} to compile function AST into bytecode. According to the posts from running code with ByteCode, the JIT enables speedup up to 10 times~(theoretically up to 25 times but these cases are very rare).
 This means that the bytecode engine of GNU-R code can be used even without a user knowing it~(explicitly calling compilation) which would make work for the bytecode debugger in our thesis very important. The second important thing is that both interpreters~(AST and BC one) can be run together therefore there has to be a need to clearly decide which is currently in use~(this feature is implemented in chapter~\ref{bytecode-interpreter-internal-status}).
 
-%TODO: JIT speedup by citation
+\subsection{Promises}\label{computer-promises}
 
-%As mentioned before, the compilation can take significant amount time, so it makes sense for the virtual machine to compile just the most used parts of code~(if the every function would be compiled, it would have even cause the slowdown). The \textbf{GNU R} has for this more strategies:
-
-%\begin{itemize}
-%  \item \textit{NO{\_}CACHE}
-%
-%      functions are compiled 1st time seen
-%
-%      \hspace*{6mm} code is never cached
-%
-%  \item \textit{NO{\_}SCORE}
-%
-%      functions are compiled 1st time seen,
-%
-%      \hspace*{6mm} code is cached,
-%
-%      in case of conflict function may be marked \textit{NOJIT}
-%
-%  \item \textit{ALL{\_}SMALL{\_}MAYBE}
-%
-%      functions with small score are compiled 2nd time seen,
-%
-%      function with high score are compiled,
-%
-%      \hspace*{6mm} 1st time seen if top-level, 2nd time seen %otherwise
-%
-%  \item \textit{TOP{\_}SMALL{\_}MAYBE}
-%
-%      functions with small score compiled,
-%
-%      \hspace*{6mm} 2nd time seen if top-level, never otherwise
-%
-%      functions with high score compiled
-%
-%      \hspace*{6mm} time seen if top-level, 2nd time seen otherwise
-%\end{itemize}
-
-\subsection{Computer language promises}\label{computer-promises}
-
-GNU-R computer language is heavily dependent on the promise pattern. As its name says this pattern represents a promise into the future that some code would be evaluated~(instead of running it immediately). For example instead direct call (see figure~\ref{fig:reading-csv-without-promise}) you can manually force GNU-R to wrap the function evaluation in the promise via the \code{future} function (see figure~\ref{fig:reading-csv-with-promise}).
+GNU-R computer language is heavily dependent on the promise pattern which implementation has to be handled in the stack printer tool~\ref{implementation-of-stack-printer}. This promise pattern represents a encapsulation of executable code which can be at some time in the future evaluated~(instead of running it immediately). For example instead direct call (see figure~\ref{fig:reading-csv-without-promise}) you can manually force GNU-R to wrap the function evaluation in the promise via the \code{future} function (see figure~\ref{fig:reading-csv-with-promise}).
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -395,7 +288,7 @@ value <- read.csv(... some datafile ...)
 #just prints the value
 print(value)
 \end{lstlisting}
-\caption{\label{fig:reading-csv-without-promise} GNU R - reading an data from csv table}
+\caption{\label{fig:reading-csv-without-promise} GNU-R - reading an data from csv table}
 \end{figure}
 
 \begin{figure}[!h]
@@ -408,10 +301,9 @@ value <- future(read.csv(... some datafile ...))
 #  and finally printing out the result
 print(value)
 \end{lstlisting}
-\caption{\label{fig:reading-csv-with-promise} GNU R - reading an data from csv table wrapped in promise}
+\caption{\label{fig:reading-csv-with-promise} GNU-R - reading an data from csv table wrapped in promise}
 \end{figure}
 
-This shown approach is manual and pretty straightforward for the user to understand. However, the GNU-R has promise based lazy evaluation of arguments. Every argument in the function is the promise and instead of evaluating it before the function call~(like in other old-fashioned languages like \code{C} or \code{Java}), the argument is evaluated inside the function code once it is accessed~(see the figure~\ref{gnu-r-promise-arguments}). It causes that the GNU-R is internally heavy dependent on the promises even it is not obvious for the normal user at the first sight. The promises and printing of their content was done in this thesis in the stack printer~\ref{implementation-of-stack-printer}.
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -435,16 +327,13 @@ calc(2,getB())
 # [1] "getB"
 # [1] "calc exit"
 \end{lstlisting}
-\caption{\label{fig:gnu-r-promise-arguments} GNU R - example of promise based arguments evaluation}
+\caption{\label{fig:gnu-r-promise-arguments} GNU-R - example of promise based arguments evaluation}
 \end{figure}
 
-
-\begin{lstlisting}
-
-\end{lstlisting}
+This shown approach is manual and pretty straightforward for the user to understand. However, the GNU-R has promise based lazy evaluation of arguments. Every argument in the function is the promise and instead of evaluating it before the function call~(like in other old-fashioned languages like \code{C} or \code{Java}), the argument is evaluated inside the function code once it is accessed~(see the figure~\ref{fig:gnu-r-promise-arguments}). It causes that the GNU-R is internally heavy dependent on the promises even it is not obvious for the normal user at the first sight. The promises and printing of their content was done in this thesis in the stack printer~\ref{implementation-of-stack-printer}.
 
 
-\section{GNU R Bytecode}
+\section{GNU-R Bytecode}
 
 GNU-R has the internal support of the BC which consists of \code{compiler} package for compiling to the bytecode. The language bytecode is interpreter by function \code{bcEval}~(inside \textit{src/main/eval.c}). The BC compiler can be used explicitly by calling certain functions to carry out compilations or implicitly by enabling compilation to occur automatically at certain points.
 
@@ -456,7 +345,7 @@ For now, the compilation of packages is enabled by calling \code{compilePKGS} wi
 \end{itemize}
 
 
-\subsection{GNU R internal representation of bytecode}\label{R-internal-bc-representation}
+\subsection{GNU-R internal representation of bytecode}\label{R-internal-bc-representation}
 
 The internal representation of bytecode is \code{SEXP} node of \code{BCODESXP} type. It is internally represented as a linked list~(CONS of cells) of two variables:
 \begin{itemize}
@@ -480,7 +369,7 @@ The internal representation of bytecode is \code{SEXP} node of \code{BCODESXP} t
 
 \subsection{Expression and source references}\label{Exprref-and-srcref}
 
-At the end of the constant pool array, there can be~(are optional) some additional information about the bytecode. This information is not used for the evaluation but are provided for specifying the original location of the compiled code. They are used in the disassembler tool~\ref{implementation-of-disassembler} and are used in the implemented feature which is doing jumping granularity restriction~\ref{debugger-jumping-granuality}. They can be of 2 types:
+At the end of the constant pool array, there can be~(are optional) some additional information about the bytecode~(citing the Source References article \cite{r-srcrefs}). This information is not used for the evaluation but are provided for specifying the original location of the compiled code. They are used in the disassembler tool~\ref{implementation-of-disassembler} and are used in the implemented feature which is doing jumping granularity restriction~\ref{debugger-jumping-granuality}. They can be of 2 types:
 
 \begin{itemize}
 	\item \textbf{Expression reference}
@@ -511,8 +400,7 @@ Array corresponding expression references~(expressions) to code for each instruc
 
 \section{Current implementation of AST debugger}\label{AST-debugger}
 
-AST evaluator of GNU-R is implemented as a recursive descent of the AST tree.
-The current implementation of debugger inside  GNU-R language is made on top of the AST interpreter and it uses the \code{RDEBUG} flag of current evaluated to check if enable the debugging features. For user, there are written functions~(user interface) managing this functionality. They are:
+The current implementation of debugger inside GNU-R language is made on top of the AST interpreter and it uses the \code{RDEBUG} flag of current evaluated to check if enable the debugging features. For user, there are written functions~(user interface) managing this functionality. They are:
 
 \begin{itemize}
 	\item \code{debug(fun, text = "", condition = NULL, signature = NULL)}
@@ -561,51 +449,7 @@ The \code{browse()} function also has support for the commands managing the debu
 
 \section{Current implementation of Bytecode disassembler}\label{current-bc-disassembler}
 
-There is already implemented the way how to see bytecode representation - the bytecode disassembler function \code{disassemble} in \code{compile} package. Even though its current functionality is very minimal and insufficient. It works the way that it converts the code instructions and constant buffer to array which can be after then printed to the console by user~(by default in the REPL loop or manually with \code{print} function). It means that the user would see~(the function would return) two arrays which is user unfriendly. The source code of current disassembler consists of 2 short functions \code{disassemble} and \code{bcDecode}~(see figure~\ref{fig:current-implementation-of-disassembler}).
-
-\begin{figure}[!htb]
-\begin{lstlisting}
-disassemble <- function(code) {
-    .CodeSym <- as.name(".Code")
-    disasm.const<-function(x)
-        if (typeof(x)=="list" && length(x) > 0
-        		&& identical(x[[1]], .CodeSym))
-            disasm(x) else x
-    disasm <-function(code) {
-        code[[2]]<-bcDecode(code[[2]])
-        code[[3]]<-lapply(code[[3]], disasm.const)
-        code
-    }
-    if (typeof(code)=="closure") {
-        code <- .Internal(bodyCode(code))
-        if (typeof(code) != "bytecode")
-            stop("function is not compiled")
-    }
-    dput(disasm(.Internal(disassemble(code))))
-}
-
-bcDecode <- function(code) {
-    n <- length(code)
-    ncode <- vector("list", n)
-    ncode[[1]] <- code[1] # version number
-    i <- 2
-    while (i <= n) {
-        name<-Opcodes.names[code[i]+1]
-        argc<-Opcodes.argc[[code[i]+1]]
-        ncode[[i]] <- as.name(name)
-        i<-i+1
-        if (argc > 0)
-            for (j in 1:argc) {
-                ncode[[i]]<-code[i]
-                i<-i+1
-            }
-    }
-    ncode
-}
-\end{lstlisting}
-	\caption{Current implementation of disassembler in GNU-R}\label{fig:current-implementation-of-disassembler}
-\end{figure}
-
+There is already implemented the way how to see bytecode representation - the bytecode disassembler function \code{disassemble} in \code{compile} package. Even though its current functionality is very minimal and insufficient. It works the way that it converts the code instructions and constant buffer to array which can be after then printed to the console by user~(by default in the REPL loop or manually with \code{print} function). It means that the user would see~(the function would return) two arrays which is user unfriendly. 
 
 \section{Analysis of disassembler improvements}\label{analysis-of-disassembler}
 
@@ -692,7 +536,7 @@ SourceFile: "HelloWorld.java"
 
 \subsection{Python bytecode disassembler}
 
-\textbf{Python} has inbuilt support of disassembler for it's internal BC~\ref{fig:python-dis-output-example}. It is provided inside package \code{dis} which is part of the package~(no need to manually installing). Source code location is in the \textit{Lib/dis.py}. As you can see the code is showing just one function at once. It is also showing the combined output of constant array at one line~(not printing separately code and constant array). See the figure~\ref{fig:python-dis-output-example} for example.
+Python has inbuilt support of disassembler for it's internal BC~\ref{fig:python-dis-output-example}. It is provided inside package \code{dis} which is part of the package~(no need to manually installing). Source code location is in the \textit{Lib/dis.py}. As you can see the code is showing just one function at once. It is also showing the combined output of constant array at one line~(not printing separately code and constant array). See the figure~\ref{fig:python-dis-output-example} for example.
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -714,13 +558,13 @@ dis.dis(myfunc)
 
 \subsection{Summary}
 
-The difference between the Java \code{javap} and the Python \code{dis} command is that \code{javap} works on the whole file instead of the Python \code{dis} which is printing just one function. They both dump the BC in the human-readable form with \textbf{instructions line-by-line}. The Python one is showing the parameters from the constant pool altogether with the instruction. The \code{javap} tool, on the other hand, supports \textbf{more levels of verbosity}.
+The difference between the Java \code{javap} and the Python \code{dis} command is that \code{javap} works on the whole file instead of the Python \code{dis} which is printing just one function. They both dump the BC in the human-readable form with instructions line-by-line. The Python one is showing the parameters from the constant pool altogether with the instruction. The \code{javap} tool, on the other hand, supports more levels of verbosity.
 
 The R can internally combine AST and BC representation of the code. It means that the architecture of the disassembler output cannot be the same as in the \code{javap} command which shows the whole file. Instead of it we can print out to the user the information provided by the old disassemble function which works over the whole functions~(instead of files as the \code{javap command}). The printed out information also have lot of information which are additional information for the user~(not necessary needed to interpret the code). To show these it would be nice if the GNU-R bytecode would have the ability to show these information conditionally according to the verbosity level. The inline showing values from the constant pool~(inspiration by the Python \code{dis} function) would be also useful because it would enable the result to be printed in compact and shorter way.%  with easily enabling the feature for printing just specified are of function.
 
 \section{Analysis of Bytecode debugger implementation}\label{analysis-of-debugger}
 
-Currently, there is no support for debugging the bytecode evaluation in real time~(just the fallback to the AST one is present) so there is no current implementation of the BC debugger to go through. To improve this it should be done the full native implementation of bytecode debugger. User interface of that native debugger implementation can be inspired with the current AST implementation - which is described part~\ref{inspiration-with-current-implementation}. The following parts~(\ref{bcdebug-implementation-in-python} and \ref{bcdebug-implementation-in-v8}) are analyzing the implementation of the \textbf{BC} debugger in other VMs~(Python VM~\ref{bcdebug-implementation-in-python} and V8 javascript VM~ref{bcdebug-implementation-in-v8}).
+Currently, there is no support for debugging the bytecode evaluation~(just the fallback to the AST evaluator is present) so there is no current implementation of the BC debugger to go through. To improve this it should be done the full native implementation of bytecode debugger. User interface of that native debugger implementation can be inspired with the current AST implementation - which is described part~\ref{inspiration-with-current-implementation}. The following parts~(\ref{bcdebug-implementation-in-python} and \ref{bcdebug-implementation-in-v8}) are analyzing the implementation of the BC debugger in other VMs~(Python VM~\ref{bcdebug-implementation-in-python} and V8 javascript VM~ref{bcdebug-implementation-in-v8}).
 
 \subsection{Inspiration with current AST implementation}\label{inspiration-with-current-implementation}
 
@@ -755,7 +599,7 @@ V8 is Javascript VM developed by the Google. It was initially used by the Chrome
 
 The V8 internal implementation is consisting of the BC interpreter~(\textit{Ignition}) and JIT x86 compiler~(\textit{TurboFan})~-see the figure~\ref{fig:ast-v8-architecture}.
 
-The bytecode interpreter is single stack registed based VM~(similarly to the GNU-R and \textit{CPython} VM). Its core functionality of the debugger works on the BC instruction level. The VM defines separate \textbf{Debug instruction for every number of the arguments}~(e.g. \code{DebugBreak0}, \code{DebugBreak1}, \code{DebugBreak2} etc.)~\ref{fig:v8-bc-breakpoint-definitions}.
+The bytecode interpreter is single stack registed based VM~(similarly to the GNU-R and \textit{CPython} VM). Its core functionality of the debugger works on the BC instruction level. The VM defines separate Debug instruction for every number of the arguments~(e.g. \code{DebugBreak0}, \code{DebugBreak1}, \code{DebugBreak2} etc.)~\ref{fig:v8-bc-breakpoint-definitions}.
 
 If the breakpoint is set on some specific instruction~(for example \textit{ShiftRight} instruction with the 2 parameters) it causes its the replacement of the original instruction by the corresponding breakpoint one according to the number of the parameters of original one~(\textit{DebugBreak2} for \textit{ShiftRight} because it has 2 parameters). These BC instructions work like special instructions~\ref{fig:v8-breakpoint-instruction-implementation} which internally calls the handler for the debugger and also dispatch the original instruction to maintain the same behavior~(consistency) of the original code.
 
@@ -849,13 +693,13 @@ There are three different things which have to be implemented - disassembler, st
 
 \section{Implementation of the disassembler}\label{implementation-of-disassembler}
 
-The whole project was structured the way that \textbf{disassembler can be easily released to the CRAN repository} without the debugger. \textbf{As much as possible code is written in the R} language~(most of it in separate package \code{bctools}, but some also to the \code{compiler} one~\label{internal-parts-of-vm}) and just necessary \textbf{minimum in C} for keeping the changes into the GNU-R core code simple.
+The whole project was structured the way that disassembler can be easily released to the CRAN repository without the debugger. As much as possible code is written in the R language~(most of it in separate package \code{bctools}, but some also to the \code{compiler} one~\label{internal-parts-of-vm}) and just necessary minimum in C for keeping the changes into the GNU-R core code simple.
 
 In the GNU-R language, there is the \code{compiler} package written in R. Inside it there is lying the current BC compiler and BC disassembler~(very minimal - see~\ref{current-bc-disassembler}). The changes made in order to realize the implementation of the advanced disassembler involved also modifying the \code{compiler} package. This package lies inside the GNU-R core code so the general idea about implementation was to put the just the bare minimum inside it~(the annotation of instructions~\ref{annotation-of-instructions} and putting a class into the disassembly code \ref{user-interface}). The most of the functionality was implemented then in the \code{bctools} package.
 
 \subsection{User interface}\label{user-interface}
 
-For better user-friendliness of the BC disassembler there has been made a decision to use the advantage of the S3 class system~(see~\ref{R-Classes}). The old \code{disassemble} function inside the \code{compiler} package was kept intact except the \textbf{putting class into the disassembly code}. The name of the class has been decided to be the \code{"disassembly"}. Having this class then allows us to have \textit{print.disassembly} function~(\textit{print} method of \textit{disassembly} class) inside our \code{bctools} package. That function would be then automatically dispatched once the user calls the \code{print} function on the object~(if the \code{bctools} package would be loaded inside user library).
+For better user-friendliness of the BC disassembler there has been made a decision to use the advantage of the S3 class system~(see~\ref{R-Classes}). The old \code{disassemble} function inside the \code{compiler} package was kept intact except the putting class into the disassembly code. The name of the class has been decided to be the \code{"disassembly"}. Having this class then allows us to have \textit{print.disassembly} function~(\textit{print} method of \textit{disassembly} class) inside our \code{bctools} package. That function would be then automatically dispatched once the user calls the \code{print} function on the object~(if the \code{bctools} package would be loaded inside user library).
 
 The usage then changed from simple list (see figure~\ref{fig:old-disassembly-ui}) to the user-friendly disassembly code~(see figure~\ref{fig:new-disassembly-ui}):
 
@@ -972,7 +816,7 @@ disassemble(compiled)
 %TODO: REDO THIS EXAMPLE
 
 \subsection{Instruction arguments}\label{instruction-arguments}
-The \textbf{BC} instruction contains an integer code identifying it followed by a variable number of arguments. These arguments can be of different 5 basic types~-~see\ref{fig:bytecode-argument-types}~(\code{BOOL}, \code{INT}, \code{LABEL}, \code{CONSTANT{\_}LABEL} and \code{CONSTANT}).
+The BC instruction contains an integer code identifying it followed by a variable number of arguments. These arguments can be of different 5 basic types~-~see\ref{fig:bytecode-argument-types}~(\code{BOOL}, \code{INT}, \code{LABEL}, \code{CONSTANT{\_}LABEL} and \code{CONSTANT}).
 
 The \code{CONSTANT} parameter can have two different meanings in the code. Some of the arguments could be a whole expression~(e.g. a+b+c) kept due to usage in some corner cases during evaluation~( e.g., \code{ADD} instruction is in the most cases taking the two topmost variables from the stack. Just in some corner cases, it is calling the internal functions which were initially designed to work on the AST evaluator, so they expect the expression as an input). These additional arguments are then stored only because the internal implementation of the bytecode evaluator and they contain the duplicate information. The optional parameter kept due to internal purposes of evaluator was named a \code{CONSTANT{\_}DBG}.
 
@@ -1112,7 +956,7 @@ while( i <= n ) {
 	\caption{Code for generating labels}\label{fig:code-generating-labels}
 \end{figure}
 
-\subsection{Verbosity and formatting}
+\subsection{Verbosity and formatting}\label{verbosity-and-formatting}
 
 Bytecode compiled function can contain the information about a location of the source code~(they are optional).  These data are not necessary for the evaluation of the code but are good for human-readability~(see~\ref{Exprref-and-srcref}). Alongside with this, there are also some of the instruction arguments which are used just for the reason of the internal implementation and have duplicate value~(see the previous~chapter~\ref{instruction-arguments}). All of this information is not necessary to be displayed to the user by default, but it would be nice for them to provide an ability to display even these information. To provide this optional ability to show more basic or more advanced information there has been put a decision to implement more levels of the verbosity in the disassembly tool.
 
@@ -1221,7 +1065,7 @@ The constant expressions in the constant pool can be of more 3 types:
 
 \begin{itemize}
 	\item regular~(ordinary) constant expressions~(e.g. numbers, an array of numbers etc.)
-	\item native functions~(calls to the inside of the GNU R C implementation)
+	\item native functions~(calls to the inside of the GNU-R C implementation)
 	\item BC compiler function code
 \end{itemize}
 
@@ -1285,11 +1129,11 @@ In the application, there are different types of the actions to print~(e.g. Cons
 
 		formatting notation - \$\code{LABEL{\_}NO}~(e.g.,~\$1)
 
-	\item \textbf{\code{SrcRef}} a.k.a. \textbf{source reference}
+	\item \textbf{\code{SrcRef}} a.k.a. source reference
 
 		formatting notation - \code{SRCREF}~(e.g.,~simple{\_}bc{\_}verbosity1.R{\#}4)
 
-	\item \textbf{\code{ExprRef}} a.k.a. \textbf{expression reference}
+	\item \code{ExprRef} a.k.a. expression reference
 
 		formatting notation - $@$\code{EXPRESSION}~(e.g.,~$@a+1$)
 
@@ -1314,7 +1158,13 @@ The second listed~(calling \code{devtools::document()}) was used during an devel
 
 \section{Implementation of the bytecode stack printer}\label{implementation-of-stack-printer}
 
-To implement the BC debugger we need to be able to print the \code{BC} stack content~(see~\ref{user-interface-and-state-of-the-bc-eval}). The way how the implementation was designed is that it was written in the C language~(GNU-R language core).
+To implement the BC debugger we need to be able to print the \code{BC} stack content~(see~\ref{user-interface-and-state-of-the-bc-eval}). The way how the implementation was designed is that it was written in the C language~(GNU-R language core). This tool was designed to be called with two parameters:
+\begin{itemize}
+	\item pointer to the beginning of the stack frame
+	\item pointer to the end of the stack frame
+\end{itemize}
+
+This design allows to print out any of the stack frame~(or eventually stack frame chunk).
 
 \subsection{Stack definition}\label{stack-definition}
 
@@ -1360,7 +1210,7 @@ The \code{TYPED{\_}STACK}, however, could also be disabled. It means that there 
 
 \subsection{Persisting stack pointers}\label{persisting-stack-pointers}
 
-In regards to the \textbf{BC} stack information, there are currently these~(global) variables representing the current state.
+In regards to the BC stack information, there are currently these~(global) variables representing the current state.
 
 \begin{itemize}
 	\item \textbf{R{\_}BCNodeStackBase} - the bottom of the stack
@@ -1373,7 +1223,7 @@ all of these satisfying an equation:
 $R{\_}BCNodeStackBase <= R{\_}BCNodeStackTop <= R{\_}BCNodeStackEnd$
 
 
-To be able to print values on the current evaluating bytecode stack we need to know when function stack frame starts and ends~(\textit{R{\_}BCNodeStackBase} points to the bottom of the whole stack and not function). There is currently not any enough information from which easily we can get a start of the function stack frame. To achieve this, there has been added the \code{R{\_}BCNodeStackFnBase} variable representing a begin of function stack frame. It is global variable but kept and managed through context handling~(in the \textit{src/main/context.c}) to simulate the CPU function register stack frame.
+To be able to print values on the bytecode frame stack we need to know when function stack frame starts and ends~(\textit{R{\_}BCNodeStackBase} points to the bottom of the whole stack and not function). There is currently not any enough information from which easily we can get a start of the function stack frame. To achieve this, there has been added the \code{R{\_}BCNodeStackFnBase} variable representing a begin of function stack frame. It is global variable but kept and managed through context handling~(in the \textit{src/main/context.c}) to simulate the CPU function register stack frame.
 
 \section{Implementation of the debugger}\label{implementation-of-debugger}
 
@@ -1411,7 +1261,7 @@ compiled(2)
 	\caption{Example of debugged function with bytecode debugger enabled}\label{fig:debugged-bcdebug-enabled}
 \end{figure}
 
-The idea used behind the debugger implementation is \textbf{inspired by the JS V8 VM}~(see~\ref{bcdebug-implementation-in-v8}). It is to replace the original instruction with the special breakpoint instruction together with saving~ the original instruction alongside the bytecode. The whole idea to make separate instruction and not the run-time check for debug flag would enable the dispatching of bytecode debug features with evaluating the same code while not causing any performance overhead in case the code is not debugged.
+The idea used behind the debugger implementation is inspired by the JS V8 VM~(see~\ref{bcdebug-implementation-in-v8}). It is to replace the original instruction with the special breakpoint instruction together with saving~ the original instruction alongside the bytecode. The whole idea to make separate instruction and not the run-time check for debug flag would enable the dispatching of bytecode debug features with evaluating the same code while not causing any performance overhead in case the code is not debugged.
 
 The bytecode debugger feature is by default disabled. Managing the state for enabling it is done by \textit{enableBCDebug} function~(written in \textit{src/main/debug.c}). This function is is internally handling a \code{R{\_}is{\_}bc{\_}debug{\_}enabled} variable. See the figure~\ref{fig:debugged-bcdebug-enabled} for example.
 
@@ -1610,7 +1460,7 @@ Thing of importance while debugging the bytecode is the ability to locate the cu
 
 \begin{itemize}
 	\item \textbf{Short compact way} inspired by AST status printing
-	\item \textbf{Long verbose way} showing the all information available in the \textbf{BC} interpreter - used by default
+	\item \textbf{Long verbose way} showing the all information available in the BC interpreter - used by default
 \end{itemize}
 
 To control whether to print out the short compact way or the long way the \code{R{\_}DebugVerbose} boolean variable is used. This flag is accessible for the user through the \code{debugVerbose()} function which acts as getter and setter altogether. It is returning the value of the variable as return value while having an optional parameter used for the modifying of the flag.
@@ -1865,7 +1715,7 @@ The test files of the \code{bctools} package include:
 	\item \textbf{switch.R} - switch command
 	\item \textbf{peephole.R} - peephole parameter
 	\item \textbf{bcverbose.R} - verbose parameter
-	\item \textbf{bcversion.R} - check if the current GNU R BC version is the supported one in this package~(see~\ref{R-internal-bc-representation})
+	\item \textbf{bcversion.R} - check if the current GNU-R BC version is the supported one in this package~(see~\ref{R-internal-bc-representation})
 \end{itemize}
 
 Because of the simplicity, the tests were not written without any testing framework. Nowadays if the test fails, there is not any more detailed information where the error occurs inside the file. To support this functionality, it is possible to modify the tests to use \code{test{\_}that} framework which supports naming the tests and printing the name in the test fails.
@@ -1968,7 +1818,7 @@ The big part of the planned future part of the work is to collaborate with the G
 
 The \code{bctools} package was developed independently as add separate disassemble feature with the minimal changes to the GNU-R VM core. This tool was also used in the debugger which is part of the VM core. When the debugger would be deployed it is suggested to merge the \code{bctools} package into the \code{compiler} because the source code of the \code{bctools} package is short~(approx. 600 lines). The reason why this was not already done, but just proposed as a future work, is that it would allow to deploy the disassembler into the working branch faster and eventually give a user-feedback for improvements before merging inside the \code{compiler} package and deploying the debugger.
 
-\subsection{GNU R Memory optimization}
+\subsection{GNU-R Memory optimization}
 
 Some of the parts of the errors which were done and fixed during the development of this thesis were memory-based. During an investigation of these errors, there has been noticed one thing. The core of the GNU-R language is heavily dependent on the linked list memory data structure. Because of the modern computer memory system cache implementation %TODO:CACHING REFERENCE
 ), this can cause a lot of memory cache misses which affect the performance. The most straightforward way to do this is to use a \code{smallvector} technique~(inspired by a llvm compiler), but the more appropriate way would be to do analysis of whole GNU-R memory subsystem optimization with focus on cache locality.
@@ -1978,7 +1828,7 @@ Some of the parts of the errors which were done and fixed during the development
 
 The GNU-R language is one of the most popular scientific language worldwide used~(by not just scientific community). For better evaluation performance its VM internally supports the bytecode alongside with old-fashioned and slow AST interpreter. Since nowadays options for debugging the bytecode were very limited. The old disassembler showed only the raw array of instructions and constant buffer and there was no native implementation of bytecode debugging. Instead of it the evaluator was internally dispatching the AST debugger which technically resulted in code going over different code while debugging. This has changed by features proposed in this thesis.
 
-There has been proposed and implemented changes which contains the \textbf{user friendly and easy-human readable bytecode disassembler}~\ref{implementation-of-disassembler}. The second part is about the implementation of the \textbf{native debugger support for bytecode evaluator}~\ref{implementation-of-debugger}. As the additional feature there has been added \code{breakpoint()} function which enables to add support for simulating conditional breakpoints~\ref{simulated-conditional-breakpoints}.
+There has been proposed and implemented changes which contains the user friendly and easy-human readable bytecode disassembler~\ref{implementation-of-disassembler}. The second part is about the implementation of the \textbf{native debugger support for bytecode evaluator}~\ref{implementation-of-debugger}. As the additional feature there has been added \code{breakpoint()} function which enables to add support for simulating conditional breakpoints~\ref{simulated-conditional-breakpoints}.
 
 In the beginning of the work there is brief introduction to the problem with the motivation part~\ref{introduction}. Following is the analysis of the current implementation of the GNU-R bytecode disassembler~\ref{analysis-of-disassembler} and debugger~\ref{analysis-of-debugger} alongside with the comparison to similar tools and features in VMs of other languages. After that there are described implementation details of the work. Firstly there is described implementation of the disassembler~\ref{implementation-of-disassembler} followed by the stack printer~\ref{implementation-of-stack-printer}. Finally there is described debugger implementation~\ref{implementation-of-debugger} where is shown reuse of two previously described features. As an addition it is described the implementation of support for simulated conditional breakpoints~\ref{conditional-breakpoints}. The end of the work contains chapter about the testing of all features~\ref{performance-testing} altogether with possible future work and improvements~\ref{testing-and-future-work}.
 
@@ -2029,7 +1879,7 @@ All the features were developed and tested and are included on the enclosed DVD.
 		.2 r{\_}disassembly\DTcomment{bytecode disassembler examples directory}.
 		.1 noncomplete{\_}functions\DTcomment{analysis of other implementations}.
 		.1 bctools\DTcomment{the bctools package directory}.
-		.1 r{\_}src\DTcomment{modified GNU R source}.
+		.1 r{\_}src\DTcomment{modified GNU-R source}.
 		.1 thesis\DTcomment{the thesis source code directory}.
 		.2 DP{\_}Saska{\_}Ales{\_}2018.pdf\DTcomment{the thesis text in PDF format}.
 		.2 DP{\_}Saska{\_}Ales{\_}.tex\DTcomment{the thesis text in \LaTeX{} format}.
