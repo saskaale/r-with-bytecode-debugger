@@ -70,7 +70,7 @@
 
 Almost everyone who has been trying to write computer program has made some logical mistakes in them. To help to solve them, we usually run program \textbf{step-by-step} with debugging tools with some debugger. The \mbox{GNU-R} which is one of the most widely used scientific languages across the whole world also has its implementation for debugging code.
 
-GNU-R language is dynamically typed interpreted language which usually means that it needs Virtual Machine to interpret. There are more ways to represent and implement its evaluation. The first one Abstract Syntax Tree~(see~\ref{AST}) evaluation is the simplest one. To make speedup of its internal evaluation, there has been introduced the Bytecode~(see~\ref{BC}) compiler and interpreter into \mbox{GNU-R}.
+GNU-R language is dynamically typed interpreted language which usually means that it needs Virtual Machine to interpret. There are more ways to represent and implement its evaluation. The first one Abstract Syntax Tree~(see~\ref{AST}) evaluation is the simplest one. To make speedup of its internal evaluation, there has been introduced the Bytecode~(see~\ref{BC}) compiler and interpreter into \mbox{GNU-R}~\cite{r-compiler-some-first-experiments}.
 
 %TODO:UPDATE REFERENCE
 
@@ -264,7 +264,7 @@ Another option how to represent the source code to evaluate is the bytecode. It 
 
 \subsection{Just in Time compilation}\label{JIT}
 
-In order to speed-up evaluation of inside VM, there have been developed various techniques of the performance optimization. One of them is Just in Time~(JIT) compilation of code. The underlying idea is to internally translate code into some more efficient representation ( from AST to either Bytecode or to the native machine code ). However, this transformation (compilation) is usually pretty expensive so it is called once the execution of a specified piece of code reached some limit.
+In order to speed-up evaluation of inside VM, there have been developed various techniques of the performance optimization. One of them is Just in Time~(JIT) compilation of code~\cite{r-jit-speedup}. The underlying idea is to internally translate code into some more efficient representation (from AST to either Bytecode or to the native machine code). However, this transformation (compilation) is usually pretty expensive so it is called once the execution of a specified piece of code reached some limit.
 GNU-R has the basic internal support of JIT. Implementation lies inside \code{src/main/eval.c} mainly in functions \code{R{\_}CheckJIT} and \code{R{\_}cmpfun} ). It is executing the \code{Compiler::tryCmpfun} to compile function AST into bytecode. According to the posts from running code with ByteCode, the JIT enables speedup up to 10 times~(theoretically up to 25 times but these cases are very rare).
 This means that the bytecode engine of GNU-R code can be used even without a user knowing it~(explicitly calling compilation) which would make work for the bytecode debugger in our thesis very important. The second important thing is that both interpreters~(AST and BC one) can be run together therefore there has to be a need to clearly decide which is currently in use~(this feature is implemented in chapter~\ref{bytecode-interpreter-internal-status}).
 
@@ -322,7 +322,7 @@ calc(2,getB())
 \caption{\label{fig:gnu-r-promise-arguments} GNU-R - example of promise based arguments evaluation}
 \end{figure}
 
-This shown approach is manual and pretty straightforward for the user to understand. However, the GNU-R has promise based lazy evaluation of arguments. Every argument in the function is the promise and instead of evaluating it before the function call~(like in other old-fashioned languages like \code{C} or \code{Java}), the argument is evaluated inside the function code once it is accessed~(see the figure~\ref{fig:gnu-r-promise-arguments}). It causes that the GNU-R is internally heavy dependent on the promises even it is not obvious for the normal user at the first sight. The promises and printing of their content was done in this thesis in the stack printer~\ref{implementation-of-stack-printer}.
+This shown approach is manual and pretty straightforward for the user to understand. However, the GNU-R has promise based lazy evaluation of arguments~\cite{R_PERFORMANCE}. Every argument in the function is the promise and instead of evaluating it before the function call~(like in other old-fashioned languages like \code{C} or \code{Java}), the argument is evaluated inside the function code once it is accessed~(see the figure~\ref{fig:gnu-r-promise-arguments}). It causes that the GNU-R is internally heavy dependent on the promises even it is not obvious for the normal user at the first sight. The promises and printing of their content was done in this thesis in the stack printer~\ref{implementation-of-stack-printer}.
 
 
 \section{GNU-R Bytecode}
@@ -453,9 +453,9 @@ The nice example of the disassembler is in Java language~(\code{javap} command o
 
 \subsection{Python bytecode disassembler}
 
-Python has inbuilt support of disassembler for it's internal BC~\ref{fig:python-dis-output-example}. It is provided inside package \code{dis} which is part of the package~(no need to manually installing). Source code location is in the \textit{Lib/dis.py}. As you can see the code is showing just one function at once. It is also showing the combined output of constant array at one line~(not printing separately code and constant array). See the figure~\ref{fig:python-dis-output-example} for example.
+Python has inbuilt support of disassembler~\cite{Python-disassembler} for it's internal BC~\ref{fig:python-dis-output-example}. It is provided inside package \code{dis} which is part of the package~(no need to manually installing). Source code location is in the \textit{Lib/dis.py}. As you can see the code is showing just one function at once. It is also showing the combined output of constant array at one line~(not printing separately code and constant array). See the figure~\ref{fig:python-dis-output-example} for example.
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \begin{lstlisting}
 import dis
 
@@ -520,7 +520,7 @@ The bytecode interpreter is single stack registed based VM~(similarly to the GNU
 
 If the breakpoint is set on some specific instruction~(for example \textit{ShiftRight} instruction with the 2 parameters) it causes its the replacement of the original instruction by the corresponding breakpoint one according to the number of the parameters of original one~(\textit{DebugBreak2} for \textit{ShiftRight} because it has 2 parameters). These BC instructions work like special instructions~\ref{fig:v8-breakpoint-instruction-implementation} which internally calls the handler for the debugger and also dispatch the original instruction to maintain the same behavior~(consistency) of the original code.
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \begin{lstlisting}
   /* Debug Breakpoints - one for each possible
   		size of unscaled bytecodes */
@@ -550,7 +550,7 @@ If the breakpoint is set on some specific instruction~(for example \textit{Shift
 	\caption{V8 BC definition for the breakpoint instructions}\label{fig:v8-bc-breakpoint-definitions}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \begin{lstlisting}
 // DebugBreak
 //
@@ -618,9 +618,9 @@ In the GNU-R language, there is the \code{compiler} package written in R. Inside
 
 For better user-friendliness of the BC disassembler there has been made a decision to use the advantage of the S3 class system~(see~\ref{R-Classes}). The old \code{disassemble} function inside the \code{compiler} package was kept intact except the putting class into the disassembly code. The name of the class has been decided to be the \code{"disassembly"}. Having this class then allows us to have \textit{print.disassembly} function~(\textit{print} method of \textit{disassembly} class) inside our \code{bctools} package. That function would be then automatically dispatched once the user calls the \code{print} function on the object~(if the \code{bctools} package would be loaded inside user library).
 
-The usage then changed from simple list (see figure~\ref{fig:old-disassembly-ui}) to the user-friendly disassembly code~(see figure~\ref{fig:new-disassembly-ui}):
+The usage then changed from simple list (see figure~\ref{fig:old-disassembly-ui}) to the user-friendly disassembly code~(see figure~\ref{fig:new-disassembly-ui}).
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \begin{lstlisting}
 #initialization
 library(compiler)
@@ -663,7 +663,7 @@ disassemble(compiled)
 	\caption{Old disassembly user interface}\label{fig:old-disassembly-ui}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \begin{lstlisting}
 #initialization
 library(compiler)
@@ -768,7 +768,7 @@ In the compiler package, there is already basic annotation specifying the number
 
 The \code{compiler} package is made with the \code{noweb} tool which is the tool used for writing documentation alongside with the code. Its source is written in the \textit{src/library/compiler/noweb/compiler.nw} file. Because the build command~(\code{make}) is not written to re-generate the source code from \code{noweb} each time the compiling is provided, we have to rerun the \code{make from-noweb} command inside the \code{compiler} to regenerate the R sources for the \code{compiler} package.
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \begin{lstlisting}
 <<opcode argument description>>=
 
@@ -797,7 +797,7 @@ STARTLOOPCNTXT.OP = c(BOOL.ARGTYPE, LABEL.ARGTYPE),
 	\caption{Example of instruction annotation}\label{fig:instruction-annotation-example}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \begin{lstlisting}
 Opcodes.argc <- lapply(Opcodes.argdescr, length)
 \end{lstlisting}
@@ -823,7 +823,7 @@ Steps to generate labels are then:
 
 The result of this algorithm is an array containing the information whether there is no label at the instruction~(\code{-2}) or the label~(number \code{>=0}).
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \begin{lstlisting}
 #first pass to mark instruction with labels
 #labels is array that describes if each	Aq
@@ -896,7 +896,7 @@ The levels are:
 
 The default value can be pre-set by \code{bcverbose} function~(provided in the \code{bctools} package).
 
-\begin{figure}[h]
+\begin{figure}[H]
 \begin{lstlisting}
 1:
  - #1: function(a) while(a) a <- a-1
@@ -916,7 +916,7 @@ The default value can be pre-set by \code{bcverbose} function~(provided in the \
 	\caption{Disassembly output with verbose lvl 0}\label{fig:disassembly-verbose-0}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \begin{lstlisting}
 Bytecode ver. 10
 
@@ -945,7 +945,7 @@ Bytecode ver. 10
 	\caption{Disassembly output with verbose lvl 1}\label{fig:disassembly-verbose-1}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \begin{lstlisting}
 Bytecode ver. 10
 
@@ -1104,12 +1104,12 @@ The printing of stack values is done through a direct call of \code{deparse1} fu
 
 \subsection{RAWMEM stack type tag}\label{rawmem-stack-tag}
 
-\begin{figure}[h!]
+In case the \code{TYPED{\_}STACK} is defined~(see~\ref{stack-definition}) then the stack values can contain raw memory chunks which cannot be printed~(see figure~\ref{fig:stack-elements-definition}). Information about the size of these chunks is directed to the top of the stack~(from bottom to the top). However we want to print the values in the direction from the top to the down. It results in the question whether the cell is printable or not. To be able to answer this question there has been created an auxiliary array containing the values if the cell is printable~(see figure~\ref{fig:stack-elements-definition}). It is causing some additional complexity by running one more linear pass through the stack~(to fill out this array). This pass is in the forward order~(from bottom to top of the stack), so we can tell whether the memory is the raw or not. The added additional complexity is not our biggest concern because this feature would be used just in case the debugger is turned on and in this case we are strict about the performance, because the program would be waiting for the user input anyways.
+
+\begin{figure}[H]
 	\includegraphics[width=90mm]{stack-rawmem.png}
 	\caption{Definition of stack elements and generated auxiliary array showing the pritable elements}\label{fig:stack-elements-definition}
 \end{figure}
-
-In case the \code{TYPED{\_}STACK} is defined~(see~\ref{stack-definition}) then the stack values can contain raw memory chunks which cannot be printed~(see figure~\ref{fig:stack-elements-definition}). Information about the size of these chunks is directed to the top of the stack~(from bottom to the top). However we want to print the values in the direction from the top to the down. It results in the question whether the cell is printable or not. To be able to answer this question there has been created an auxiliary array containing the values if the cell is printable~(see figure~\ref{fig:stack-elements-definition}). It is causing some additional complexity by running one more linear pass through the stack~(to fill out this array). This pass is in the forward order~(from bottom to top of the stack), so we can tell whether the memory is the raw or not.
 
 The whole algorithm to dump the stack then has two passes:
 
@@ -1160,7 +1160,11 @@ The main idea behind the debugger implementation is to maintain the same functio
 
 \subsection{Global design}
 
-\begin{figure}[h]
+The idea used behind the debugger implementation is inspired by the JS V8 VM~(see~\ref{bcdebug-implementation-in-v8}). It is to replace the original instruction with the special breakpoint instruction together with saving~ the original instruction alongside the bytecode. The whole idea to make separate instruction and not the run-time check for debug flag would enable the dispatching of bytecode debug features with evaluating the same code while not causing any performance overhead in case the code is not debugged.
+
+The bytecode debugger feature is by default disabled. Managing the state for enabling it is done by \textit{enableBCDebug} function~(written in \textit{src/main/debug.c}). This function is is internally handling a \code{R{\_}is{\_}bc{\_}debug{\_}enabled} variable. See the figure~\ref{fig:debugged-bcdebug-enabled} for example.
+
+\begin{figure}[H]
 \begin{lstlisting}
 options(keep.source=TRUE)
 library(compiler)
@@ -1177,10 +1181,6 @@ compiled(2)
 \end{lstlisting}
 	\caption{Example of debugged function with bytecode debugger enabled}\label{fig:debugged-bcdebug-enabled}
 \end{figure}
-
-The idea used behind the debugger implementation is inspired by the JS V8 VM~(see~\ref{bcdebug-implementation-in-v8}). It is to replace the original instruction with the special breakpoint instruction together with saving~ the original instruction alongside the bytecode. The whole idea to make separate instruction and not the run-time check for debug flag would enable the dispatching of bytecode debug features with evaluating the same code while not causing any performance overhead in case the code is not debugged.
-
-The bytecode debugger feature is by default disabled. Managing the state for enabling it is done by \textit{enableBCDebug} function~(written in \textit{src/main/debug.c}). This function is is internally handling a \code{R{\_}is{\_}bc{\_}debug{\_}enabled} variable. See the figure~\ref{fig:debugged-bcdebug-enabled} for example.
 
 \subsection{Instruction for debugging}\label{instruction-for-debugging}
 
@@ -1206,7 +1206,9 @@ The internal representation of the \code{BCODESXP} memory object holding the GNU
 
 \subsection{Setting and removing debug instruction}\label{setting-and-unsetting-debug-instruction}
 
-\begin{figure}[h]
+To be able to set~(and unset) the debug instruction on the bytecode there has been created a \code{bcSetBreakpoint} function inside \code{compiler} package~(see fig.~\ref{fig:bcsetbreakpoint-source} for source code). It has support for both setting and removing the breakpoint on instruction~(parameter \code{is}). It is returning the position of newly set instruction which is used in the setting next breakpoint~\ref{setting-next-breakpoint}. This returned position can be different than the position passed through the parameter. The reason behind this is that this function needs to be fail-proof. It means that it cannot break the code by modifying the argument instead of the instruction~(the function is exposed to the end-user). The way to solve is to implement finding of the first instruction which position~(index) is the first after the position given through \code{code} argument~(satisfies the \code{$>= code$} condition). Then the \code{bcSetBreakpoint} function can place the breakpoint to the founded position and return that position.
+
+\begin{figure}[H]
 \begin{lstlisting}
 bcSetBreakpoint <- function(code, pos, is=TRUE) {
   if (typeof(code)=="closure")
@@ -1235,9 +1237,6 @@ bcSetBreakpoint <- function(code, pos, is=TRUE) {
 \end{lstlisting}
 	\caption{Source code of bcSetBreakpoint function}\label{fig:bcsetbreakpoint-source}
 \end{figure}
-
-To be able to set~(and unset) the debug instruction on the bytecode there has been created a \code{bcSetBreakpoint} function inside \code{compiler} package~(see fig.~\ref{fig:bcsetbreakpoint-source} for source code). It has support for both setting and removing the breakpoint on instruction~(parameter \code{is}). It is returning the position of newly set instruction which is used in the setting next breakpoint~\ref{setting-next-breakpoint}. This returned position can be different than the position passed through the parameter. The reason behind this is that this function needs to be fail-proof. It means that it cannot break the code by modifying the argument instead of the instruction~(the function is exposed to the end-user). The way to solve is to implement finding of the first instruction which position~(index) is the first after the position given through \code{code} argument~(satisfies the \code{$>= code$} condition). Then the \code{bcSetBreakpoint} function can place the breakpoint to the founded position and return that position.
-%This function is internally calling the \textit{modifybcbreakpoint} which is modifying by setting or removing the bytecode on the specified location while storing the original BC code array~(see~\ref{storing-original-instructions}).
 
 \subsection{Listing breakpoints}\label{listing-breakpoints}
 
@@ -1420,7 +1419,11 @@ The runtime-checking was chosen due to implementation simplicity. The performanc
 
 \subsection{Handling of the recursive character of the bytecode}
 
-\begin{figure}[h]
+The debugger implementation is modifying the breakpoint code by adding temporary breakpoint instructions~(see~\ref{setting-next-breakpoint}). This means that while calling recursive call there can be already set breakpoint instruction in the evaluated code. However, we do not want to have any of them executed in the recursive call of the function. To solve this there was done checking~(at the beginning of the \code{bcEval} function) whether the code is modified. If yes then we are creating a shallow copy of the current code without a modified bytecode code array by making new \code{BCODESXP} object created from an original code array and constant array~(see figure~\ref{fig:erase-breakpoints-in-bceval}).
+
+Because of this implementation is allocating a new element we have to satisfy the language GC by putting its reference to the bytecode stack. It was decided to push the current evaluated body even when this change is not done. It is creating tiny memory overhead by having one unnecessary element on the stack but it is resulting in better code readability because of less conditions in the code.
+
+\begin{figure}[H]
 \begin{lstlisting}
 /* duplicate body in case this
 	function has modified */
@@ -1443,11 +1446,6 @@ BCNPUSH(body); /* pushing body is neccesary
 	\caption{Modifying the bytecode array in the beginning of bcEval to erase breakpoints from the code}\label{fig:erase-breakpoints-in-bceval}
 \end{figure}
 
-The debugger implementation is modifying the breakpoint code by adding temporary breakpoint instructions~(see~\ref{setting-next-breakpoint}). This means that while calling recursive call there can be already set breakpoint instruction in the evaluated code. However, we do not want to have any of them executed in the recursive call of the function. To solve this there was done checking~(at the beginning of the \code{bcEval} function) whether the code is modified. If yes then we are creating a shallow copy of the current code without a modified bytecode code array by making new \code{BCODESXP} object created from an original code array and constant array~(see figure~\ref{fig:erase-breakpoints-in-bceval}).
-
-Because of this implementation is allocating a new element we have to satisfy the language GC by putting its reference to the bytecode stack. It was decided to push the current evaluated body even when this change is not done. It is creating tiny memory overhead by having one unnecessary element on the stack but it is resulting in better code readability because of less conditions in the code.
-
-
 \subsection{Threaded and non-threaded design of the application}\label{threaded-and-non-threaded-design}
 
 Because of the speedup of the GNU-R evaluating there is support for the \code{THREADED} code~(see~\ref{Computed-GOTO}).
@@ -1456,7 +1454,9 @@ This means there were two different dispatch systems which had to be analyzed an
 
 \subsubsection{THREADED{\_}CODE defined}
 
-\begin{figure}[h]
+In this case, the needed changes were minimal~(see figure~\ref{fig:instruction-handling-threaded}). It required adding a macro \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP} for a switching to the different instruction. In this case, the original bytecode instruction is represented with the location inside the code~(see~\ref{Computed-GOTO}) so the jump is being executed directly to that location.
+
+\begin{figure}[H]
 \begin{lstlisting}
 #define NEXT() (__extension__ ({ \
     currentpc = pc; goto *(*pc++).v; \
@@ -1473,12 +1473,11 @@ This means there were two different dispatch systems which had to be analyzed an
 	\caption{Changes made for instruction handling macros in case \code{THREADED{\_}CODE} defined}\label{fig:instruction-handling-threaded}
 \end{figure}
 
-In this case, the needed changes were minimal~(see figure~\ref{fig:instruction-handling-threaded}). It required adding a macro \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP} for a switching to the different instruction. In this case, the original bytecode instruction is represented with the location inside the code~(see~\ref{Computed-GOTO}) so the jump is being executed directly to that location.
-
-
 \subsubsection{THREADED{\_}CODE not defined}
 
-\begin{figure}[h]
+In this situation, things are more complicated because the whole evaluator design is one big loop. The changes in this code were described in the figure~\ref{fig:instruction-handling-not-threaded}. The loop originally had one big switch~(its beginning is defined in \code{BEGIN{\_}MACHINE} macro) which was deciding which instruction to execute according to the value of operand~(\code{*op}). We changed this behavior so that it is loading operand~(\code{*op}) into a variable~(\code{jmp{\_}opcode}), then placed another jump label~(\code{do{\_}instruction}) and after that finally decided which instruction has to be evaluated according to the value of that variable~(by \code{switch} command). In the case of executing breakpoint instruction and evaluating original instruction~(jumping to another instruction through \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP}) we are setting the auxiliary variable \code{jmp{\_}opcode} to the desired instruction code and evaluating the switch statement for instruction~(jumping to the \code{jmp{\_}opcode} label).
+
+\begin{figure}[H]
 \begin{lstlisting}
 #define NEXT() goto loop
 
@@ -1495,11 +1494,18 @@ In this case, the needed changes were minimal~(see figure~\ref{fig:instruction-h
 	\caption{Changes made for instruction handling macros in case \code{THREADED{\_}CODE} not defined}\label{fig:instruction-handling-not-threaded}
 \end{figure}
 
-In this situation, things are more complicated because the whole evaluator design is one big loop. The changes in this code were described in the figure~\ref{fig:instruction-handling-not-threaded}. The loop originally had one big switch~(its beginning is defined in \code{BEGIN{\_}MACHINE} macro) which was deciding which instruction to execute according to the value of operand~(\code{*op}). We changed this behavior so that it is loading operand~(\code{*op}) into a variable~(\code{jmp{\_}opcode}), then placed another jump label~(\code{do{\_}instruction}) and after that finally decided which instruction has to be evaluated according to the value of that variable~(by \code{switch} command). In the case of executing breakpoint instruction and evaluating original instruction~(jumping to another instruction through \code{BREAKPOINT{\_}GOTO{\_}ORIGIN{\_}OP}) we are setting the auxiliary variable \code{jmp{\_}opcode} to the desired instruction code and evaluating the switch statement for instruction~(jumping to the \code{jmp{\_}opcode} label).
-
 \subsection{Handling of the debugger user input}\label{handling-debugger-user-input}
 
-\begin{figure}[h]
+The original environment browser has inbuilt support for handling the debugging~(\textit{step into}, \textit{next step}, \textit{continue} etc.) via the user input~(see~\ref{handling-debugger-user-input}). It is managed by setting up the \code{RDEBUG} flag and the \code{R{\_}BrowserLastCommand} variable on the evaluated environment. The intent of implementing bytecode debugger interface was to reuse as much of this feature. It resulted in the fact that the bytecode debugger control is also managed through these variables. 
+
+Bytecode interpreter also provides the more status information~(see~\ref{long-verbose-way}). It has been decided to extend the user interface to support showing these pieces of information by those commands~(see implementation in the figure~\ref{fig:implementation-of-bcstack-bc-commands}):
+
+\begin{itemize}
+	\item \code{bc} - print the current bytecode with marked the current evaluated position~(see~\ref{implementation-of-disassembler})
+	\item \code{bcstack} - print current bytecode stack~(see~\ref{implementation-of-stack-printer})
+\end{itemize}
+
+\begin{figure}[H]
 \begin{lstlisting}
 ...
 other commands
@@ -1529,15 +1535,6 @@ other commands
 	\caption{Implemenation of \code{bcstack} and \code{bc} commands in the debugger interface}\label{fig:implementation-of-bcstack-bc-commands}
 \end{figure}
 
-The original environment browser has inbuilt support for handling the debugging~(\textit{step into}, \textit{next step}, \textit{continue} etc.) via the user input~(see~\ref{handling-debugger-user-input}). It is managed by setting up the \code{RDEBUG} flag and the \code{R{\_}BrowserLastCommand} variable on the evaluated environment. The intent of implementing bytecode debugger interface was to reuse as much of this feature. It resulted in the fact that the bytecode debugger control is also managed through these variables. 
-
-Bytecode interpreter also provides the more status information~(see~\ref{long-verbose-way}). It has been decided to extend the user interface to support showing these pieces of information by those commands~(see implementation in the figure~\ref{fig:implementation-of-bcstack-bc-commands}):
-
-\begin{itemize}
-	\item \code{bc} - print the current bytecode with marked the current evaluated position~(see~\ref{implementation-of-disassembler})
-	\item \code{bcstack} - print current bytecode stack~(see~\ref{implementation-of-stack-printer})
-\end{itemize}
-
 \subsection{Entry points to the bcEval function}
 
 While debugging bytecode, there are no runtime checks inside the \code{bcEval} function for the \code{RDEBUG} flag~(due to performance reasons - see~\ref{instruction-for-debugging}). Because of this and the nature of dispatching breakpoint functionality through the special \code{BREAKPOINT} instructions~(see~\ref{instruction-for-debugging}) there is need for setting the bytecode instruction~\ref{setting-next-breakpoint} to dispatch bytecode functionality. The modifying of the flag of the debugger functionality~(\code{RDEBUG}) means that we have to check and potentially apply the breakpoint instruction to the code every time the \code{RDEBUG} flag can be modified.
@@ -1553,11 +1550,13 @@ The first case is handled at the beginning of the bytecode evaluation function~(
 
 The other entry point~(after the return from the function calls) would be used just because of the conditional breakpoints implementation~\ref{conditional-breakpoints}. If the debugger modified the state of the evaluated bytecode function~(the function was not in debug mode and now is due to calling breakpoint), add the debugging instruction to the next following instruction~(see~\ref{conditional-breakpoints}).
 
-%Because both of these cases are potentially changing the code array~(see~\ref{storing-original-instructions}) the \code{codebase} and \code{constants} array and also \code{pc} variable~(it is pointer to one of the instruction in the \code{codebase}).
-
 \section{Simulated conditional breakpoints}\label{conditional-breakpoints}
 
-\begin{figure}[h]
+Due to lack of the ability of the simple and user-friendly conditional breakpoints, there has been put a decision to add support for simulating them. This feature was implemented via \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser. This \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being a separate command~(which would be big change in the language parser) it is a callable function.
+
+As you can see in the figure~\ref{fig:conditional-breakpoints-breakpoint}, this function is modifying the \code{RDEBUG} flag of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context).
+
+\begin{figure}[H]
 \begin{lstlisting}
 SEXP attribute_hidden do_breakpoint
 	(SEXP call, SEXP op, SEXP args, SEXP rho)
@@ -1588,7 +1587,7 @@ SEXP attribute_hidden do_breakpoint
 	\caption{Implementation of simulated conditional breakpoints through breakpoint() function}\label{fig:conditional-breakpoints-breakpoint}\label{simulated-conditional-breakpoints}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \begin{lstlisting}
 #setting up the bytecode
 options(keep.source=TRUE)
@@ -1611,15 +1610,11 @@ compiled()
 	\caption{Example usage of simulated conditional breakpoints through breakpoint() function}\label{fig:example-of-conditional-breakpoints}
 \end{figure}
 
-Due to lack of the ability of the simple and user-friendly conditional breakpoints, there has been put a decision to add support for simulating them. This feature was implemented via \code{breakpoint()} function which fires the debugger functionality on the spot. It allows the user to simulate conditional breakpoint behavior by calling the environment browser. This \code{breakpoint()}~(see fig. \ref{fig:example-of-conditional-breakpoints}) function is inspired by the JS \code{debugger;} command, but instead of being a separate command~(which would be big change in the language parser) it is a callable function.
-
-As you can see in the figure~\ref{fig:conditional-breakpoints-breakpoint}, this function is modifying the \code{RDEBUG} flag of the currently evaluating environment and resetting the temporary bytecode variables (\code{R{\_}BrowserLastCommand} and \code{browserfinish} member of function context).
-
 \chapter{Testing and future work}\label{testing-and-future-work}
 
-The each 3 implemented parts of this thesis were tested separately. The goal was to make as much code as possible to be able to run the automated tests on.
+There was done unit testing of the Bytecode disassembler~\ref{bytecode-disassembler-testing} alongside with the performance testing of the debugger implementation on the bytecode engine~\ref{performance-testing}.
 
-\section{Bytecode disassembler}
+\section{Bytecode disassembler}\label{bytecode-disassembler-testing}
 
 The main part of the work was done as the separate GNU-R package \code{bctools}. The R package system has its test subsystem which runs every file in the \code{tests} directory and checks if it returns an error or not.
 
@@ -1633,75 +1628,6 @@ The test files of the \code{bctools} package include:
 	\item \textbf{bcverbose.R} - verbose parameter
 	\item \textbf{bcversion.R} - check if the current GNU-R BC version is the supported one in this package~(see~\ref{R-internal-bc-representation})
 \end{itemize}
-
-Because of the simplicity, the tests were not written without any testing framework. Nowadays if the test fails, there is not any more detailed information where the error occurs inside the file. To support this functionality, it is possible to modify the tests to use \code{test{\_}that} framework which supports naming the tests and printing the name in the test fails.
-
-%\section{Bytecode debugger}
-
-%The \textbf{BC} debugger tests was done to make sure that there are no bugs in the code. The testing was done manually altogether with the writing of the some automated tests. Automated testing was done by step by step simulation of the step-into~(\textbf{"s" command} in the browser) by modifying beginning of the \textbf{Rf{\_}ReplIteration} function~(found in \textbf{src/main/main.c}).
-
-%The modified function:
-%\begin{lstlisting}
-%int Rf_ReplIteration(
-%	SEXP rho,
-%	int savestack,
-%	int browselevel,
-%	R_ReplState *state
-%  )
-%{
-%
-%  ... variables initialization ...
-%
-%  if(!*state->bufp) {
-%    R_Busy(0);
-%    if(browselevel){
-%    	/* environment browser is on */
-%      strcpy((char*)state->buf, "s\n");
-%    }else{
-%      if (R_ReadConsole(
-%      	  R_PromptString(browselevel, state->prompt_type),
-%            state->buf,
-%            CONSOLE_BUFFER_SIZE,
-%            1)
-%             == 0)
-%        return(-1);
-%    }
-%    state->bufp = state->buf;
-%  }
-%
-%  ... end of the function ...
-%
-%}
-%\end{lstlisting}
-
-%Altogether with these changes there was made an script~(modification of the test feature from the \textit{R CMD test} command) to utilize the R package test files as testing examples. The tool was comparing the output with and without an bytecode debugger support enabled and trying to simulate the same output as normal. Although this tool was not 100\% successful because internally the tests~(tested on the test directory from the \textit{bctools} package) was using catching output with it's internal feature. Running the debugger in this function meant that there was infinite recursion~(catching output which causes another catching of the output). This testing can be considered just partially successful, because it was not able to run across any of the input test cases.
-
-%Next to this automated testing this feature was tested manually, which results were considered successful.
-
-%\subsection{Effectiveness of testing}
-
-%During the tests there has been observed numerous issues. Some of them were caused by the oversight during %analyzes of the \textbf{BC} compiler and/or evaluator. Example of these are:
-%\begin{itemize}
-%	\item handling of the \textbf{SWITCH} command arguments - lack of support for the \textbf{CONSTANT{\_}LABEL} %type - this feature support has to be also done into the disassembler code
-%	\item memory issues caused by \textbf{Garbage collector} due to forgotten support for the added global %variables (such as \textbf{R{\_}BCNodeStackFnBase})
-%	\item memory issue caused by modification of the body variable while duplication of the current evaluated %one~(see~\ref{setting-and-unsetting-debug-instruction}) - solved by pushing this variable onto the BC stack
-%\end{itemize}
-
-%\subsection{Side effects of the scripts}
-
-%There are limited options to debug the memory errors inside the language \textbf{VM}~(and generally any \textbf{C} code) and finding these errors are even more difficult when the  R code is evaluated - in that case the code is internally represented as \textit{SEXP} type parameter in the \textit{eval} or eventually as an bytecode in the \textit{bcEval}.
-
-%To be able to better understand whether some of the memory issues which occurred were caused by the injected R code and not other changes there has been made decision to rewrite some of the parts to not use \textbf{R} call to the \textbf{compiler} package but use just native \textbf{C} implementation. These parts are not having the full functionality as their \textbf{R} counterparts and were not fully tested. Although of this they can be useful for future performance improvements so they are included in the attached DVD.
-
-%These parts of code are:
-%\begin{itemize}
-% \item \textbf{Rf{\_}breakOnNextBCInst}
-% \item \textbf{do{\_}BCdisasm} used in \textbf{R{\_}printCurrentBCbody} function
-%\end{itemize}
-
-%\section{Conditional breakpoints}
-
-%The conditional breakpoints are in term of the code part of the debugger support so the testing was done altogether with other testing of the bytecode debugger support.
 
 \section{Performance testing}\label{performance-testing}
 
@@ -1737,8 +1663,7 @@ The \code{bctools} package was developed independently as add separate disassemb
 
 \subsection{GNU-R Memory optimization}
 
-Some of the parts of the errors which were done and fixed during the development of this thesis were memory-based. During an investigation of these errors, there has been noticed one thing. The core of the GNU-R language is heavily dependent on the linked list memory data structure. Because of the modern computer memory system cache implementation %TODO:CACHING REFERENCE
-), this can cause a lot of memory cache misses which affect the performance. The most straightforward way to do this is to use a \code{smallvector} technique~(inspired by a llvm compiler), but the more appropriate way would be to do analysis of whole GNU-R memory subsystem optimization with focus on cache locality.
+Some of the parts of the errors which were done and fixed during the development of this thesis were memory-based. During an investigation of these errors, there has been noticed one thing. The core of the GNU-R language is heavily dependent on the linked list memory data structure. Because of the modern computer memory system cache implementation~\cite{processor-cache}, this can cause a lot of memory cache misses which affect the performance. The most straightforward way to do this is to use a \code{smallvector} technique~(inspired by a llvm compiler), but the more appropriate way would be to do analysis of whole GNU-R memory subsystem optimization with focus on cache locality.
 
 \setsecnumdepth{part}
 \begin{conclusion}
