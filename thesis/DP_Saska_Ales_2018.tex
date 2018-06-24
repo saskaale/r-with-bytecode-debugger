@@ -42,7 +42,7 @@
 \authorFN{Saska} %author's surname
 \author{Ale{\v s} Saska} %author's name without academic degrees
 \authorWithDegrees{Bc. Ale{\v s} Saska} %author's name with academic degrees
-\supervisor{Ing. Petr M{\%' a}j}
+\supervisor{Ing. Petr M{\' a}j}
 \acknowledgements{Thanks to my adviser Petr M{\' a}j for help with reviewing thesis, Tom{\' a}{\v s} Kalibera for useful help with the GNU-R code and functionality, my father for assisting with the submission of this work, and big thanks to my girlfriend Leslie Ronish for psychological support and all the tea required to make this work happen.}
 \abstractEN{First part of this thesis is about analysis and implementation of the bytecode disassembler tool for GNU-R language. Second part of the work is about debugging of the bytecode subsystem of the GNU-R language which is in current version unsufficient because it is implemented through fallback into the AST subsystem. This absence is fixed in this work with implementation of the native bytecode debugger. In order to implement the debugger there was also designed and implemented the bytecode stack printer. The debugger was designed with focus on not doing any negative evaluation performace slowdown which was proved in the end during testing phase.}
 
@@ -68,19 +68,17 @@
 
 \section{Motivation and objectives}\label{motivation-and-objectives}
 
-Almost everyone who has been trying to write computer program has made some logical mistakes in them. To help to solve them, we usually run program \textbf{step-by-step} with debugging tools with some debugger. The \mbox{GNU-R} which is one of the most widely used scientific languages across the whole world also has its implementation for debugging code.
+Almost everyone who has written computer programs has made some logical mistakes while writing them. To help solve these issues, programmers usually run program \textbf{step-by-step} with debugging tools. The \mbox{GNU-R}, which is one of the most widely used scientific languages across the whole entire world, also has the implementation for debugging code.
 
-GNU-R language is dynamically typed interpreted language which usually means that it needs Virtual Machine to interpret. There are more ways to represent and implement its evaluation. The first one Abstract Syntax Tree~(see~\ref{AST}) evaluation is the simplest one. To make speedup of its internal evaluation, there has been introduced the Bytecode~(see~\ref{BC}) compiler and interpreter into \mbox{GNU-R}~\cite{r-compiler-some-first-experiments}.
+GNU-R language is a dynamically typed interpreted language, which usually means that it needs Virtual Machine to interpret. There are more ways to represent and implement its evaluation. The first one Abstract Syntax Tree~(see~\ref{AST}) evaluation is the simplest one. To speed up its internal evaluation, the Bytecode~(see~\ref{BC}) compiler and interpreter has previously been introduced into \mbox{GNU-R} language~\cite{r-compiler-some-first-experiments}.
 
-%TODO:UPDATE REFERENCE
+While the abstract syntax tree evaluator is the slowest of the two GNU-R interpreters, it already contains the debugging features implemented. However, it was previously difficult to analyze and debug the other analyzer, bytecode. The only method provided to analyze the bytecode is a very basic disassembler that shows the data in a jargon heavy view. It also means that there is currently no support for debugging the GNU-R bytecode evaluation. When the user requests the debugging feature, the GNU-R core currently has to switch into the AST interpreter instead of performing debugging the bytecode. The slight differences in representation of code between the bytecode and AST can potentially cause an issue when debugging because the debugged code is always only being performed on the AST regardless of whether the user is aware. Eventually, this can also cause an issue when there is an error inside the AST or the BC interpreter core. This can result in a confusing and tough to solve issue. There is also no way for the user to see the internal variables and state of the BC interpreter.
 
-While the abstract syntax evaluator is the slowest of the two GNU-R interpreters it already contains the debugging features implemented. However, it was previously difficult to analyze and debug the other analyzer, bytecode. The only method provided to analyze the bytecode is very basic disassembler showing the data in human unfriendly way. It means that there is currently no support for debugging of the GNU-R bytecode evaluation. Instead of it there is implemented switching into the AST interpreter once user requests the debugging features. The whole lack of the native bytecode debugger is causing potential issues because the code used for bytecode can be slightly different than the code used while not-debugging~(AST one) even if it produces the same result. Eventually, this can also cause an issue when there is an error inside AST or BC interpreter core. This can result in confusing and very hard to solve issue.
+Therefore, the work done in this thesis aims to solve the insufficient bytecode disassembler by replacing it with a new easy-to-use and human-friendly one. Another implemented feature is the advanced and user-friendly bytecode debugger, which is significantly improving the options for analysis and debugging. On top of this, the \code{breakpoint()} instruction which is used for the simulation of the conditional breakpoints was implemented. 
 
-The work done in this thesis is solving the insufficient bytecode disassembler by replacing it with a new easy-to-use and human-friendly one. The another implemented feature is the advanced and user-friendly native support for bytecode debugger which is significantly improving the options for analysis and debugging any program code running on the bytecode engine of the language. On top of this, there was implemented the feature containing breakpoint instruction which is used for the simulation of the conditional breakpoints. The implementation was written with the focus on having any performance slowdown of the language~(the bytecode engine). This was proven in the performance testing part on the ending of the work~(see~\ref{performance-testing}). 
+The focus of the implementation was to maintain the performance of the language~(the bytecode engine). The performance testing at the end of this work confirmed this~(see~\ref{performance-testing}). The disassembler \code{bctools} package has automated tests that improve its maintenance in the future. 
 
-All the implemented features were successfully tested~\ref{testing-and-future-work}. The disassembler \code{bctools} package has written automated tests and there was concluded an performance testing of the GNU-R engine~\ref{performance-testing}. 
-
-This thesis is organized as follows: Section~\ref{introduction} is the introduction into problems of dynamic languages evaluation. Section~\ref{analysis-of-disassembler} contains the analysis of possible solutions how to implement the bytecode disassembler and the debugger. Section~\ref{realization} is describing design of current implementation. Section~\ref{testing-and-future-work} describes what type of testing has been done on the work. Section~\ref{testing-and-future-work} proposing work for the future improvements of the work followed by thesis summarization in conclusion.
+This thesis is organized as follows: Section~\ref{introduction} is the introduction to problems in the current GNU-R debugging features. Section~\ref{analysis-of-disassembler} contains the analysis of possible solutions of how to implement the bytecode disassembler and the debugger. Section~\ref{realization} is describing the design of current implementation. Section~\ref{testing-and-future-work} describes what type of testing has been performed on the work. Section~\ref{testing-and-future-work} proposes the future improvements possible due to this thesis and is followed by thesis summarization in conclusion~\ref{conclusion}.
 
 \setsecnumdepth{all}
 
@@ -1661,12 +1659,24 @@ The big part of the planned future part of the work is to collaborate with the G
 
 The \code{bctools} package was developed independently as add separate disassemble feature with the minimal changes to the GNU-R VM core. This tool was also used in the debugger which is part of the VM core. When the debugger would be deployed it is suggested to merge the \code{bctools} package into the \code{compiler} because the source code of the \code{bctools} package is short~(approx. 600 lines). The reason why this was not already done, but just proposed as a future work, is that it would allow to deploy the disassembler into the working branch faster and eventually give a user-feedback for improvements before merging inside the \code{compiler} package and deploying the debugger.
 
+\subsection{Ability to print out values from the different environment}
+
+The current implementation of bytecode function print / stack print inside debugger is reflecting the nature of evaluation browser which is evaluating expressions on the currently evaluated environment. This is restricting user to show the bytecode content of the parent calls. 
+
+It can be solved either as:
+\begin{itemize}
+	\item Adding the additional argument specifying the stack frame 
+	\item Adding the ability to switch the stack frames ( like \code{fr} command of the \code{gdb} debugger )
+\end{itemize}
+
+The easiest solution to implement is the first one. On the other side even the parent environments could have expressions which can be shadowed. The second \code{fr} feature would enable user to show not just bytecode but also the expressions from any environment in the stack trace.
+
 \subsection{GNU-R Memory optimization}
 
 Some of the parts of the errors which were done and fixed during the development of this thesis were memory-based. During an investigation of these errors, there has been noticed one thing. The core of the GNU-R language is heavily dependent on the linked list memory data structure. Because of the modern computer memory system cache implementation~\cite{processor-cache}, this can cause a lot of memory cache misses which affect the performance. The most straightforward way to do this is to use a \code{smallvector} technique~(inspired by a llvm compiler), but the more appropriate way would be to do analysis of whole GNU-R memory subsystem optimization with focus on cache locality.
 
 \setsecnumdepth{part}
-\begin{conclusion}
+\begin{conclusion}\label{conclusion}
 
 The GNU-R language is one of the most popular scientific language worldwide used~(by not just scientific community). For better evaluation performance its VM internally supports the bytecode alongside with old-fashioned and slow AST interpreter. Since nowadays options for debugging the bytecode were very limited. The old disassembler showed only the raw array of instructions with the constant buffer and there was no native implementation of bytecode debugging. Instead of it the evaluator was internally dispatching the AST debugger which technically resulted in the fact that the interpreter was going over the different code while debugging. The purpose of this thesis was to analyze these issues, propose the change, and write the implentation of these fixes.
 
