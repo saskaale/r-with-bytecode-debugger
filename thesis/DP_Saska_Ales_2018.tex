@@ -208,7 +208,7 @@ while(1){
 
 \subsubsection{Computed GOTO used - threaded code}\label{computed-goto-used}
 
-The \code{switch} statement should be implemented very efficiently by C compilers - the condition serves as an offset into a lookup table that says where to jump next which means that it is evaluated for every bytecode instruction. However, it turns out that there's a popular GCC extension that allows the compiler to generate even faster code. The main idea behind this is to store the address of the label into the value of a variable which allows the dynamic lookup of the next value.
+The \code{switch} statement should be implemented very efficiently by C compilers - the condition serves as an offset into a lookup table that says where to jump next which means that it is evaluated for every bytecode instruction~(\cite{COMPUTED_GOTO}). However, it turns out that there's a popular GCC extension that allows the compiler to generate even faster code. The main idea behind this is to store the address of the label into the value of a variable which allows the dynamic lookup of the next value.
 
 \begin{figure}[H]
 \begin{lstlisting}
